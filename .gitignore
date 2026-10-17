@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Build & Cache Fix for Monorepo
+build/
+**/build/
+.gradle/
+**/.gradle/
+android/.gradle/
+**/android/.gradle/
+**/android/app/build/
+ios/Pods/
+**/ios/Pods/
+.flutter-plugins
+.flutter-plugin-dependencies
