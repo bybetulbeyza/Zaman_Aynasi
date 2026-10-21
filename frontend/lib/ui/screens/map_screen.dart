@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../data/models/heritage_place.dart';
+import '../../../data/repositories/heritage_repository.dart';
+import '../widgets/map/map_top_search_bar.dart';
+import '../widgets/map/route_stop_preview_sheet.dart';
+import 'slider_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -11,94 +16,220 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  // Bursa Tarihi Çarşı & Hanlar Bölgesi odaklı başlangıç noktası
-  final LatLng _bursaCenter = const LatLng(40.1834, 29.0630);
+  final MapController _mapController = MapController();
+  final HeritageRepository _heritageRepository = HeritageRepository();
 
-  // Örnek pilot bölge eserleri
-  final List<HeritagePlace> _places = [
-    HeritagePlace(
-      id: '1',
-      name: 'Ulu Cami',
-      category: PlaceCategory.cami,
-      location: const LatLng(40.1834, 29.0630),
-      shortDescription: '1399 yılında I. Bayezid tarafından yaptırılan ulu mabet.',
-    ),
-    HeritagePlace(
-      id: '2',
-      name: 'Koza Han',
-      category: PlaceCategory.han,
-      location: const LatLng(40.1842, 29.0645),
-      shortDescription: 'İpek yolu ticaretinin kalbi, tarihi ipek pazarı.',
-    ),
-    HeritagePlace(
-      id: '3',
-      name: 'Yeşil Türbe',
-      category: PlaceCategory.turbe,
-      location: const LatLng(40.1816, 29.0747),
-      shortDescription: 'Bursa\'nın simgesi olan çinileriyle ünlü anıt yapı.',
-    ),
-  ];
+  final LatLng _bursaCenter = const LatLng(40.1838, 29.0635);
+
+  List<HeritagePlace> _routePlaces = [];
+  bool _isLoading = true;
+  int _currentStopIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPlaces();
+  }
+
+  Future<void> _fetchPlaces() async {
+    final places = await _heritageRepository.getPlaces();
+    if (mounted) {
+      setState(() {
+        _routePlaces = places;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Zaman Aynası - Keşif Haritası',
-          style: TextStyle(fontWeight: FontWeight.bold),
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: AppColors.bgCanvas,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.leafGreen),
         ),
-        backgroundColor: const Color(0xFF0F172A), // Vakıf / Gece Laciverti
-        foregroundColor: Colors.white,
-      ),
-      body: FlutterMap(
-        options: MapOptions(
-          initialCenter: _bursaCenter,
-          initialZoom: 15.0,
-        ),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.zamanaynasi.app',
+      );
+    }
+
+    if (_routePlaces.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.bgCanvas,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Eserler yüklenemedi.',
+                style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() => _isLoading = true);
+                  _fetchPlaces();
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.leafGreen),
+                child: const Text('Tekrar Dene', style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
-          MarkerLayer(
-            markers: _places.map((place) {
-              return Marker(
-                point: place.location,
-                width: 48,
-                height: 48,
-                child: GestureDetector(
-                  onTap: () {
-                    // Pine tıklandığında mini bilgi snackbar'ı göster
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${place.name} seçildi'),
-                        duration: const Duration(seconds: 1),
-                        backgroundColor: place.categoryColor,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: place.categoryColor,
-                      shape: BoxShape.circle,
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
+        ),
+      );
+    }
+
+    final currentPlace = _routePlaces[_currentStopIndex];
+    final List<LatLng> routePoints = _routePlaces.map((p) => p.location).toList();
+
+    return Scaffold(
+      backgroundColor: AppColors.bgCanvas,
+      body: Stack(
+        children: [
+          // 1. Harita Katmanı
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _routePlaces.isNotEmpty ? _routePlaces.first.location : _bursaCenter,
+              initialZoom: 16.5,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.zamanaynasi.app',
+              ),
+
+              // Zümrüt Yeşili Rota Çizgisi
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: routePoints,
+                    strokeWidth: 4.5,
+                    color: AppColors.leafGreen,
+                  ),
+                ],
+              ),
+
+              // Numaralı Durak Pinleri (1, 2, 3...)
+              MarkerLayer(
+                markers: List.generate(_routePlaces.length, (index) {
+                  final place = _routePlaces[index];
+                  final isSelected = index == _currentStopIndex;
+
+                  return Marker(
+                    point: place.location,
+                    width: isSelected ? 42 : 34,
+                    height: isSelected ? 42 : 34,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _currentStopIndex = index;
+                        });
+                        _mapController.move(place.location, 16.8);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFFC59F60)
+                              : AppColors.leafGreen,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2.2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
-                      border: Border.all(color: Colors.white, width: 2),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     ),
-                    child: Icon(
-                      place.categoryIcon,
-                      color: Colors.white,
-                      size: 24,
+                  );
+                }),
+              ),
+            ],
+          ),
+
+          // 2. Üst Arama ve Filtre Çubuğu
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 0,
+            right: 0,
+            child: MapTopSearchBar(
+              onSearchChanged: (query) {},
+              onFilterSelected: (category) {},
+            ),
+          ),
+
+          // 3. "Yol Tarifi" Hızlı Aksiyon Butonu
+          Positioned(
+            bottom: 245,
+            right: 16,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${currentPlace.name} için rota hesaplanıyor...'),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.navigation_outlined, size: 16, color: Colors.white),
+              label: const Text(
+                'Yol tarifi ↗',
+                style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.leafGreen,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                elevation: 3,
+              ),
+            ),
+          ),
+
+          // 4. Alt Durak Önizleme Kartı
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: RouteStopPreviewSheet(
+              routeTitle: currentPlace.routeName,
+              routeStats: 'Durak ${_currentStopIndex + 1} / ${_routePlaces.length} • 2,4 km • 1 sa 15 dk',
+              placeName: currentPlace.name,
+              placeDistanceTime: '240 m • 3 dk yürüyüş',
+              placeImageUrl: currentPlace.imageAfterUrl,
+              onDetailTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SliderScreen(
+                      title: currentPlace.name,
+                      beforeImageUrl: currentPlace.imageBeforeUrl, // Eski (Sol)
+                      afterImageUrl: currentPlace.imageAfterUrl,   // Yeni (Sağ)
+                      description: currentPlace.shortDescription,
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              },
+              onNextStopTap: () {
+                setState(() {
+                  _currentStopIndex = (_currentStopIndex + 1) % _routePlaces.length;
+                });
+                _mapController.move(
+                  _routePlaces[_currentStopIndex].location,
+                  16.8,
+                );
+              },
+            ),
           ),
         ],
       ),

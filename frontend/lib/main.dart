@@ -1,42 +1,38 @@
 import 'package:flutter/material.dart';
-import 'ui/screens/map_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/constants/app_colors.dart';
+import 'ui/screens/main_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Supabase Dashboard -> Project Settings -> API kısmındaki bilgiler:
+  await Supabase.initialize(
+    url: 'https://rozgcvedqcfunjmfhptj.supabase.co',
+    anonKey: 'sb_publishable_KCU71TvdS3yGzepKYae-kQ_gIeZzBu_',
+  );
+
+  runApp(const ZamanAynasiApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ZamanAynasiApp extends StatelessWidget {
+  const ZamanAynasiApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Zaman Aynası',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      //home: const HomeScreen(),
-      home: MapScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Zaman Aynası'),
-        centerTitle: true,
-      ),
-      body: const Center(
-        child: Text(
-          'Zaman Aynası Projesi Hazır',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        useMaterial3: true,
+        scaffoldBackgroundColor: AppColors.bgCanvas,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.ciniBlue,
+          primary: AppColors.ciniBlue,
+          secondary: AppColors.leafGreen,
         ),
       ),
+      home: const MainScreen(),
     );
   }
 }
