@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'core/constants/app_colors.dart';
+import 'core/constants/app_theme.dart';
 import 'ui/screens/main_screen.dart';
 
 Future<void> main() async {
@@ -23,15 +23,7 @@ class ZamanAynasiApp extends StatelessWidget {
     return MaterialApp(
       title: 'Zaman Aynası',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme(
-        useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.bgCanvas,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.ciniBlue,
-          primary: AppColors.ciniBlue,
-          secondary: AppColors.leafGreen,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       home: const MainScreen(),
     );
   }
