@@ -14,16 +14,16 @@ class AppTheme {
       ),
 
       // Yumuşak kart yapısı
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.cardBg,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.borderSubtle, width: 1),
+          side: const BorderSide(color: AppColors.borderSubtle, width: 0.8),
         ),
       ),
 
-      // Birincil butonlar (Zümrüt yeşili butonlar)
+      // Birincil butonlar
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryTeal,
@@ -40,7 +40,7 @@ class AppTheme {
         ),
       ),
 
-      // İkincil / Gri butonlar (Örn: "Detay" butonu)
+      // İkincil / Gri butonlar
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.textDark,

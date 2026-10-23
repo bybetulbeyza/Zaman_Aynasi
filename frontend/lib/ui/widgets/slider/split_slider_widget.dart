@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:before_after/before_after.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/heritage_place.dart';
+import '../common/app_network_image.dart';
 
 class SplitSliderWidget extends StatefulWidget {
   final String beforeImageUrl;
@@ -15,8 +16,8 @@ class SplitSliderWidget extends StatefulWidget {
     super.key,
     required this.beforeImageUrl,
     required this.afterImageUrl,
-    this.beforeLabel = 'Dönem',
-    this.afterLabel = 'Bugün',
+    this.beforeLabel = 'Günümüz',
+    this.afterLabel = 'Tarihi Dönem',
     this.hotspots = const [],
     this.onHotspotSelected,
   });
@@ -41,7 +42,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   }
 
   @override
-  void disposedelegate() {
+  void dispose() {
     _pulseController.dispose();
     super.dispose();
   }
@@ -52,6 +53,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
         final totalHeight = constraints.maxHeight.isFinite ? constraints.maxHeight : 340.0;
+        final dividerX = _sliderValue * totalWidth;
 
         return Stack(
           children: [
@@ -61,29 +63,15 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               height: totalHeight,
               child: BeforeAfter(
                 value: _sliderValue,
-                before: Image.network(
-                  widget.beforeImageUrl,
-                  fit: BoxFit.cover,
+                before: AppNetworkImage(
+                  imageUrl: widget.afterImageUrl,
                   width: totalWidth,
                   height: totalHeight,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: AppColors.borderSubtle,
-                    child: const Center(
-                      child: Icon(Icons.image_not_supported_outlined, color: AppColors.textMuted),
-                    ),
-                  ),
                 ),
-                after: Image.network(
-                  widget.afterImageUrl,
-                  fit: BoxFit.cover,
+                after: AppNetworkImage(
+                  imageUrl: widget.beforeImageUrl,
                   width: totalWidth,
                   height: totalHeight,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: AppColors.borderSubtle,
-                    child: const Center(
-                      child: Icon(Icons.image_not_supported_outlined, color: AppColors.textMuted),
-                    ),
-                  ),
                 ),
                 onValueChanged: (val) {
                   setState(() {
@@ -93,27 +81,58 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               ),
             ),
 
-            // 2. Sol Alt "Dönem" Etiketi
+            // 2. Çift Oklu Tutamaç
             Positioned(
-              left: 16,
-              bottom: 16,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 150),
-                opacity: (_sliderValue > 0.1) ? 1.0 : 0.0,
-                child: _buildBadge(
-                  widget.beforeLabel,
-                  backgroundColor: AppColors.ciniCobalt.withOpacity(0.85),
+              left: dividerX - 1.0,
+              top: 0,
+              bottom: 0,
+              child: IgnorePointer(
+                child: Container(
+                  width: 2.0,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+              ),
+            ),
+            Positioned(
+              left: dividerX - 18.0,
+              top: (totalHeight / 2) - 18.0,
+              child: IgnorePointer(
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.30),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: AppColors.borderSubtle,
+                      width: 1.2,
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.arrow_left_rounded, size: 16, color: AppColors.textDark),
+                      Icon(Icons.arrow_right_rounded, size: 16, color: AppColors.textDark),
+                    ],
+                  ),
                 ),
               ),
             ),
 
-            // 3. Sağ Alt "Bugün" Etiketi
+            // 3. Sol Üst: "Günümüz" Rozeti
             Positioned(
-              right: 16,
-              bottom: 16,
+              left: 16,
+              top: 68,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 150),
-                opacity: (_sliderValue < 0.9) ? 1.0 : 0.0,
+                opacity: (_sliderValue > 0.12) ? 1.0 : 0.0,
                 child: _buildBadge(
                   widget.afterLabel,
                   backgroundColor: AppColors.primaryTealDark.withOpacity(0.85),
@@ -121,18 +140,30 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               ),
             ),
 
-            // 4. Dinamik Hotspot'lar (Oransal Çizim)
+            // 4. Sağ Üst: "Tarihi Dönem" Rozeti
+            Positioned(
+              right: 16,
+              top: 68,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 150),
+                opacity: (_sliderValue < 0.88) ? 1.0 : 0.0,
+                child: _buildBadge(
+                  widget.beforeLabel,
+                  backgroundColor: AppColors.ciniCobalt.withOpacity(0.85),
+                ),
+              ),
+            ),
+
+            // 5. Dinamik Hotspot'lar
             if (_showHotspots)
               ...widget.hotspots.map((hotspot) {
-                // Hotspot'un bulunduğu yatay konum (0.0 - 1.0)
                 final isBeforeSide = hotspot.targetSide.toLowerCase() == 'before';
                 final isVisible = isBeforeSide
-                    ? (hotspot.xPercent < _sliderValue)
-                    : (hotspot.xPercent > _sliderValue);
+                    ? (hotspot.xPercent > _sliderValue)
+                    : (hotspot.xPercent < _sliderValue);
 
                 if (!isVisible) return const SizedBox.shrink();
 
-                // Gerçek piksel koordinatları
                 final leftPos = (hotspot.xPercent * totalWidth).clamp(20.0, totalWidth - 40.0);
                 final topPos = (hotspot.yPercent * totalHeight).clamp(20.0, totalHeight - 40.0);
 
@@ -210,14 +241,15 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
 
   Widget _buildBadge(String text, {required Color backgroundColor}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white24, width: 0.6),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 4,
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -226,9 +258,9 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
         text,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 12,
+          fontSize: 11.5,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.3,
+          letterSpacing: 0.2,
         ),
       ),
     );

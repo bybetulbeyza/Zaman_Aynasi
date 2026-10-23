@@ -43,6 +43,15 @@ class _MapScreenState extends State<MapScreen> {
         _applyFilters();
         _isLoading = false;
       });
+
+      for (final place in places) {
+        if (place.imageAfterUrl.isNotEmpty) {
+          precacheImage(NetworkImage(place.imageAfterUrl), context);
+        }
+        if (place.imageBeforeUrl.isNotEmpty) {
+          precacheImage(NetworkImage(place.imageBeforeUrl), context);
+        }
+      }
     }
   }
 
@@ -63,7 +72,7 @@ class _MapScreenState extends State<MapScreen> {
       }
     });
 
-    if (_filteredPlaces.isNotEmpty) {
+    if (!_isLoading && _filteredPlaces.isNotEmpty) {
       _mapController.move(_filteredPlaces[_currentStopIndex].location, 16.5);
     }
   }
@@ -254,7 +263,7 @@ class _MapScreenState extends State<MapScreen> {
                         beforeImageUrl: currentPlace.imageBeforeUrl,
                         afterImageUrl: currentPlace.imageAfterUrl,
                         description: currentPlace.shortDescription,
-                        hotspots: currentPlace.hotspots, // Dinamik liste bağlandı
+                        hotspots: currentPlace.hotspots,
                       ),
                     ),
                   );

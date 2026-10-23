@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../common/app_network_image.dart';
 
 class RouteStopPreviewSheet extends StatelessWidget {
   final String routeTitle;
@@ -25,7 +26,11 @@ class RouteStopPreviewSheet extends StatelessWidget {
     return Container(
       width: 72,
       height: 72,
-      color: AppColors.borderSubtle,
+      decoration: BoxDecoration(
+        color: AppColors.borderSubtle,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      alignment: Alignment.center,
       child: const Icon(
         Icons.image_outlined,
         color: AppColors.textMuted,
@@ -78,7 +83,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
           ),
           const SizedBox(height: 2),
 
-          // Rota Detay Metni (Durak sayısı, toplam km, süre)
+          // Rota Detay Metni
           Text(
             routeStats,
             style: const TextStyle(
@@ -103,19 +108,14 @@ class RouteStopPreviewSheet extends StatelessWidget {
             child: Row(
               children: [
                 // Durak Görseli
-                ClipRRect(
+                (placeImageUrl != null && placeImageUrl!.isNotEmpty)
+                    ? AppNetworkImage(
+                  imageUrl: placeImageUrl!,
+                  width: 72,
+                  height: 72,
                   borderRadius: BorderRadius.circular(12),
-                  child: (placeImageUrl != null && placeImageUrl!.isNotEmpty)
-                      ? Image.network(
-                    placeImageUrl!,
-                    width: 72,
-                    height: 72,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildPlaceholder(),
-                  )
-                      : _buildPlaceholder(),
-                ),
+                )
+                    : _buildPlaceholder(),
                 const SizedBox(width: 14),
 
                 // İsim & Yürüme Mesafesi
@@ -150,6 +150,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
+          // Butonlar: Detay & Sonraki Durak
           Row(
             children: [
               Expanded(
