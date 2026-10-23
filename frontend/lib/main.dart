@@ -6,7 +6,7 @@ import 'ui/screens/main_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Supabase Dashboard -> Project Settings -> API kısmındaki bilgiler:
+  // Supabase Dashboard -> Project Settings -> API
   await Supabase.initialize(
     url: 'https://rozgcvedqcfunjmfhptj.supabase.co',
     anonKey: 'sb_publishable_KCU71TvdS3yGzepKYae-kQ_gIeZzBu_',
@@ -23,7 +23,7 @@ class ZamanAynasiApp extends StatelessWidget {
     return MaterialApp(
       title: 'Zaman Aynası',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+      theme: AppTheme.lightTheme(
         useMaterial3: true,
         scaffoldBackgroundColor: AppColors.bgCanvas,
         colorScheme: ColorScheme.fromSeed(

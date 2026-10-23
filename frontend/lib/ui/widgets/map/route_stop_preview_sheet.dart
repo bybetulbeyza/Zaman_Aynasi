@@ -23,13 +23,13 @@ class RouteStopPreviewSheet extends StatelessWidget {
 
   Widget _buildPlaceholder() {
     return Container(
-      width: 70,
-      height: 70,
-      color: const Color(0xFFE2DED6),
+      width: 72,
+      height: 72,
+      color: AppColors.borderSubtle,
       child: const Icon(
         Icons.image_outlined,
         color: AppColors.textMuted,
-        size: 28,
+        size: 26,
       ),
     );
   }
@@ -37,18 +37,18 @@ class RouteStopPreviewSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.cardBg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 20,
-            offset: Offset(0, -4),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 18,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,12 +56,12 @@ class RouteStopPreviewSheet extends StatelessWidget {
           // Üst Tutamaç (Handle)
           Center(
             child: Container(
-              width: 48,
-              height: 5,
-              margin: const EdgeInsets.only(bottom: 16),
+              width: 44,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFFE0DDD5),
-                borderRadius: BorderRadius.circular(2.5),
+                color: AppColors.borderSubtle,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
@@ -70,42 +70,46 @@ class RouteStopPreviewSheet extends StatelessWidget {
           Text(
             routeTitle,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
               letterSpacing: -0.2,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
 
-          // Rota Detay Metni
+          // Rota Detay Metni (Durak sayısı, toplam km, süre)
           Text(
             routeStats,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12.5,
               color: AppColors.textMuted,
               fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Seçili Durak Kartı
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.cardSubBg,
+              color: AppColors.bgCanvas,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.borderSubtle,
+                width: 0.8,
+              ),
             ),
             child: Row(
               children: [
-                // Durak Görseli / İkonu (Boşsa veya hata verirse placeholder gösterir)
+                // Durak Görseli
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   child: (placeImageUrl != null && placeImageUrl!.isNotEmpty)
                       ? Image.network(
                     placeImageUrl!,
-                    width: 70,
-                    height: 70,
+                    width: 72,
+                    height: 72,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
                         _buildPlaceholder(),
@@ -114,7 +118,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 14),
 
-                // İsim & Mesafe
+                // İsim & Yürüme Mesafesi
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,9 +127,11 @@ class RouteStopPreviewSheet extends StatelessWidget {
                         placeName,
                         style: const TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.bold,
                           color: AppColors.textDark,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -133,6 +139,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textMuted,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
@@ -141,29 +148,32 @@ class RouteStopPreviewSheet extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
-          // Butonlar: Detay & Sonraki Durak
           Row(
             children: [
-              // Detay Butonu (Outlined)
               Expanded(
                 child: SizedBox(
-                  height: 48,
+                  height: 46,
                   child: OutlinedButton(
                     onPressed: onDetailTap,
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.leafGreen, width: 1.5),
+                      backgroundColor: AppColors.chipInactiveBg,
+                      side: const BorderSide(
+                        color: AppColors.chipBorder,
+                        width: 1.0,
+                      ),
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(23),
                       ),
                     ),
                     child: const Text(
                       'Detay',
                       style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.leafGreen,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
                       ),
                     ),
                   ),
@@ -171,25 +181,24 @@ class RouteStopPreviewSheet extends StatelessWidget {
               ),
               const SizedBox(width: 12),
 
-              // Sonraki Durak Butonu (Filled)
               Expanded(
                 child: SizedBox(
-                  height: 48,
+                  height: 46,
                   child: ElevatedButton(
                     onPressed: onNextStopTap,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.leafGreen,
+                      backgroundColor: AppColors.primaryTeal,
+                      foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(23),
                       ),
                     ),
                     child: const Text(
                       'Sonraki durak',
                       style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

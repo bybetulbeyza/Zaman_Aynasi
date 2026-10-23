@@ -21,9 +21,13 @@ class _MapScreenState extends State<MapScreen> {
 
   final LatLng _bursaCenter = const LatLng(40.1838, 29.0635);
 
-  List<HeritagePlace> _routePlaces = [];
+  List<HeritagePlace> _allPlaces = [];
+  List<HeritagePlace> _filteredPlaces = [];
   bool _isLoading = true;
   int _currentStopIndex = 0;
+
+  String _searchQuery = '';
+  String _selectedCategory = 'Tümü';
 
   @override
   void initState() {
@@ -35,9 +39,32 @@ class _MapScreenState extends State<MapScreen> {
     final places = await _heritageRepository.getPlaces();
     if (mounted) {
       setState(() {
-        _routePlaces = places;
+        _allPlaces = places;
+        _applyFilters();
         _isLoading = false;
       });
+    }
+  }
+
+  void _applyFilters() {
+    setState(() {
+      _filteredPlaces = _allPlaces.where((place) {
+        final matchesSearch = place.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            (place.shortDescription?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+
+        final matchesCategory = _selectedCategory == 'Tümü' ||
+            (place.category.toLowerCase().trim() == _selectedCategory.toLowerCase().trim());
+
+        return matchesSearch && matchesCategory;
+      }).toList();
+
+      if (_currentStopIndex >= _filteredPlaces.length) {
+        _currentStopIndex = 0;
+      }
+    });
+
+    if (_filteredPlaces.isNotEmpty) {
+      _mapController.move(_filteredPlaces[_currentStopIndex].location, 16.5);
     }
   }
 
@@ -47,12 +74,12 @@ class _MapScreenState extends State<MapScreen> {
       return const Scaffold(
         backgroundColor: AppColors.bgCanvas,
         body: Center(
-          child: CircularProgressIndicator(color: AppColors.leafGreen),
+          child: CircularProgressIndicator(color: AppColors.primaryTeal),
         ),
       );
     }
 
-    if (_routePlaces.isEmpty) {
+    if (_allPlaces.isEmpty) {
       return Scaffold(
         backgroundColor: AppColors.bgCanvas,
         body: Center(
@@ -69,7 +96,7 @@ class _MapScreenState extends State<MapScreen> {
                   setState(() => _isLoading = true);
                   _fetchPlaces();
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.leafGreen),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryTeal),
                 child: const Text('Tekrar Dene', style: TextStyle(color: Colors.white)),
               ),
             ],
@@ -78,8 +105,9 @@ class _MapScreenState extends State<MapScreen> {
       );
     }
 
-    final currentPlace = _routePlaces[_currentStopIndex];
-    final List<LatLng> routePoints = _routePlaces.map((p) => p.location).toList();
+    final hasPlaces = _filteredPlaces.isNotEmpty;
+    final currentPlace = hasPlaces ? _filteredPlaces[_currentStopIndex] : null;
+    final List<LatLng> routePoints = _filteredPlaces.map((p) => p.location).toList();
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -89,7 +117,7 @@ class _MapScreenState extends State<MapScreen> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: _routePlaces.isNotEmpty ? _routePlaces.first.location : _bursaCenter,
+              initialCenter: _allPlaces.isNotEmpty ? _allPlaces.first.location : _bursaCenter,
               initialZoom: 16.5,
             ),
             children: [
@@ -98,27 +126,28 @@ class _MapScreenState extends State<MapScreen> {
                 userAgentPackageName: 'com.zamanaynasi.app',
               ),
 
-              // Zümrüt Yeşili Rota Çizgisi
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: routePoints,
-                    strokeWidth: 4.5,
-                    color: AppColors.leafGreen,
-                  ),
-                ],
-              ),
+              // Rota Çizgisi
+              if (routePoints.length > 1)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: routePoints,
+                      strokeWidth: 4.0,
+                      color: AppColors.primaryTeal,
+                    ),
+                  ],
+                ),
 
-              // Numaralı Durak Pinleri (1, 2, 3...)
+              // Numaralı Durak Pinleri
               MarkerLayer(
-                markers: List.generate(_routePlaces.length, (index) {
-                  final place = _routePlaces[index];
+                markers: List.generate(_filteredPlaces.length, (index) {
+                  final place = _filteredPlaces[index];
                   final isSelected = index == _currentStopIndex;
 
                   return Marker(
                     point: place.location,
-                    width: isSelected ? 42 : 34,
-                    height: isSelected ? 42 : 34,
+                    width: isSelected ? 44 : 36,
+                    height: isSelected ? 44 : 36,
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -129,13 +158,13 @@ class _MapScreenState extends State<MapScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFFC59F60)
-                              : AppColors.leafGreen,
+                              ? AppColors.ciniBordeaux
+                              : AppColors.primaryTeal,
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2.2),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withOpacity(0.25),
                               blurRadius: 6,
                               offset: const Offset(0, 3),
                             ),
@@ -160,77 +189,88 @@ class _MapScreenState extends State<MapScreen> {
 
           // 2. Üst Arama ve Filtre Çubuğu
           Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
+            top: MediaQuery.of(context).padding.top + 8,
             left: 0,
             right: 0,
             child: MapTopSearchBar(
-              onSearchChanged: (query) {},
-              onFilterSelected: (category) {},
+              onSearchChanged: (query) {
+                _searchQuery = query;
+                _applyFilters();
+              },
+              onFilterSelected: (category) {
+                _selectedCategory = category;
+                _applyFilters();
+              },
+              onFilterTap: () {
+                // Filtre modalı veya sıralama opsiyonu
+              },
             ),
           ),
 
           // 3. "Yol Tarifi" Hızlı Aksiyon Butonu
-          Positioned(
-            bottom: 245,
-            right: 16,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${currentPlace.name} için rota hesaplanıyor...'),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.navigation_outlined, size: 16, color: Colors.white),
-              label: const Text(
-                'Yol tarifi ↗',
-                style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.leafGreen,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                elevation: 3,
+          if (currentPlace != null)
+            Positioned(
+              bottom: 250,
+              right: 16,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${currentPlace.name} için yol tarifi başlatılıyor...'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.navigation_outlined, size: 16, color: Colors.white),
+                label: const Text(
+                  'Yol tarifi ↗',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 13),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryTeal,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  elevation: 4,
+                ),
               ),
             ),
-          ),
 
           // 4. Alt Durak Önizleme Kartı
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: RouteStopPreviewSheet(
-              routeTitle: currentPlace.routeName,
-              routeStats: 'Durak ${_currentStopIndex + 1} / ${_routePlaces.length} • 2,4 km • 1 sa 15 dk',
-              placeName: currentPlace.name,
-              placeDistanceTime: '240 m • 3 dk yürüyüş',
-              placeImageUrl: currentPlace.imageAfterUrl,
-              onDetailTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SliderScreen(
-                      title: currentPlace.name,
-                      beforeImageUrl: currentPlace.imageBeforeUrl, // Eski (Sol)
-                      afterImageUrl: currentPlace.imageAfterUrl,   // Yeni (Sağ)
-                      description: currentPlace.shortDescription,
+          if (currentPlace != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: RouteStopPreviewSheet(
+                routeTitle: currentPlace.routeName.isNotEmpty ? currentPlace.routeName : 'Han ve Çarşı Hattı',
+                routeStats: 'Durak ${_currentStopIndex + 1} / ${_filteredPlaces.length} • 3,8 km • 2 sa 30 dk',
+                placeName: currentPlace.name,
+                placeDistanceTime: '240 m • 3 dk yürüyüş',
+                placeImageUrl: currentPlace.imageAfterUrl,
+                onDetailTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SliderScreen(
+                        title: currentPlace.name,
+                        beforeImageUrl: currentPlace.imageBeforeUrl,
+                        afterImageUrl: currentPlace.imageAfterUrl,
+                        description: currentPlace.shortDescription,
+                      ),
                     ),
-                  ),
-                );
-              },
-              onNextStopTap: () {
-                setState(() {
-                  _currentStopIndex = (_currentStopIndex + 1) % _routePlaces.length;
-                });
-                _mapController.move(
-                  _routePlaces[_currentStopIndex].location,
-                  16.8,
-                );
-              },
+                  );
+                },
+                onNextStopTap: () {
+                  setState(() {
+                    _currentStopIndex = (_currentStopIndex + 1) % _filteredPlaces.length;
+                  });
+                  _mapController.move(
+                    _filteredPlaces[_currentStopIndex].location,
+                    16.8,
+                  );
+                },
+              ),
             ),
-          ),
         ],
       ),
     );
