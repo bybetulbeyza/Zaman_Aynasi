@@ -50,10 +50,10 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _filteredPlaces = _allPlaces.where((place) {
         final matchesSearch = place.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            (place.shortDescription?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+            place.shortDescription.toLowerCase().contains(_searchQuery.toLowerCase());
 
         final matchesCategory = _selectedCategory == 'Tümü' ||
-            (place.category.toLowerCase().trim() == _selectedCategory.toLowerCase().trim());
+            (place.category.label.toLowerCase().trim() == _selectedCategory.toLowerCase().trim());
 
         return matchesSearch && matchesCategory;
       }).toList();
@@ -201,9 +201,7 @@ class _MapScreenState extends State<MapScreen> {
                 _selectedCategory = category;
                 _applyFilters();
               },
-              onFilterTap: () {
-                // Filtre modalı veya sıralama opsiyonu
-              },
+              onFilterTap: () {},
             ),
           ),
 
@@ -256,6 +254,7 @@ class _MapScreenState extends State<MapScreen> {
                         beforeImageUrl: currentPlace.imageBeforeUrl,
                         afterImageUrl: currentPlace.imageAfterUrl,
                         description: currentPlace.shortDescription,
+                        hotspots: currentPlace.hotspots, // Dinamik liste bağlandı
                       ),
                     ),
                   );

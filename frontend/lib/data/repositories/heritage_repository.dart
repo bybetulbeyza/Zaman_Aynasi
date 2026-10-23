@@ -7,14 +7,13 @@ class HeritageRepository {
 
   Future<List<HeritagePlace>> getPlaces() async {
     try {
-      // Tablodaki tüm verileri çeker
       final data = await _client
           .from('heritage_places')
-          .select()
+          .select('*, Hotspots(*)')
           .order('id', ascending: true);
 
       return (data as List)
-          .map((item) => HeritagePlace.fromJson(item))
+          .map((item) => HeritagePlace.fromJson(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
       debugPrint('Supabase veri çekme hatası: $e');

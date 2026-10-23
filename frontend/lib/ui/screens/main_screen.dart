@@ -10,7 +10,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1; // Harita seçili başlar
+  int _currentIndex = 1;
 
   final List<Widget> _screens = [
     const Center(child: Text('Ana Sayfa', style: TextStyle(color: AppColors.textDark))),
@@ -29,9 +29,9 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBg,
           border: const Border(
-            top: BorderSide(color: AppColors.borderSubtle, width: 0.8),
+            top: BorderSide(color: AppColors.dividerLine, width: 0.9),
           ),
           boxShadow: [
             BoxShadow(
@@ -41,17 +41,38 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.only(top: 8, bottom: 6),
         child: SafeArea(
           top: false,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home, label: 'Ana Sayfa', index: 0),
-              _buildNavItem(icon: Icons.place_outlined, activeIcon: Icons.place, label: 'Harita', index: 1),
+              _buildNavItem(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home_rounded,
+                label: 'Ana Sayfa',
+                index: 0,
+              ),
+              _buildNavItem(
+                icon: Icons.place_outlined,
+                activeIcon: Icons.place_rounded,
+                label: 'Harita',
+                index: 1,
+              ),
               _buildQrButton(),
-              _buildNavItem(icon: Icons.alt_route_rounded, activeIcon: Icons.alt_route_rounded, label: 'Rotalarım', index: 3),
-              _buildNavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: 'Profil', index: 4),
+              _buildNavItem(
+                icon: Icons.alt_route_rounded,
+                activeIcon: Icons.alt_route_rounded,
+                label: 'Rotalarım',
+                index: 3,
+              ),
+              _buildNavItem(
+                icon: Icons.person_outline_rounded,
+                activeIcon: Icons.person_rounded,
+                label: 'Profil',
+                index: 4,
+              ),
             ],
           ),
         ),
@@ -66,7 +87,7 @@ class _MainScreenState extends State<MainScreen> {
     required int index,
   }) {
     final isSelected = _currentIndex == index;
-    final color = isSelected ? AppColors.leafGreen : AppColors.textMuted;
+    final color = isSelected ? AppColors.primaryTeal : AppColors.textMuted;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -89,6 +110,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  // Dairesel QR Butonu
   Widget _buildQrButton() {
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = 2),
@@ -96,14 +118,14 @@ class _MainScreenState extends State<MainScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 46,
-            height: 46,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: const Color(0xFFC59F60),
-              borderRadius: BorderRadius.circular(14),
+              color: AppColors.ciniBordeaux,
+              shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFC59F60).withOpacity(0.35),
+                  color: AppColors.ciniBordeaux.withOpacity(0.32),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -121,7 +143,7 @@ class _MainScreenState extends State<MainScreen> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFC59F60),
+              color: AppColors.textDark,
             ),
           ),
         ],
