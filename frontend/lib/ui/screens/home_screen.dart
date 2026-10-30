@@ -13,6 +13,7 @@ import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/common/app_logo.dart';
 import 'places_list_screen.dart';
+import 'reels_screen.dart';
 import 'slider_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -100,6 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             _buildHero(),
+            const SizedBox(height: 20),
+            _buildQuickActions(),
             const SizedBox(height: 26),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -218,19 +221,13 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 54,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: AppColors.creamSoft,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.search_rounded, color: AppColors.logoNavy),
+                  const Icon(Icons.search_rounded, color: AppColors.textDark),
                   const SizedBox(width: 12),
                   Text(
                     context.t('search_hint'),
@@ -243,8 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 26),
-          _buildQuickActions(),
         ],
       ),
     );
@@ -278,69 +273,83 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ---------- Hızlı eylemler (hero içinde) ----------
+  // ---------- Hızlı eylemler ----------
 
   Widget _buildQuickActions() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _quickAction(
-          context.t('qa_nearby'),
-          Icons.near_me_outlined,
-          widget.onNearbyTap ?? widget.onExploreMapTap,
-        ),
-        _quickAction(
-          context.t('qa_create_route'),
-          Icons.alt_route_rounded,
-          widget.onCreateRouteTap,
-        ),
-        _quickAction(
-          context.t('qa_scan_qr'),
-          Icons.qr_code_scanner_rounded,
-          widget.onQrTap,
-        ),
-        _quickAction(
-          context.t('qa_cities'),
-          Icons.location_city_rounded,
-          () => showCityPickerSheet(context),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _quickAction(
+            context.t('qa_nearby'),
+            Icons.near_me_outlined,
+            widget.onNearbyTap ?? widget.onExploreMapTap,
+          ),
+          _quickAction(
+            context.t('qa_create_route'),
+            Icons.alt_route_rounded,
+            widget.onCreateRouteTap,
+          ),
+          _quickAction(
+            context.t('qa_stories'),
+            Icons.play_circle_outline_rounded,
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReelsScreen()),
+            ),
+            highlight: true,
+          ),
+          _quickAction(
+            context.t('qa_cities'),
+            Icons.location_city_rounded,
+            () => showCityPickerSheet(context),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _quickAction(String label, IconData icon, VoidCallback? onTap) {
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
+  Widget _quickAction(
+    String label,
+    IconData icon,
+    VoidCallback? onTap, {
+    bool highlight = false,
+  }) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: SizedBox(
+        width: 80,
         child: Column(
           children: [
             Container(
-              width: 58,
-              height: 58,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
-                color: AppColors.creamSoft,
+                color: AppColors.primaryTealLight,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                border: highlight
+                    ? Border.all(color: AppColors.ciniBordeaux, width: 1.4)
+                    : null,
               ),
-              child: Icon(icon, size: 26, color: AppColors.logoNavy),
+              child: Icon(
+                icon,
+                size: 24,
+                color: highlight
+                    ? AppColors.ciniBordeaux
+                    : AppColors.primaryTeal,
+              ),
             ),
-            const SizedBox(height: 9),
+            const SizedBox(height: 8),
             Text(
               label,
               maxLines: 1,
-              textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 12.5,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
               ),
             ),
           ],

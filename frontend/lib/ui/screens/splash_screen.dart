@@ -17,7 +17,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _anim = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1000),
@@ -111,7 +112,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   padding: const EdgeInsets.only(bottom: 36),
                   child: Text(
                     context.t('splash_credit'),
-                    style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
               ],
@@ -123,8 +127,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Widget _line() => Container(
-        width: 64,
-        height: 1.2,
-        color: AppColors.logoNavy.withValues(alpha: 0.7),
-      );
+    width: 64,
+    height: 1.2,
+    color: AppColors.logoNavy.withValues(alpha: 0.7),
+  );
 }

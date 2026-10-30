@@ -29,7 +29,8 @@ class _SliderScreenState extends State<SliderScreen> {
   static const double _sheetMin = 0.42;
   static const double _sheetMax = 0.9;
 
-  final DraggableScrollableController _sheetController = DraggableScrollableController();
+  final DraggableScrollableController _sheetController =
+      DraggableScrollableController();
   Hotspot? _selectedHotspot;
   bool _showHint = false;
   Timer? _hintTimer;
@@ -76,12 +77,16 @@ class _SliderScreenState extends State<SliderScreen> {
     messenger.hideCurrentSnackBar();
     if (route.contains(_place)) {
       route.remove(_place);
-      messenger.showSnackBar(SnackBar(content: Text(context.t('route_removed'))));
+      messenger.showSnackBar(
+        SnackBar(content: Text(context.t('route_removed'))),
+      );
     } else {
       route.add(_place);
       messenger.showSnackBar(
         SnackBar(
-          content: Text(context.t('route_added').replaceAll('{n}', '${route.length}')),
+          content: Text(
+            context.t('route_added').replaceAll('{n}', '${route.length}'),
+          ),
         ),
       );
     }
@@ -125,7 +130,10 @@ class _SliderScreenState extends State<SliderScreen> {
                       opacity: _showHint && _selectedHotspot == null ? 1 : 0,
                       child: Center(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 9,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.62),
                             borderRadius: BorderRadius.circular(22),
@@ -133,14 +141,20 @@ class _SliderScreenState extends State<SliderScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.touch_app_outlined,
-                                  size: 18, color: Colors.white),
+                              const Icon(
+                                Icons.touch_app_outlined,
+                                size: 18,
+                                color: Colors.white,
+                              ),
                               const SizedBox(width: 8),
-                              Text(context.t('hotspot_hint'),
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600)),
+                              Text(
+                                context.t('hotspot_hint'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -170,12 +184,17 @@ class _SliderScreenState extends State<SliderScreen> {
                               color: Colors.white.withValues(alpha: 0.3),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.6), width: 1),
+                                color: Colors.white.withValues(alpha: 0.6),
+                                width: 1,
+                              ),
                             ),
                             child: IconButton(
                               padding: EdgeInsets.zero,
-                              icon: const Icon(Icons.arrow_back_ios_new,
-                                  size: 18, color: Colors.white),
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 18,
+                                color: Colors.white,
+                              ),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
@@ -197,7 +216,9 @@ class _SliderScreenState extends State<SliderScreen> {
             builder: (context, scrollController) => Container(
               decoration: BoxDecoration(
                 color: AppColors.bgCanvas,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.10),
@@ -229,7 +250,8 @@ class _SliderScreenState extends State<SliderScreen> {
         MapEntry(context.t('period'), _place.constructionDate),
       if (_place.architect.isNotEmpty)
         MapEntry(context.t('architect'), _place.architect),
-      if (_place.patron.isNotEmpty) MapEntry(context.t('patron'), _place.patron),
+      if (_place.patron.isNotEmpty)
+        MapEntry(context.t('patron'), _place.patron),
     ];
 
     return [
@@ -251,7 +273,10 @@ class _SliderScreenState extends State<SliderScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(_place.nameFor(en), style: AppTheme.displayLarge.copyWith(fontSize: 28)),
+            child: Text(
+              _place.nameFor(en),
+              style: AppTheme.displayLarge.copyWith(fontSize: 28),
+            ),
           ),
           const SizedBox(width: 12),
           const LangToggle(),
@@ -282,7 +307,10 @@ class _SliderScreenState extends State<SliderScreen> {
           child: Text(
             '↑ ${context.t('swipe_up')}',
             style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primaryTeal),
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryTeal,
+            ),
           ),
         ),
       ),
@@ -301,7 +329,11 @@ class _SliderScreenState extends State<SliderScreen> {
       const SizedBox(height: 10),
       Text(
         _place.descriptionFor(en),
-        style: const TextStyle(fontSize: 16, height: 1.55, color: AppColors.textDark),
+        style: const TextStyle(
+          fontSize: 16,
+          height: 1.55,
+          color: AppColors.textDark,
+        ),
       ),
       const SizedBox(height: 26),
 
@@ -317,11 +349,19 @@ class _SliderScreenState extends State<SliderScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+        ),
         const SizedBox(height: 2),
-        Text(value,
-            style: const TextStyle(
-                fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textDark,
+          ),
+        ),
       ],
     );
   }
@@ -336,7 +376,9 @@ class _SliderScreenState extends State<SliderScreen> {
         decoration: BoxDecoration(
           borderRadius: radius,
           border: Border.all(
-              color: AppColors.ciniBordeaux.withValues(alpha: 0.45), width: 1.1),
+            color: AppColors.ciniBordeaux.withValues(alpha: 0.45),
+            width: 1.1,
+          ),
         ),
         child: ClipRRect(
           borderRadius: radius,
@@ -346,21 +388,30 @@ class _SliderScreenState extends State<SliderScreen> {
               Image.network(
                 _place.imageAfterUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const ColoredBox(color: AppColors.heroPetrol),
+                errorBuilder: (_, __, ___) =>
+                    const ColoredBox(color: AppColors.heroPetrol),
               ),
               Container(color: Colors.black.withValues(alpha: 0.28)),
               Positioned(
                 top: 12,
                 left: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.ciniBordeaux,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Text(context.t('ai_generated'),
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                  child: Text(
+                    context.t('ai_generated'),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
               ),
               Center(
@@ -372,7 +423,9 @@ class _SliderScreenState extends State<SliderScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    available ? Icons.play_arrow_rounded : Icons.hourglass_empty_rounded,
+                    available
+                        ? Icons.play_arrow_rounded
+                        : Icons.hourglass_empty_rounded,
                     color: AppColors.primaryTeal,
                     size: 34,
                   ),
@@ -382,7 +435,9 @@ class _SliderScreenState extends State<SliderScreen> {
                 left: 14,
                 bottom: 12,
                 child: Text(
-                  available ? context.t('transform_video') : context.t('video_soon'),
+                  available
+                      ? context.t('transform_video')
+                      : context.t('video_soon'),
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ),
@@ -403,7 +458,9 @@ class _SliderScreenState extends State<SliderScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: AppColors.ciniBordeaux.withValues(alpha: 0.4), width: 1.1),
+            color: AppColors.ciniBordeaux.withValues(alpha: 0.4),
+            width: 1.1,
+          ),
         ),
         child: Row(
           children: [
@@ -411,28 +468,42 @@ class _SliderScreenState extends State<SliderScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(context.t('source_book'),
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark)),
+                  Text(
+                    context.t('source_book'),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                    inventory.isNotEmpty ? inventory : context.t('source_label'),
-                    style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+                    inventory.isNotEmpty
+                        ? inventory
+                        : context.t('source_label'),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(context.t('source_open'),
-                          style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryTeal)),
+                      Text(
+                        context.t('source_open'),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryTeal,
+                        ),
+                      ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.open_in_new_rounded,
-                          size: 14, color: AppColors.primaryTeal),
+                      const Icon(
+                        Icons.open_in_new_rounded,
+                        size: 14,
+                        color: AppColors.primaryTeal,
+                      ),
                     ],
                   ),
                 ],
@@ -445,11 +516,14 @@ class _SliderScreenState extends State<SliderScreen> {
                 color: AppColors.primaryTealLight,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text(context.t('verified'),
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryTeal)),
+              child: Text(
+                context.t('verified'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryTeal,
+                ),
+              ),
             ),
           ],
         ),
@@ -459,10 +533,17 @@ class _SliderScreenState extends State<SliderScreen> {
 
   Widget _buildActionBar() {
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        12 + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: AppColors.dividerLine, width: 1.2)),
+        border: Border(
+          top: BorderSide(color: AppColors.dividerLine, width: 1.2),
+        ),
       ),
       child: Row(
         children: [
@@ -471,10 +552,16 @@ class _SliderScreenState extends State<SliderScreen> {
               onPressed: () => LauncherUtil.openDirections(_place.location),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primaryTeal,
-                side: const BorderSide(color: AppColors.primaryTeal, width: 1.2),
+                side: const BorderSide(
+                  color: AppColors.primaryTeal,
+                  width: 1.2,
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const StadiumBorder(),
-                textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                textStyle: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               child: Text(context.t('directions')),
             ),
@@ -487,13 +574,23 @@ class _SliderScreenState extends State<SliderScreen> {
                 final inRoute = ActiveRoute.instance.contains(_place);
                 return ElevatedButton.icon(
                   onPressed: _toggleRoute,
-                  icon: Icon(inRoute ? Icons.check_rounded : Icons.add_rounded, size: 20),
-                  label: Text(inRoute ? context.t('in_route') : context.t('add_to_route')),
+                  icon: Icon(
+                    inRoute ? Icons.check_rounded : Icons.add_rounded,
+                    size: 20,
+                  ),
+                  label: Text(
+                    inRoute ? context.t('in_route') : context.t('add_to_route'),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: inRoute ? AppColors.primaryTealDark : AppColors.primaryTeal,
+                    backgroundColor: inRoute
+                        ? AppColors.primaryTealDark
+                        : AppColors.primaryTeal,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: const StadiumBorder(),
-                    textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                    textStyle: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 );
               },
@@ -543,7 +640,11 @@ class _SliderScreenState extends State<SliderScreen> {
                 onTap: () => setState(() => _selectedHotspot = null),
                 child: const Padding(
                   padding: EdgeInsets.only(left: 8),
-                  child: Icon(Icons.close, size: 20, color: AppColors.textMuted),
+                  child: Icon(
+                    Icons.close,
+                    size: 20,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ),
             ],
@@ -553,7 +654,11 @@ class _SliderScreenState extends State<SliderScreen> {
             hotspot.descriptionFor(en),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 14, color: AppColors.textMuted, height: 1.4),
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textMuted,
+              height: 1.4,
+            ),
           ),
           const SizedBox(height: 14),
           Row(
@@ -564,7 +669,10 @@ class _SliderScreenState extends State<SliderScreen> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: const StadiumBorder(),
-                    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   child: Text('${context.t('see_details')} →'),
                 ),
@@ -580,7 +688,10 @@ class _SliderScreenState extends State<SliderScreen> {
                       backgroundColor: AppColors.ciniBordeaux,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: const StadiumBorder(),
-                      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                      textStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
@@ -602,7 +713,9 @@ class _SliderScreenState extends State<SliderScreen> {
       ),
       builder: (sheetContext) => SafeArea(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.75),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
+          ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(22, 22, 22, 24),
             child: Column(
@@ -614,7 +727,10 @@ class _SliderScreenState extends State<SliderScreen> {
                 Text(
                   hotspot.descriptionFor(en),
                   style: const TextStyle(
-                      fontSize: 16, height: 1.6, color: AppColors.textDark),
+                    fontSize: 16,
+                    height: 1.6,
+                    color: AppColors.textDark,
+                  ),
                 ),
               ],
             ),

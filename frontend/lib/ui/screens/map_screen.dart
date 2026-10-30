@@ -124,8 +124,9 @@ class MapScreenState extends State<MapScreen> {
 
   void _recenter() {
     if (!_hasRealLocation) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(context.t('location_off_note'))));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.t('location_off_note'))));
       return;
     }
     _mapController.move(_userLocation, 16.5);
@@ -135,12 +136,14 @@ class MapScreenState extends State<MapScreen> {
     setState(() {
       final filtered = _allPlaces.where((place) {
         final q = _searchQuery.toLowerCase();
-        final matchesSearch = place.name.toLowerCase().contains(q) ||
+        final matchesSearch =
+            place.name.toLowerCase().contains(q) ||
             place.nameEn.toLowerCase().contains(q) ||
             place.shortDescription.toLowerCase().contains(q) ||
             place.shortDescriptionEn.toLowerCase().contains(q);
 
-        final matchesCategory = _selectedCategory == null || place.category == _selectedCategory;
+        final matchesCategory =
+            _selectedCategory == null || place.category == _selectedCategory;
 
         return matchesSearch && matchesCategory;
       }).toList();
@@ -181,7 +184,10 @@ class MapScreenState extends State<MapScreen> {
             children: [
               Text(
                 context.t('map_load_error'),
-                style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
@@ -189,8 +195,13 @@ class MapScreenState extends State<MapScreen> {
                   setState(() => _isLoading = true);
                   _initDataAndLocation();
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryTeal),
-                child: Text(context.t('retry'), style: const TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryTeal,
+                ),
+                child: Text(
+                  context.t('retry'),
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -200,7 +211,9 @@ class MapScreenState extends State<MapScreen> {
 
     final hasPlaces = _filteredPlaces.isNotEmpty;
     final currentPlace = hasPlaces ? _filteredPlaces[_currentStopIndex] : null;
-    final List<LatLng> routePoints = _filteredPlaces.map((p) => p.location).toList();
+    final List<LatLng> routePoints = _filteredPlaces
+        .map((p) => p.location)
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -210,7 +223,9 @@ class MapScreenState extends State<MapScreen> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: _allPlaces.isNotEmpty ? _allPlaces.first.location : _bursaCenter,
+              initialCenter: _allPlaces.isNotEmpty
+                  ? _allPlaces.first.location
+                  : _bursaCenter,
               initialZoom: 16.5,
             ),
             children: [
@@ -316,12 +331,15 @@ class MapScreenState extends State<MapScreen> {
             child: MapTopSearchBar(
               routeLabel: _routeChip == null
                   ? null
-                  : context.t('route_chip').replaceAll(
-                      '{name}',
-                      _routeChip == 'active'
-                          ? (ActiveRoute.instance.titleFor(context.isEn) ??
-                              context.t('ar_title'))
-                          : context.t('nearby_route_title')),
+                  : context
+                        .t('route_chip')
+                        .replaceAll(
+                          '{name}',
+                          _routeChip == 'active'
+                              ? (ActiveRoute.instance.titleFor(context.isEn) ??
+                                    context.t('ar_title'))
+                              : context.t('nearby_route_title'),
+                        ),
               onSearchChanged: (query) {
                 _routeChip = null;
                 _searchQuery = query;
@@ -360,56 +378,70 @@ class MapScreenState extends State<MapScreen> {
                             onTap: _recenter,
                             child: const Padding(
                               padding: EdgeInsets.all(15),
-                              child: Icon(Icons.my_location_rounded,
-                                  color: AppColors.primaryTeal),
+                              child: Icon(
+                                Icons.my_location_rounded,
+                                color: AppColors.primaryTeal,
+                              ),
                             ),
                           ),
                         ),
                         ElevatedButton.icon(
-                          onPressed: () => LauncherUtil.openDirections(currentPlace.location),
+                          onPressed: () => LauncherUtil.openDirections(
+                            currentPlace.location,
+                          ),
                           icon: const Icon(Icons.north_east_rounded, size: 18),
                           label: Text(context.t('directions')),
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 22,
+                              vertical: 14,
+                            ),
                             shape: const StadiumBorder(),
-                            textStyle:
-                                const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                            textStyle: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
                   RouteStopPreviewSheet(
-                routeTitle: currentPlace.routeName.isNotEmpty
-                    ? currentPlace.routeNameFor(context.isEn)
-                    : context.t('nearby_route_title'),
-                routeStats: context
-                    .t('stop_of')
-                    .replaceAll('{i}', '${_currentStopIndex + 1}')
-                    .replaceAll('{n}', '${_filteredPlaces.length}'),
-                placeName: currentPlace.nameFor(context.isEn),
-                placeDistanceTime: LocationService.formatDistance(
-                  LocationService.sortPlacesByDistance(places: [currentPlace], userLocation: _userLocation).first.distanceMeters,
-                ),
-                placeImageUrl: currentPlace.imageAfterUrl,
-                onDetailTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SliderScreen(place: currentPlace),
+                    routeTitle: currentPlace.routeName.isNotEmpty
+                        ? currentPlace.routeNameFor(context.isEn)
+                        : context.t('nearby_route_title'),
+                    routeStats: context
+                        .t('stop_of')
+                        .replaceAll('{i}', '${_currentStopIndex + 1}')
+                        .replaceAll('{n}', '${_filteredPlaces.length}'),
+                    placeName: currentPlace.nameFor(context.isEn),
+                    placeDistanceTime: LocationService.formatDistance(
+                      LocationService.sortPlacesByDistance(
+                        places: [currentPlace],
+                        userLocation: _userLocation,
+                      ).first.distanceMeters,
                     ),
-                  );
-                },
-                onNextStopTap: () {
-                  setState(() {
-                    _currentStopIndex = (_currentStopIndex + 1) % _filteredPlaces.length;
-                  });
-                  _mapController.move(
-                    _filteredPlaces[_currentStopIndex].location,
-                    16.8,
-                  );
-                },
-              ),
+                    placeImageUrl: currentPlace.imageAfterUrl,
+                    onDetailTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              SliderScreen(place: currentPlace),
+                        ),
+                      );
+                    },
+                    onNextStopTap: () {
+                      setState(() {
+                        _currentStopIndex =
+                            (_currentStopIndex + 1) % _filteredPlaces.length;
+                      });
+                      _mapController.move(
+                        _filteredPlaces[_currentStopIndex].location,
+                        16.8,
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

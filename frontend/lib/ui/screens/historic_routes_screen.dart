@@ -20,7 +20,11 @@ class HistoricRoutesScreen extends StatefulWidget {
   /// "Rota oluştur" butonu: rota oluşturma formunu açar.
   final VoidCallback? onCreateRoute;
 
-  const HistoricRoutesScreen({super.key, this.onRouteStarted, this.onCreateRoute});
+  const HistoricRoutesScreen({
+    super.key,
+    this.onRouteStarted,
+    this.onCreateRoute,
+  });
 
   @override
   State<HistoricRoutesScreen> createState() => _HistoricRoutesScreenState();
@@ -36,20 +40,27 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   @override
   void initState() {
     super.initState();
-    _repository.getPlaces().then((p) {
-      if (mounted) {
-        setState(() {
-          _routes = HeritageRoute.fromPlaces(p);
-          _isLoading = false;
+    _repository
+        .getPlaces()
+        .then((p) {
+          if (mounted) {
+            setState(() {
+              _routes = HeritageRoute.fromPlaces(p);
+              _isLoading = false;
+            });
+          }
+        })
+        .catchError((_) {
+          if (mounted) setState(() => _isLoading = false);
         });
-      }
-    }).catchError((_) {
-      if (mounted) setState(() => _isLoading = false);
-    });
   }
 
   void _start(HeritageRoute route) {
-    ActiveRoute.instance.setRoute(route.stops, titleTr: route.name, titleEn: route.nameEn);
+    ActiveRoute.instance.setRoute(
+      route.stops,
+      titleTr: route.name,
+      titleEn: route.nameEn,
+    );
     widget.onRouteStarted?.call(route.stops);
   }
 
@@ -63,7 +74,9 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
       ),
       builder: (_) => SafeArea(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
           child: ListView(
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
@@ -80,22 +93,36 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                         height: 32,
                         alignment: Alignment.center,
                         decoration: const BoxDecoration(
-                            color: AppColors.primaryTeal, shape: BoxShape.circle),
-                        child: Text('${i + 1}',
-                            style: const TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.w700)),
+                          color: AppColors.primaryTeal,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${i + 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(route.stops[i].nameFor(context.isEn),
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w700)),
-                            Text(route.stops[i].category.labelFor(context.isEn),
-                                style: const TextStyle(
-                                    fontSize: 13, color: AppColors.textMuted)),
+                            Text(
+                              route.stops[i].nameFor(context.isEn),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              route.stops[i].category.labelFor(context.isEn),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -112,68 +139,88 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   @override
   Widget build(BuildContext context) {
     // Rota verisi şimdilik yalnızca aktif şehir (Bursa) için var
-    final visible =
-        (_city == 'Tümü' || AppCities.isAvailable(_city)) ? _routes : <HeritageRoute>[];
+    final visible = (_city == 'Tümü' || AppCities.isAvailable(_city))
+        ? _routes
+        : <HeritageRoute>[];
 
-    return PatternBackground(child: Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                children: [
-                  Text(context.t('hr_title'), style: AppTheme.displayLarge),
-                  const SizedBox(height: 6),
-                  Text(context.t('hr_subtitle'),
-                      style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
-                  const SizedBox(height: 16),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _cities
-                          .map((c) => Padding(
+    return PatternBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                  children: [
+                    Text(context.t('hr_title'), style: AppTheme.displayLarge),
+                    const SizedBox(height: 6),
+                    Text(
+                      context.t('hr_subtitle'),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _cities
+                            .map(
+                              (c) => Padding(
                                 padding: const EdgeInsets.only(right: 10),
                                 child: FilterChipPill(
-                                  label: c == 'Tümü' ? context.t('all_filter') : c,
+                                  label: c == 'Tümü'
+                                      ? context.t('all_filter')
+                                      : c,
                                   selected: _city == c,
                                   onTap: () => setState(() => _city = c),
                                 ),
-                              ))
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ActiveRouteCard(onShowOnMap: (stops) => widget.onRouteStarted?.call(stops)),
-                  if (_isLoading)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 40),
-                      child: Center(
-                          child: CircularProgressIndicator(color: AppColors.primaryTeal)),
-                    )
-                  else if (visible.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 40),
-                      child: Center(
-                        child: Text(context.t('hr_soon').replaceAll('{city}', _city),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: AppColors.textMuted)),
+                              ),
+                            )
+                            .toList(),
                       ),
                     ),
-                  for (final route in visible) ...[
-                    _card(route),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
+                    ActiveRouteCard(
+                      onShowOnMap: (stops) =>
+                          widget.onRouteStarted?.call(stops),
+                    ),
+                    if (_isLoading)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 40),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryTeal,
+                          ),
+                        ),
+                      )
+                    else if (visible.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 40),
+                        child: Center(
+                          child: Text(
+                            context.t('hr_soon').replaceAll('{city}', _city),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: AppColors.textMuted),
+                          ),
+                        ),
+                      ),
+                    for (final route in visible) ...[
+                      _card(route),
+                      const SizedBox(height: 28),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            _buildCreateBar(),
-          ],
+              _buildCreateBar(),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 
   /// Navigasyonun hemen üstünde sabit duran büyük "Rota oluştur" butonu.
@@ -195,7 +242,10 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
           label: Text(context.t('rc_create')),
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
-            textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            textStyle: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),
@@ -262,9 +312,19 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
         const SizedBox(height: 14),
         Row(
           children: [
-            Expanded(child: PillButton.outlined(context.t('hr_see_stops'), onPressed: () => _showStops(route))),
+            Expanded(
+              child: PillButton.outlined(
+                context.t('hr_see_stops'),
+                onPressed: () => _showStops(route),
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: PillButton(context.t('hr_start'), onPressed: () => _start(route))),
+            Expanded(
+              child: PillButton(
+                context.t('hr_start'),
+                onPressed: () => _start(route),
+              ),
+            ),
           ],
         ),
       ],

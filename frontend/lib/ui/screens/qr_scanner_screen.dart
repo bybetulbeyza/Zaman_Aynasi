@@ -49,9 +49,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       if (matchedPlace == null) {
         if (mounted) {
           setState(() => _isProcessing = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.t('qr_unknown'))),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(context.t('qr_unknown'))));
         }
         return;
       }
@@ -98,9 +98,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         body: Stack(
           alignment: Alignment.center,
           children: [
-            MobileScanner(
-              onDetect: _onDetect,
-            ),
+            MobileScanner(onDetect: _onDetect),
             // Tarama Çerçevesi
             Container(
               width: 240,
@@ -116,120 +114,128 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     }
 
     // Ekran Tasarımı (Birebir Görseldeki Tasarım)
-    return PatternBackground(child: Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
+    return PatternBackground(
+      child: Scaffold(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: true,
-        title: Text(
-          context.t('nav_qr'),
-          style: const TextStyle(
-            fontSize: 22,
-            fontFamily: 'Fraunces',
-            fontWeight: FontWeight.w600,
-            color: AppColors.textDark,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: true,
+          title: Text(
+            context.t('nav_qr'),
+            style: const TextStyle(
+              fontSize: 22,
+              fontFamily: 'Fraunces',
+              fontWeight: FontWeight.w600,
+              color: AppColors.textDark,
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            children: [
-              const Spacer(flex: 1),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
+            child: Column(
+              children: [
+                const Spacer(flex: 1),
 
-              // Büyük Dairesel QR İkon Alanı
-              Container(
-                width: 160,
-                height: 160,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryTealLight,
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.qr_code_scanner_rounded,
-                  size: 76,
-                  color: AppColors.primaryTealDark,
-                ),
-              ),
-
-              const SizedBox(height: 36),
-
-              // Başlık
-              Text(
-                context.t('qr_heading'),
-                style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 18),
-
-              // Açıklama Kartı
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderSubtle, width: 0.8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  context.t('qr_body'),
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    height: 1.5,
-                    color: AppColors.textMuted,
+                // Büyük Dairesel QR İkon Alanı
+                Container(
+                  width: 160,
+                  height: 160,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryTealLight,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.qr_code_scanner_rounded,
+                    size: 76,
+                    color: AppColors.primaryTealDark,
                   ),
                 ),
-              ),
 
-              const Spacer(flex: 2),
+                const SizedBox(height: 36),
 
-              // "Kamerayı aç" Butonu
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() => _isScannerOpen = true);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryTeal,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26),
+                // Başlık
+                Text(
+                  context.t('qr_heading'),
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 18),
+
+                // Açıklama Kartı
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.borderSubtle,
+                      width: 0.8,
                     ),
-                    elevation: 0,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Text(
-                    context.t('qr_open_camera'),
+                    context.t('qr_body'),
                     style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      fontSize: 13.5,
+                      height: 1.5,
+                      color: AppColors.textMuted,
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
-            ],
+                const Spacer(flex: 2),
+
+                // "Kamerayı aç" Butonu
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() => _isScannerOpen = true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryTeal,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      context.t('qr_open_camera'),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 }

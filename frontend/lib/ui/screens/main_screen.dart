@@ -53,9 +53,11 @@ class _MainScreenState extends State<MainScreen> {
               const Icon(Icons.place_rounded, color: Colors.white, size: 20),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(context
-                    .t('geo_nearby')
-                    .replaceAll('{name}', place.nameFor(context.isEn))),
+                child: Text(
+                  context
+                      .t('geo_nearby')
+                      .replaceAll('{name}', place.nameFor(context.isEn)),
+                ),
               ),
             ],
           ),
@@ -122,10 +124,7 @@ class _MainScreenState extends State<MainScreen> {
     ];
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: screens),
       bottomNavigationBar: _buildBottomBar(),
     );
   }
@@ -236,7 +235,11 @@ class _MainScreenState extends State<MainScreen> {
                     isLabelVisible: !ActiveRoute.instance.isEmpty,
                     label: Text('${ActiveRoute.instance.length}'),
                     backgroundColor: AppColors.ciniBordeaux,
-                    child: Icon(isSelected ? activeIcon : icon, color: color, size: 26),
+                    child: Icon(
+                      isSelected ? activeIcon : icon,
+                      color: color,
+                      size: 26,
+                    ),
                   ),
                 )
               : Icon(isSelected ? activeIcon : icon, color: color, size: 26),
@@ -273,7 +276,9 @@ class _MainScreenState extends State<MainScreen> {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: AppColors.ciniBordeaux.withValues(alpha: selected ? 0.45 : 0.28),
+                color: AppColors.ciniBordeaux.withValues(
+                  alpha: selected ? 0.45 : 0.28,
+                ),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

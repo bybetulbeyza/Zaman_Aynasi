@@ -55,7 +55,8 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
     final query = _searchController.text.toLowerCase().trim();
     setState(() {
       _filteredPlaces = _allPlaces.where((place) {
-        final matchesSearch = place.name.toLowerCase().contains(query) ||
+        final matchesSearch =
+            place.name.toLowerCase().contains(query) ||
             place.nameEn.toLowerCase().contains(query) ||
             place.shortDescription.toLowerCase().contains(query) ||
             place.shortDescriptionEn.toLowerCase().contains(query);
@@ -72,117 +73,127 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   void _openPlace(HeritagePlace place) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => SliderScreen(place: place),
-      ),
+      MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final canPop = Navigator.of(context).canPop();
-    return PatternBackground(child: Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Row(
-                children: [
-                  if (canPop)
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Padding(
-                        padding: EdgeInsets.only(right: 12),
-                        child: Icon(Icons.arrow_back_ios_new,
-                            size: 20, color: AppColors.textDark),
+    return PatternBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: Row(
+                  children: [
+                    if (canPop)
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Padding(
+                          padding: EdgeInsets.only(right: 12),
+                          child: Icon(
+                            Icons.arrow_back_ios_new,
+                            size: 20,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ),
+                    Text(context.t('inv_title'), style: AppTheme.displayLarge),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: _buildSearchRow(),
+              ),
+              const SizedBox(height: 14),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: AppCategories.filters.map((cat) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: FilterChipPill(
+                        label: cat == null
+                            ? context.t('all_filter')
+                            : cat.labelFor(context.isEn),
+                        selected: _selectedCategory == cat,
+                        onTap: () {
+                          _selectedCategory = cat;
+                          _applyFilter();
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      context
+                          .t('inv_count')
+                          .replaceAll('{n}', '${_filteredPlaces.length}'),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textDark,
                       ),
                     ),
-                  Text(context.t('inv_title'), style: AppTheme.displayLarge),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _buildSearchRow(),
-            ),
-            const SizedBox(height: 14),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: AppCategories.filters.map((cat) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: FilterChipPill(
-                      label: cat == null
-                          ? context.t('all_filter')
-                          : cat.labelFor(context.isEn),
-                      selected: _selectedCategory == cat,
+                    GestureDetector(
                       onTap: () {
-                        _selectedCategory = cat;
+                        _sortAlphabetical = !_sortAlphabetical;
                         _applyFilter();
                       },
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    context
-                        .t('inv_count')
-                        .replaceAll('{n}', '${_filteredPlaces.length}'),
-                    style: const TextStyle(
-                        fontSize: 15, color: AppColors.textDark),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      _sortAlphabetical = !_sortAlphabetical;
-                      _applyFilter();
-                    },
-                    child: Text(
-                      _sortAlphabetical ? '${context.t('sort')} · A-Z' : context.t('sort'),
-                      style: const TextStyle(
-                        color: AppColors.primaryTeal,
-                        fontWeight: FontWeight.w700,
+                      child: Text(
+                        _sortAlphabetical
+                            ? '${context.t('sort')} · A-Z'
+                            : context.t('sort'),
+                        style: const TextStyle(
+                          color: AppColors.primaryTeal,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                          color: AppColors.primaryTeal))
-                  : _filteredPlaces.isEmpty
-                      ? Center(
-                          child: Text(context.t('no_match'),
-                              style: const TextStyle(color: AppColors.textMuted)),
-                        )
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                          itemCount: _filteredPlaces.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 20),
-                          itemBuilder: (_, i) =>
-                              _buildPlaceCard(_filteredPlaces[i]),
+              Expanded(
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryTeal,
                         ),
-            ),
-          ],
+                      )
+                    : _filteredPlaces.isEmpty
+                    ? Center(
+                        child: Text(
+                          context.t('no_match'),
+                          style: const TextStyle(color: AppColors.textMuted),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                        itemCount: _filteredPlaces.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 20),
+                        itemBuilder: (_, i) =>
+                            _buildPlaceCard(_filteredPlaces[i]),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 
   Widget _buildSearchRow() {
@@ -212,7 +223,8 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
     const radius = BorderRadius.all(Radius.circular(20));
     final subtitle = [
       place.category.labelFor(context.isEn),
-      if (place.constructionDate.trim().isNotEmpty) place.constructionDate.trim(),
+      if (place.constructionDate.trim().isNotEmpty)
+        place.constructionDate.trim(),
     ].join(' · ');
 
     return Column(
@@ -263,13 +275,18 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontSize: 14, color: AppColors.textMuted),
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            PillButton(context.t('explore'), onPressed: () => _openPlace(place)),
+            PillButton(
+              context.t('explore'),
+              onPressed: () => _openPlace(place),
+            ),
           ],
         ),
       ],
