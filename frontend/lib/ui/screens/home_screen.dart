@@ -145,74 +145,87 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHero() {
     final top = MediaQuery.of(context).padding.top;
     return Container(
-      padding: EdgeInsets.fromLTRB(20, top + 14, 20, 0),
-      decoration: PatternBackground.onDarkDecoration(),
-      child: Stack(
+      padding: EdgeInsets.fromLTRB(20, top + 14, 20, 24),
+      // Desen hero'da çok silik tutulur; başlık ve arama çubuğu öne çıksın
+      decoration: PatternBackground.onDarkDecoration(lineOpacity: 0.10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Sağda silik lale motifi
-          Positioned(
-            right: -24,
-            bottom: 36,
-            child: Opacity(
-              opacity: 0.2,
-              child: const TulipMotif(height: 230),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Zaman Aynası',
-                    style: TextStyle(
-                      fontFamily: AppTheme.headingFont,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const LangToggle(onDark: true),
-                ],
-              ),
-              const SizedBox(height: 40),
-              Text(
-                context.t('hero_title'),
-                style: const TextStyle(
+              const Text(
+                'Zaman Aynası',
+                style: TextStyle(
                   fontFamily: AppTheme.headingFont,
-                  fontSize: 32,
-                  height: 1.15,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 28),
-              GestureDetector(
-                onTap: _openPlaces,
-                child: Container(
-                  height: 54,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
+              const LangToggle(onDark: true),
+            ],
+          ),
+          const SizedBox(height: 26),
+          // Başlık solda, lale amblemi sağda: iki blok yan yana, çakışma yok
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  context.t('hero_title').replaceAll('\n', ' '),
+                  style: const TextStyle(
+                    fontFamily: AppTheme.headingFont,
+                    fontSize: 26,
+                    height: 1.2,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search_rounded, color: AppColors.textDark),
-                      const SizedBox(width: 12),
-                      Text(
-                        context.t('search_hint'),
-                        style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
-                      ),
-                    ],
                   ),
                 ),
               ),
-              // Arama çubuğu hero'dan krem alana taşmasın diye alt boşluk
-              const SizedBox(height: 28),
+              const SizedBox(width: 14),
+              Container(
+                width: 72,
+                height: 72,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFBF6EA),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.ciniBordeaux, width: 2.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 14,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: const TulipMotif(height: 52),
+              ),
             ],
+          ),
+          const SizedBox(height: 24),
+          GestureDetector(
+            onTap: _openPlaces,
+            child: Container(
+              height: 54,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.search_rounded, color: AppColors.textDark),
+                  const SizedBox(width: 12),
+                  Text(
+                    context.t('search_hint'),
+                    style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

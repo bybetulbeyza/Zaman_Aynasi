@@ -31,14 +31,17 @@ class PatternBackground extends StatelessWidget {
         scale = 3.0;
 
   /// Petrol zeminde çini desenli dekorasyon (Ana Sayfa hero'su gibi özel kapsayıcılar için).
-  static BoxDecoration onDarkDecoration() => const BoxDecoration(
+  static BoxDecoration onDarkDecoration({double lineOpacity = 0.17}) => BoxDecoration(
         color: AppColors.heroPetrol,
         image: DecorationImage(
-          image: AssetImage(asset),
+          image: const AssetImage(asset),
           repeat: ImageRepeat.repeat,
           alignment: Alignment.topLeft,
           scale: 3.0,
-          colorFilter: ColorFilter.mode(Color(0x2B9CCBD2), BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(
+            const Color(0xFF9CCBD2).withValues(alpha: lineOpacity),
+            BlendMode.srcIn,
+          ),
         ),
       );
 

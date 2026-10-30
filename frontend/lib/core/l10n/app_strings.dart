@@ -165,7 +165,7 @@ const Map<String, String> appStringsEn = {
   'nav_profile': 'Profile',
 
   // Home
-  'hero_title': 'Discover foundation\nheritage through its stories',
+  'hero_title': 'Discover heritage\nthrough its stories',
   'qa_nearby': 'Nearby',
   'qa_create_route': 'Create route',
   'qa_scan_qr': 'Scan QR',
