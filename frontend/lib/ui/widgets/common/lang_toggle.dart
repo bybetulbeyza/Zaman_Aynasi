@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/app_lang.dart';
 
-/// TR | EN geçişi. [onDark] true ise petrol zemin üstünde (hero) çizgi beyaz olur.
+/// TR | EN geçişi. Tek global dil durumunu ([AppLang]) değiştirir.
+/// [onDark] true ise petrol zemin üstünde (hero) çizgi beyaz olur.
 class LangToggle extends StatelessWidget {
-  final bool isTurkish;
-  final ValueChanged<bool> onChanged;
   final bool onDark;
 
-  const LangToggle({
-    super.key,
-    required this.isTurkish,
-    required this.onChanged,
-    this.onDark = false,
-  });
+  const LangToggle({super.key, this.onDark = false});
 
   @override
   Widget build(BuildContext context) {
+    final isEnglish = context.isEn;
     final accent = onDark ? Colors.white : AppColors.primaryTeal;
     return Container(
       padding: const EdgeInsets.all(3),
@@ -26,8 +22,8 @@ class LangToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _seg('TR', isTurkish, accent),
-          _seg('EN', !isTurkish, accent),
+          _seg('TR', !isEnglish, accent),
+          _seg('EN', isEnglish, accent),
         ],
       ),
     );
@@ -37,7 +33,7 @@ class LangToggle extends StatelessWidget {
     final selBg = onDark ? Colors.white : AppColors.primaryTeal;
     final selFg = onDark ? AppColors.heroPetrol : Colors.white;
     return GestureDetector(
-      onTap: () => onChanged(label == 'TR'),
+      onTap: () => AppLang.instance.setEnglish(label == 'EN'),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         decoration: BoxDecoration(

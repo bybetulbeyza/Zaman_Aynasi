@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/app_lang.dart';
 import '../common/app_network_image.dart';
 
 class RouteStopPreviewSheet extends StatelessWidget {
@@ -169,9 +170,9 @@ class RouteStopPreviewSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(23),
                       ),
                     ),
-                    child: const Text(
-                      'Detay',
-                      style: TextStyle(
+                    child: Text(
+                      context.t('detail'),
+                      style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textDark,
@@ -195,9 +196,9 @@ class RouteStopPreviewSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(23),
                       ),
                     ),
-                    child: const Text(
-                      'Sonraki durak',
-                      style: TextStyle(
+                    child: Text(
+                      context.t('next_stop'),
+                      style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w600,
                       ),

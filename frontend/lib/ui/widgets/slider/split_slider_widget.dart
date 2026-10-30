@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:before_after/before_after.dart';
 import '../../../core/constants/app_colors.dart';
@@ -16,8 +17,8 @@ class SplitSliderWidget extends StatefulWidget {
     super.key,
     required this.beforeImageUrl,
     required this.afterImageUrl,
-    this.beforeLabel = 'Günümüz',
-    this.afterLabel = 'Tarihi Dönem',
+    this.beforeLabel = 'Bugün',
+    this.afterLabel = 'Dönem',
     this.hotspots = const [],
     this.onHotspotSelected,
   });
@@ -230,6 +231,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               ),
 
             // 7. Modu Açıp Kapatma Butonu (Sol Alt Köşe)
+            if (kDebugMode)
             Positioned(
               left: 12,
               bottom: 12,

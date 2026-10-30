@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_categories.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/app_lang.dart';
+import '../../../data/models/heritage_place.dart';
 
 class MapTopSearchBar extends StatefulWidget {
   final ValueChanged<String>? onSearchChanged;
-  final ValueChanged<String>? onFilterSelected;
-  final VoidCallback? onFilterTap;
+  final ValueChanged<PlaceCategory?>? onFilterSelected;
 
   const MapTopSearchBar({
     super.key,
     this.onSearchChanged,
     this.onFilterSelected,
-    this.onFilterTap,
   });
 
   @override
@@ -18,16 +19,7 @@ class MapTopSearchBar extends StatefulWidget {
 }
 
 class _MapTopSearchBarState extends State<MapTopSearchBar> {
-  String _selectedCategory = 'Tümü';
-  final List<String> _categories = [
-    'Tümü',
-    'Sosyal & Sivil Yapılar',
-    'Külliye',
-    'Han',
-    'Cami',
-    'Hamam',
-    'Türbe',
-  ];
+  PlaceCategory? _selectedCategory; // null = Tümü
 
   @override
   Widget build(BuildContext context) {
@@ -66,45 +58,21 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
                         color: AppColors.textDark,
                         fontSize: 14,
                       ),
-                      decoration: const InputDecoration(
-                        hintText: 'Eser, semt veya rota ara',
-                        hintStyle: TextStyle(
+                      decoration: InputDecoration(
+                        hintText: context.t('map_search_hint'),
+                        hintStyle: const TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.search_rounded,
                           color: AppColors.textMuted,
                           size: 22,
                         ),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 13),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 13),
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: widget.onFilterTap,
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryTeal,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryTeal.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.tune_rounded,
-                      color: Colors.white,
-                      size: 22,
                     ),
                   ),
                 ),
@@ -121,10 +89,10 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
-              itemCount: _categories.length,
+              itemCount: AppCategories.filters.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
-                final cat = _categories[index];
+                final cat = AppCategories.filters[index];
                 final isSelected = cat == _selectedCategory;
 
                 return GestureDetector(
@@ -159,7 +127,7 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
                       ],
                     ),
                     child: Text(
-                      cat,
+                      cat == null ? context.t('all_filter') : cat.labelFor(context.isEn),
                       style: TextStyle(
                         color: isSelected ? Colors.white : AppColors.textDark,
                         fontSize: 13,

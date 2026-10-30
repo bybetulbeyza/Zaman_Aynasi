@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/app_lang.dart';
+import '../../core/state/active_route.dart';
 import '../../core/constants/app_theme.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/models/heritage_route.dart';
@@ -42,6 +44,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   }
 
   void _start(HeritageRoute route) {
+    ActiveRoute.instance.setRoute(route.stops, titleTr: route.name, titleEn: route.nameEn);
     widget.onRouteStarted?.call(route.stops);
     Navigator.pop(context);
   }
@@ -61,7 +64,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
             children: [
-              Text(route.name, style: AppTheme.titleLarge),
+              Text(route.nameFor(context.isEn), style: AppTheme.titleLarge),
               const SizedBox(height: 14),
               for (var i = 0; i < route.stops.length; i++)
                 Padding(
@@ -83,10 +86,10 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(route.stops[i].name,
+                            Text(route.stops[i].nameFor(context.isEn),
                                 style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w700)),
-                            Text(route.stops[i].category.label,
+                            Text(route.stops[i].category.labelFor(context.isEn),
                                 style: const TextStyle(
                                     fontSize: 13, color: AppColors.textMuted)),
                           ],
@@ -125,12 +128,12 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                         size: 20, color: AppColors.textDark),
                   ),
                 ),
-                const Text('Tarihi Rotalar', style: AppTheme.displayLarge),
+                Text(context.t('hr_title'), style: AppTheme.displayLarge),
               ],
             ),
             const SizedBox(height: 6),
-            const Text('Bölgeye ve temaya göre hazır rota paketleri',
-                style: TextStyle(fontSize: 15, color: AppColors.textMuted)),
+            Text(context.t('hr_subtitle'),
+                style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
             const SizedBox(height: 16),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -139,7 +142,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                     .map((c) => Padding(
                           padding: const EdgeInsets.only(right: 10),
                           child: FilterChipPill(
-                            label: c,
+                            label: c == 'Tümü' ? context.t('all_filter') : c,
                             selected: _city == c,
                             onTap: () => setState(() => _city = c),
                           ),
@@ -158,7 +161,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 40),
                 child: Center(
-                  child: Text('$_city için hazır rotalar yakında eklenecek.',
+                  child: Text(context.t('hr_soon').replaceAll('{city}', _city),
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: AppColors.textMuted)),
                 ),
@@ -213,7 +216,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                   right: 20,
                   bottom: 16,
                   child: Text(
-                    route.name,
+                    route.nameFor(context.isEn),
                     style: const TextStyle(
                       fontFamily: AppTheme.headingFont,
                       fontSize: 26,
@@ -228,15 +231,15 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          '${AppCities.active} · ${route.stops.length} durak · ${route.durationLabel} · ${route.distanceLabel}',
+          '${AppCities.active} · ${route.stops.length} ${context.t('stops_word')} · ${route.durationLabelFor(context.isEn)} · ${route.distanceLabelFor(context.isEn)}',
           style: const TextStyle(fontSize: 14.5, color: AppColors.textMuted),
         ),
         const SizedBox(height: 14),
         Row(
           children: [
-            Expanded(child: PillButton.outlined('Durakları gör', onPressed: () => _showStops(route))),
+            Expanded(child: PillButton.outlined(context.t('hr_see_stops'), onPressed: () => _showStops(route))),
             const SizedBox(width: 12),
-            Expanded(child: PillButton('Rotayı başlat', onPressed: () => _start(route))),
+            Expanded(child: PillButton(context.t('hr_start'), onPressed: () => _start(route))),
           ],
         ),
       ],

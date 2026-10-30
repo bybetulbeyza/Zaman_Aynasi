@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/app_categories.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../../core/constants/app_theme.dart';
@@ -23,17 +25,8 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   List<HeritagePlace> _allPlaces = [];
   List<HeritagePlace> _filteredPlaces = [];
   bool _isLoading = true;
-  String _selectedCategory = 'Tümü';
+  PlaceCategory? _selectedCategory; // null = Tümü
   bool _sortAlphabetical = false;
-
-  final List<String> _categories = [
-    'Tümü',
-    'Cami',
-    'Han',
-    'Hamam',
-    'Türbe',
-    'Külliye',
-  ];
 
   @override
   void initState() {
@@ -63,9 +56,11 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
     setState(() {
       _filteredPlaces = _allPlaces.where((place) {
         final matchesSearch = place.name.toLowerCase().contains(query) ||
-            place.shortDescription.toLowerCase().contains(query);
-        final matchesCat = _selectedCategory == 'Tümü' ||
-            place.category.label.toLowerCase().trim() == _selectedCategory.toLowerCase().trim();
+            place.nameEn.toLowerCase().contains(query) ||
+            place.shortDescription.toLowerCase().contains(query) ||
+            place.shortDescriptionEn.toLowerCase().contains(query);
+        final matchesCat =
+            _selectedCategory == null || place.category == _selectedCategory;
         return matchesSearch && matchesCat;
       }).toList();
       if (_sortAlphabetical) {
@@ -78,7 +73,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SliderScreen.fromPlace(place),
+        builder: (_) => SliderScreen(place: place),
       ),
     );
   }
@@ -106,7 +101,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                             size: 20, color: AppColors.textDark),
                       ),
                     ),
-                  const Text('Tarih Envanteri', style: AppTheme.displayLarge),
+                  Text(context.t('inv_title'), style: AppTheme.displayLarge),
                 ],
               ),
             ),
@@ -120,11 +115,13 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
-                children: _categories.map((cat) {
+                children: AppCategories.filters.map((cat) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: FilterChipPill(
-                      label: cat,
+                      label: cat == null
+                          ? context.t('all_filter')
+                          : cat.labelFor(context.isEn),
                       selected: _selectedCategory == cat,
                       onTap: () {
                         _selectedCategory = cat;
@@ -141,7 +138,9 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Bursa'da ${_filteredPlaces.length} eser",
+                    context
+                        .t('inv_count')
+                        .replaceAll('{n}', '${_filteredPlaces.length}'),
                     style: const TextStyle(
                         fontSize: 15, color: AppColors.textDark),
                   ),
@@ -151,7 +150,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                       _applyFilter();
                     },
                     child: Text(
-                      _sortAlphabetical ? 'Sırala · A-Z' : 'Sırala',
+                      _sortAlphabetical ? '${context.t('sort')} · A-Z' : context.t('sort'),
                       style: const TextStyle(
                         color: AppColors.primaryTeal,
                         fontWeight: FontWeight.w700,
@@ -167,9 +166,9 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                       child: CircularProgressIndicator(
                           color: AppColors.primaryTeal))
                   : _filteredPlaces.isEmpty
-                      ? const Center(
-                          child: Text('Eşleşen eser bulunamadı.',
-                              style: TextStyle(color: AppColors.textMuted)),
+                      ? Center(
+                          child: Text(context.t('no_match'),
+                              style: const TextStyle(color: AppColors.textMuted)),
                         )
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
@@ -187,48 +186,32 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   }
 
   Widget _buildSearchRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 54,
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (_) => _applyFilter(),
-              style: const TextStyle(fontSize: 15),
-              decoration: const InputDecoration(
-                hintText: 'Eser adı veya semt ara',
-                hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 15),
-                border: InputBorder.none,
-                icon: Icon(Icons.search_rounded, color: AppColors.textDark),
-              ),
-            ),
-          ),
+    return Container(
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (_) => _applyFilter(),
+        style: const TextStyle(fontSize: 15),
+        decoration: InputDecoration(
+          hintText: context.t('search_hint'),
+          hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+          border: InputBorder.none,
+          icon: const Icon(Icons.search_rounded, color: AppColors.textDark),
         ),
-        const SizedBox(width: 12),
-        Container(
-          width: 54,
-          height: 54,
-          decoration: const BoxDecoration(
-            color: AppColors.primaryTeal,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.tune_rounded, color: Colors.white),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildPlaceCard(HeritagePlace place) {
     const radius = BorderRadius.all(Radius.circular(20));
     final subtitle = [
-      place.category.label,
+      place.category.labelFor(context.isEn),
       if (place.constructionDate.trim().isNotEmpty) place.constructionDate.trim(),
     ].join(' · ');
 
@@ -267,7 +250,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    place.name,
+                    place.nameFor(context.isEn),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTheme.titleLarge,
@@ -284,7 +267,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            PillButton('Keşfet', onPressed: () => _openPlace(place)),
+            PillButton(context.t('explore'), onPressed: () => _openPlace(place)),
           ],
         ),
       ],

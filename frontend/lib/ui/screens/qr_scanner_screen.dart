@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import 'slider_screen.dart';
@@ -48,7 +49,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         if (mounted) {
           setState(() => _isProcessing = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Bu karekod tanınmadı. Tarih Envanteri\'nden aramayı deneyin.')),
+            SnackBar(content: Text(context.t('qr_unknown'))),
           );
         }
         return;
@@ -64,7 +65,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SliderScreen.fromPlace(matchedPlace!),
+            builder: (context) => SliderScreen(place: matchedPlace!),
           ),
         );
       }
@@ -87,9 +88,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             icon: const Icon(Icons.close_rounded, color: Colors.white),
             onPressed: () => setState(() => _isScannerOpen = false),
           ),
-          title: const Text(
-            'Karekodu Hizalayın',
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          title: Text(
+            context.t('qr_align'),
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
           centerTitle: true,
         ),
@@ -121,11 +122,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        title: const Text(
-          'QR Okut',
-          style: TextStyle(
+        title: Text(
+          context.t('nav_qr'),
+          style: const TextStyle(
             fontSize: 22,
-            fontFamily: 'Serif',
+            fontFamily: 'Fraunces',
             fontWeight: FontWeight.w600,
             color: AppColors.textDark,
           ),
@@ -143,7 +144,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 width: 160,
                 height: 160,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFD6F0F0), // Görseldeki pastel açık turkuaz/teal
+                  color: AppColors.primaryTealLight,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -157,9 +158,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               const SizedBox(height: 36),
 
               // Başlık
-              const Text(
-                'Tabeladaki karekodu okut',
-                style: TextStyle(
+              Text(
+                context.t('qr_heading'),
+                style: const TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textDark,
@@ -185,11 +186,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     ),
                   ],
                 ),
-                child: const Text(
-                  'Tarihi yapının tabelasındaki karekodu okut. '
-                      'Eserin sayfası önce/bugün fotoğrafıyla açılır. '
-                      'Karekod yoksa Tarih Envanteri\'nden ara.',
-                  style: TextStyle(
+                child: Text(
+                  context.t('qr_body'),
+                  style: const TextStyle(
                     fontSize: 13.5,
                     height: 1.5,
                     color: AppColors.textMuted,
@@ -214,9 +213,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Kamerayı aç',
-                    style: TextStyle(
+                  child: Text(
+                    context.t('qr_open_camera'),
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,

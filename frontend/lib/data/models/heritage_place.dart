@@ -8,6 +8,24 @@ enum PlaceCategory {
   kulliye,
   sosyalSivilYapilar;
 
+  String labelFor(bool en) {
+    if (!en) return label;
+    switch (this) {
+      case PlaceCategory.cami:
+        return 'Mosque';
+      case PlaceCategory.han:
+        return 'Inn';
+      case PlaceCategory.hamam:
+        return 'Bathhouse';
+      case PlaceCategory.turbe:
+        return 'Tomb';
+      case PlaceCategory.kulliye:
+        return 'Complex';
+      case PlaceCategory.sosyalSivilYapilar:
+        return 'Social & Civil';
+    }
+  }
+
   String get label {
     switch (this) {
       case PlaceCategory.cami:
@@ -34,6 +52,9 @@ class Hotspot {
   final String targetSide;
   final double xPercent;
   final double yPercent;
+  final String titleEn;
+  final String descriptionEn;
+  final String? aiVideoEnUrl;
   final String? aiVideoUrl; // Supabase: ai_video (boşsa 'AI hikâyesi' butonu gizlenir)
   final String? targetPlaceId; // Külliyeden alt yapıya (Türbe, Hamam vb.) geçiş ID'si
 
@@ -45,9 +66,23 @@ class Hotspot {
     required this.targetSide,
     required this.xPercent,
     required this.yPercent,
+    this.titleEn = '',
+    this.descriptionEn = '',
+    this.aiVideoEnUrl,
     this.aiVideoUrl,
     this.targetPlaceId,
   });
+
+  String titleFor(bool en) => en && titleEn.isNotEmpty ? titleEn : title;
+  String descriptionFor(bool en) => en && descriptionEn.isNotEmpty ? descriptionEn : description;
+
+  /// Dile göre AI videosu; İngilizce yoksa Türkçeye döner. Hiçbiri yoksa null.
+  String? videoFor(bool en) {
+    final enUrl = aiVideoEnUrl?.trim() ?? '';
+    final trUrl = aiVideoUrl?.trim() ?? '';
+    if (en && enUrl.isNotEmpty) return enUrl;
+    return trUrl.isNotEmpty ? trUrl : (enUrl.isNotEmpty ? enUrl : null);
+  }
 
   bool get hasAiVideo => aiVideoUrl != null && aiVideoUrl!.trim().isNotEmpty;
 
@@ -62,6 +97,9 @@ class Hotspot {
       targetSide: (json['target_side'] as String?)?.toLowerCase() ?? 'after',
       xPercent: (json['x_percent'] as num?)?.toDouble() ?? 0.0,
       yPercent: (json['y_percent'] as num?)?.toDouble() ?? 0.0,
+      titleEn: (json['title_en'] as String? ?? '').trim(),
+      descriptionEn: (json['description_en'] as String? ?? '').trim(),
+      aiVideoEnUrl: (json['ai_video_en'] as String?)?.trim(),
       aiVideoUrl: (json['ai_video'] as String?)?.trim(),
       targetPlaceId: json['target_place_id']?.toString(),
     );
@@ -83,6 +121,11 @@ class HeritagePlace {
   final String architect;        // Supabase: architect
   final String patron;           // Supabase: patron (Bani)
   final String inventoryLocation;// Supabase: inventory_location (örn. 'Cilt 1, s. 37')
+  final String nameEn;
+  final String shortDescriptionEn;
+  final String routeNameEn;
+  final String audioGuideEnUrl;
+  final String aiVideoEnUrl;
   final String aiVideoUrl;       // Supabase: ai_video (tarihî dönüşüm videosu)
   final String audioGuideUrl;    // Supabase: audio_guide (sesli rehber ses dosyası)
   final String qrUrl;            // Supabase: qr_url (QR görselinin adresi; QR içeriği 'eser:<id>')
@@ -104,6 +147,11 @@ class HeritagePlace {
     this.architect = '',
     this.patron = '',
     this.inventoryLocation = '',
+    this.nameEn = '',
+    this.shortDescriptionEn = '',
+    this.routeNameEn = '',
+    this.audioGuideEnUrl = '',
+    this.aiVideoEnUrl = '',
     this.aiVideoUrl = '',
     this.audioGuideUrl = '',
     this.qrUrl = '',
@@ -114,7 +162,19 @@ class HeritagePlace {
   // Harita ve genel rotalarda alt yapıyı gizlemek için kontrol
   bool get isSubPlace => parentId != null && parentId!.isNotEmpty;
 
-  bool get hasAiVideo => aiVideoUrl.isNotEmpty;
+  String nameFor(bool en) => en && nameEn.isNotEmpty ? nameEn : name;
+  String descriptionFor(bool en) =>
+      en && shortDescriptionEn.isNotEmpty ? shortDescriptionEn : shortDescription;
+  String routeNameFor(bool en) => en && routeNameEn.isNotEmpty ? routeNameEn : routeName;
+
+  /// Dile göre sesli rehber adresi; İngilizce yoksa Türkçeye döner.
+  String audioFor(bool en) =>
+      en && audioGuideEnUrl.isNotEmpty ? audioGuideEnUrl : audioGuideUrl;
+
+  /// Dile göre AI videosu adresi; İngilizce yoksa Türkçeye döner.
+  String videoFor(bool en) => en && aiVideoEnUrl.isNotEmpty ? aiVideoEnUrl : aiVideoUrl;
+
+  bool get hasAiVideo => aiVideoUrl.isNotEmpty || aiVideoEnUrl.isNotEmpty;
   bool get hasAudioGuide => audioGuideUrl.isNotEmpty;
 
   // SliderScreen ile tam geriye dönük uyumluluk
@@ -136,6 +196,11 @@ class HeritagePlace {
       architect: architect,
       patron: patron,
       inventoryLocation: inventoryLocation,
+      nameEn: nameEn,
+      shortDescriptionEn: shortDescriptionEn,
+      routeNameEn: routeNameEn,
+      audioGuideEnUrl: audioGuideEnUrl,
+      aiVideoEnUrl: aiVideoEnUrl,
       aiVideoUrl: aiVideoUrl,
       audioGuideUrl: audioGuideUrl,
       qrUrl: qrUrl,
@@ -172,6 +237,11 @@ class HeritagePlace {
       architect: (json['architect'] as String? ?? '').trim(),
       patron: (json['patron'] as String? ?? '').trim(),
       inventoryLocation: (json['inventory_location'] as String? ?? '').trim(),
+      nameEn: (json['name_en'] as String? ?? '').trim(),
+      shortDescriptionEn: (json['short_description_en'] as String? ?? '').trim(),
+      routeNameEn: (json['route_name_en'] as String? ?? '').trim(),
+      audioGuideEnUrl: (json['audio_guide_en'] as String? ?? '').trim(),
+      aiVideoEnUrl: (json['ai_video_en'] as String? ?? '').trim(),
       aiVideoUrl: (json['ai_video'] as String? ?? '').trim(),
       audioGuideUrl: (json['audio_guide'] as String? ?? '').trim(),
       qrUrl: json['qr_url'] as String? ?? '',

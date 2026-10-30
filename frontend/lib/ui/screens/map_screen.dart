@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/app_lang.dart';
+import '../../../core/utils/launcher_util.dart';
 import '../../../core/utils/location_service.dart';
 import '../../../data/models/heritage_place.dart';
 import '../../../data/repositories/heritage_repository.dart';
@@ -31,7 +33,7 @@ class MapScreenState extends State<MapScreen> {
   int _currentStopIndex = 0;
 
   String _searchQuery = '';
-  String _selectedCategory = 'Tümü';
+  PlaceCategory? _selectedCategory; // null = Tümü
 
   @override
   void initState() {
@@ -89,11 +91,11 @@ class MapScreenState extends State<MapScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           children: [
-            Icon(Icons.near_me_rounded, color: Colors.white, size: 18),
-            SizedBox(width: 8),
-            Text('Konumunuza yakın 4 duraklı rota hazırlandı.'),
+            const Icon(Icons.near_me_rounded, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Expanded(child: Text(context.t('nearby_route_ready'))),
           ],
         ),
         backgroundColor: AppColors.primaryTeal,
@@ -117,11 +119,13 @@ class MapScreenState extends State<MapScreen> {
   void _applyFilters() {
     setState(() {
       final filtered = _allPlaces.where((place) {
-        final matchesSearch = place.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            place.shortDescription.toLowerCase().contains(_searchQuery.toLowerCase());
+        final q = _searchQuery.toLowerCase();
+        final matchesSearch = place.name.toLowerCase().contains(q) ||
+            place.nameEn.toLowerCase().contains(q) ||
+            place.shortDescription.toLowerCase().contains(q) ||
+            place.shortDescriptionEn.toLowerCase().contains(q);
 
-        final matchesCategory = _selectedCategory == 'Tümü' ||
-            (place.category.label.toLowerCase().trim() == _selectedCategory.toLowerCase().trim());
+        final matchesCategory = _selectedCategory == null || place.category == _selectedCategory;
 
         return matchesSearch && matchesCategory;
       }).toList();
@@ -160,9 +164,9 @@ class MapScreenState extends State<MapScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Eserler yüklenemedi.',
-                style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w600),
+              Text(
+                context.t('map_load_error'),
+                style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
@@ -171,7 +175,7 @@ class MapScreenState extends State<MapScreen> {
                   _initDataAndLocation();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryTeal),
-                child: const Text('Tekrar Dene', style: TextStyle(color: Colors.white)),
+                child: Text(context.t('retry'), style: const TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -275,7 +279,6 @@ class MapScreenState extends State<MapScreen> {
                 _selectedCategory = category;
                 _applyFilters();
               },
-              onFilterTap: () {},
             ),
           ),
 
@@ -285,10 +288,32 @@ class MapScreenState extends State<MapScreen> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: RouteStopPreviewSheet(
-                routeTitle: currentPlace.routeName.isNotEmpty ? currentPlace.routeName : 'Yakın Çevre Rotası',
-                routeStats: 'Durak ${_currentStopIndex + 1} / ${_filteredPlaces.length} • Yürüyüş Hattı',
-                placeName: currentPlace.name,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16, bottom: 12),
+                    child: ElevatedButton.icon(
+                      onPressed: () => LauncherUtil.openDirections(currentPlace.location),
+                      icon: const Icon(Icons.north_east_rounded, size: 18),
+                      label: Text(context.t('directions')),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                        shape: const StadiumBorder(),
+                        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                  RouteStopPreviewSheet(
+                routeTitle: currentPlace.routeName.isNotEmpty
+                    ? currentPlace.routeNameFor(context.isEn)
+                    : context.t('nearby_route_title'),
+                routeStats: context
+                    .t('stop_of')
+                    .replaceAll('{i}', '${_currentStopIndex + 1}')
+                    .replaceAll('{n}', '${_filteredPlaces.length}'),
+                placeName: currentPlace.nameFor(context.isEn),
                 placeDistanceTime: LocationService.formatDistance(
                   LocationService.sortPlacesByDistance(places: [currentPlace], userLocation: _userLocation).first.distanceMeters,
                 ),
@@ -297,7 +322,7 @@ class MapScreenState extends State<MapScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SliderScreen.fromPlace(currentPlace),
+                      builder: (context) => SliderScreen(place: currentPlace),
                     ),
                   );
                 },
@@ -310,6 +335,8 @@ class MapScreenState extends State<MapScreen> {
                     16.8,
                   );
                 },
+              ),
+                ],
               ),
             ),
         ],

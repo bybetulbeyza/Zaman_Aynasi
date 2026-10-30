@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/app_theme.dart';
+import 'core/l10n/app_lang.dart';
 import 'ui/screens/main_screen.dart';
 
 Future<void> main() async {
@@ -20,11 +21,14 @@ class ZamanAynasiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Zaman Aynası',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const MainScreen(),
+    return AppLangScope(
+      lang: AppLang.instance,
+      child: MaterialApp(
+        title: 'Zaman Aynası',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home: const MainScreen(),
+      ),
     );
   }
 }

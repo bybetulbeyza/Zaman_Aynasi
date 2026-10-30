@@ -41,6 +41,9 @@ dependencies:
   cached_network_image: ^4.0.5
   geolocator: ^14.1.2
   mobile_scanner: ^7.4.2
+  just_audio: ^0.10.6
+  video_player: ^2.14.1
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:

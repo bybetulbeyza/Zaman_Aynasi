@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
+import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../widgets/common/app_network_image.dart';
@@ -37,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<HeritagePlace> _featuredPlaces = [];
   List<HeritagePlace> _nearbyPlaces = [];
   bool _isLoading = true;
-  bool _isTurkish = true; // Şimdilik yalnızca görsel; çeviri altyapısı sonra
 
   @override
   void initState() {
@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SliderScreen.fromPlace(place),
+        builder: (_) => SliderScreen(place: place),
       ),
     );
   }
@@ -95,17 +95,17 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SectionTitle(
-              'Öne çıkan vakıf eserleri',
-              actionLabel: 'Tümü',
+              context.t('home_featured'),
+              actionLabel: context.t('all'),
               onAction: _openPlaces,
             ),
           ),
           const SizedBox(height: 14),
           _buildHorizontalList(_featuredPlaces, large: true),
           const SizedBox(height: 28),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: SectionTitle('Yakınımdaki eserler'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SectionTitle(context.t('home_nearby')),
           ),
           const SizedBox(height: 14),
           _buildHorizontalList(_nearbyPlaces, large: false),
@@ -148,17 +148,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                     ),
                   ),
-                  LangToggle(
-                    onDark: true,
-                    isTurkish: _isTurkish,
-                    onChanged: (v) => setState(() => _isTurkish = v),
-                  ),
+                  const LangToggle(onDark: true),
                 ],
               ),
               const SizedBox(height: 40),
-              const Text(
-                'Vakıf mirasını\nhikâyeleriyle keşfet',
-                style: TextStyle(
+              Text(
+                context.t('hero_title'),
+                style: const TextStyle(
                   fontFamily: AppTheme.headingFont,
                   fontSize: 32,
                   height: 1.15,
@@ -177,13 +173,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(30),
                     border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.search_rounded, color: AppColors.textDark),
-                      SizedBox(width: 12),
+                      const Icon(Icons.search_rounded, color: AppColors.textDark),
+                      const SizedBox(width: 12),
                       Text(
-                        'Eser adı veya semt ara',
-                        style: TextStyle(color: AppColors.textMuted, fontSize: 15),
+                        context.t('search_hint'),
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
                       ),
                     ],
                   ),
@@ -206,12 +202,12 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _quickAction('Yakınımda', Icons.near_me_outlined,
+          _quickAction(context.t('qa_nearby'), Icons.near_me_outlined,
               widget.onNearbyTap ?? widget.onExploreMapTap),
-          _quickAction('Rota oluştur', Icons.alt_route_rounded, widget.onCreateRouteTap),
-          _quickAction('QR okut', Icons.qr_code_scanner_rounded, widget.onQrTap,
+          _quickAction(context.t('qa_create_route'), Icons.alt_route_rounded, widget.onCreateRouteTap),
+          _quickAction(context.t('qa_scan_qr'), Icons.qr_code_scanner_rounded, widget.onQrTap,
               highlight: true),
-          _quickAction('Şehirler', Icons.location_city_rounded,
+          _quickAction(context.t('qa_cities'), Icons.location_city_rounded,
               () => showCityPickerSheet(context)),
         ],
       ),
@@ -275,9 +271,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (places.isEmpty) {
       return SizedBox(
         height: 80,
-        child: const Center(
-          child: Text('Eser bulunamadı.',
-              style: TextStyle(color: AppColors.textMuted)),
+        child: Center(
+          child: Text(context.t('no_places'),
+              style: const TextStyle(color: AppColors.textMuted)),
         ),
       );
     }
@@ -357,7 +353,7 @@ class _PlaceCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      place.name,
+                      place.nameFor(context.isEn),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -370,7 +366,7 @@ class _PlaceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${place.category.label} · $city',
+                      '${place.category.labelFor(context.isEn)} · $city',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.white70,

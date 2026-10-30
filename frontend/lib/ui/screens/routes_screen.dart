@@ -8,6 +8,9 @@ import '../../core/constants/app_theme.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/tulip_motif.dart';
+import '../../core/constants/app_categories.dart';
+import '../../core/l10n/app_lang.dart';
+import '../../core/state/active_route.dart';
 import 'historic_routes_screen.dart';
 
 class RoutesScreen extends StatefulWidget {
@@ -25,17 +28,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
   String _selectedCity = AppCities.active;
   int _selectedHours = 2; // 1, 2, 3 saat
 
-  // Çoklu kategori seçimi
-  final List<String> _availableCategories = [
-    'Cami',
-    'Han',
-    'Hamam',
-    'Çeşme',
-    'Türbe',
-    'Medrese',
-    'Müze',
-  ];
-  late Set<String> _selectedCategories;
+  // Çoklu kategori seçimi (Envanter ve Harita ile aynı kategori listesi)
+  late Set<PlaceCategory> _selectedCategories;
 
   List<HeritagePlace> _allPlaces = [];
   bool _isLoading = true;
@@ -43,7 +37,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedCategories = {'Cami', 'Han'}; // Görseldeki varsayılan seçililer
+    _selectedCategories = {PlaceCategory.cami, PlaceCategory.han}; // Görseldeki varsayılan seçililer
     _fetchPlaces();
   }
 
@@ -65,11 +59,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
   int get _calculatedStopsCount {
     if (_allPlaces.isEmpty) return _selectedHours * 2;
     // Seçili kategorilere uyan eserleri say
-    final matchingCount = _allPlaces.where((p) {
-      return _selectedCategories.any((cat) =>
-      p.category.label.toLowerCase().contains(cat.toLowerCase()) ||
-          p.name.toLowerCase().contains(cat.toLowerCase()));
-    }).length;
+    final matchingCount =
+        _allPlaces.where((p) => _selectedCategories.contains(p.category)).length;
 
     // Saat başına ortalama 2-3 durak gezilebilir
     final maxByTime = _selectedHours * 3;
@@ -89,12 +80,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
     final userLocation = await LocationService.getCurrentLocation();
 
     // Filtreleme: Seçili kategorilere göre eserleri al
-    List<HeritagePlace> pool = _allPlaces.where((p) {
-      if (_selectedCategories.isEmpty) return true;
-      return _selectedCategories.any((cat) =>
-      p.category.label.toLowerCase().contains(cat.toLowerCase()) ||
-          p.name.toLowerCase().contains(cat.toLowerCase()));
-    }).toList();
+    List<HeritagePlace> pool = _allPlaces
+        .where((p) => _selectedCategories.isEmpty || _selectedCategories.contains(p.category))
+        .toList();
 
     if (pool.isEmpty) pool = List.from(_allPlaces);
 
@@ -110,6 +98,12 @@ class _RoutesScreenState extends State<RoutesScreen> {
     if (mounted) {
       Navigator.pop(context); // Dialog kapat
 
+      ActiveRoute.instance.setRoute(
+        finalRoute,
+        titleTr: 'Özel rotam',
+        titleEn: 'My custom route',
+      );
+
       if (widget.onRouteCreated != null) {
         widget.onRouteCreated!(finalRoute);
       } else {
@@ -119,7 +113,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
               children: [
                 const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
                 const SizedBox(width: 8),
-                Text('${finalRoute.length} duraklı özel rota oluşturuldu.'),
+                Text(context.t('route_created').replaceAll('{n}', '${finalRoute.length}')),
               ],
             ),
             backgroundColor: AppColors.primaryTeal,
@@ -153,6 +147,96 @@ class _RoutesScreenState extends State<RoutesScreen> {
         child: child,
       );
 
+  Widget _buildActiveRouteCard() {
+    return ListenableBuilder(
+      listenable: ActiveRoute.instance,
+      builder: (context, _) {
+        final route = ActiveRoute.instance;
+        if (route.isEmpty) return const SizedBox.shrink();
+        final en = context.isEn;
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.heroPetrol,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      route.titleFor(en) ?? context.t('ar_title'),
+                      style: const TextStyle(
+                        fontFamily: AppTheme.headingFont,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: route.clear,
+                    child: const Icon(Icons.close_rounded, color: Colors.white70),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                context.t('ar_stops').replaceAll('{n}', '${route.length}'),
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 14),
+              for (var i = 0; i < route.stops.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                            color: AppColors.primaryTeal, shape: BoxShape.circle),
+                        child: Text('${i + 1}',
+                            style: const TextStyle(
+                                color: Colors.white, fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          route.stops[i].nameFor(en),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white, fontSize: 15),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => route.remove(route.stops[i]),
+                        child: const Icon(Icons.remove_circle_outline_rounded,
+                            size: 20, color: Colors.white54),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                child: PillButton(
+                  context.t('ar_show_map'),
+                  onPressed: () => widget.onRouteCreated?.call(route.stops),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _openHistoricRoutes() {
     Navigator.push(
       context,
@@ -176,8 +260,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Rota oluştur', style: AppTheme.displayLarge),
+                    Text(context.t('rc_title'), style: AppTheme.displayLarge),
                     const SizedBox(height: 20),
+                    _buildActiveRouteCard(),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(22),
@@ -189,7 +274,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _label('Şehir'),
+                          _label(context.t('rc_city')),
                           _field(
                             padding: const EdgeInsets.symmetric(horizontal: 18),
                             child: DropdownButtonHideUnderline(
@@ -209,7 +294,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                           child: Text(
                                             AppCities.isAvailable(c)
                                                 ? c
-                                                : '$c · Yakında',
+                                                : '$c · ${context.t('soon')}',
                                             style: TextStyle(
                                               color: AppCities.isAvailable(c)
                                                   ? AppColors.textDark
@@ -225,7 +310,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          _label('Başlangıç noktası'),
+                          _label(context.t('rc_start')),
                           _field(
                             child: Row(
                               children: [
@@ -237,8 +322,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                       shape: BoxShape.circle),
                                 ),
                                 const SizedBox(width: 12),
-                                const Text('Konumum',
-                                    style: TextStyle(
+                                Text(context.t('rc_my_location'),
+                                    style: const TextStyle(
                                         fontSize: 17, color: AppColors.textDark)),
                                 const Spacer(),
                                 Container(
@@ -249,8 +334,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(color: AppColors.chipBorder),
                                   ),
-                                  child: const Text('Şimdi',
-                                      style: TextStyle(
+                                  child: Text(context.t('rc_now'),
+                                      style: const TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.textDark)),
@@ -259,7 +344,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          _label('Süre'),
+                          _label(context.t('rc_duration')),
                           Row(
                             children: [1, 2, 3].map((h) {
                               final sel = _selectedHours == h;
@@ -286,7 +371,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                         ),
                                       ),
                                       child: Text(
-                                        '$h saat',
+                                        '$h ${context.t('rc_hour')}',
                                         style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w700,
@@ -302,14 +387,16 @@ class _RoutesScreenState extends State<RoutesScreen> {
                             }).toList(),
                           ),
                           const SizedBox(height: 22),
-                          _label('Ne tür yerleri gezmek istersin?'),
+                          _label(context.t('rc_types')),
                           Wrap(
                             spacing: 10,
                             runSpacing: 10,
-                            children: _availableCategories.map((cat) {
+                            children: AppCategories.filters
+                                .whereType<PlaceCategory>()
+                                .map((cat) {
                               final sel = _selectedCategories.contains(cat);
                               return FilterChipPill(
-                                label: cat,
+                                label: cat.labelFor(context.isEn),
                                 selected: sel,
                                 onTap: () => setState(() {
                                   if (sel) {
@@ -325,14 +412,17 @@ class _RoutesScreenState extends State<RoutesScreen> {
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            'Yaklaşık $_calculatedStopsCount durak · $_selectedHours saat',
+                            context
+                                .t('rc_summary')
+                                .replaceAll('{n}', '$_calculatedStopsCount')
+                                .replaceAll('{h}', '$_selectedHours'),
                             style: const TextStyle(
                                 fontSize: 14, color: AppColors.textMuted),
                           ),
                           const SizedBox(height: 14),
                           SizedBox(
                             width: double.infinity,
-                            child: PillButton('Rota oluştur',
+                            child: PillButton(context.t('rc_create'),
                                 onPressed: _handleCreateRoute),
                           ),
                         ],
@@ -342,15 +432,15 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     Center(
                       child: Column(
                         children: [
-                          const Text('Hazır rota mı arıyorsun?',
-                              style: TextStyle(
+                          Text(context.t('rc_ready_q'),
+                              style: const TextStyle(
                                   fontSize: 15, color: AppColors.textMuted)),
                           const SizedBox(height: 6),
                           GestureDetector(
                             onTap: _openHistoricRoutes,
-                            child: const Text(
-                              "Tarihi Rotalar'a göz at",
-                              style: TextStyle(
+                            child: Text(
+                              context.t('rc_browse'),
+                              style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.primaryTeal,

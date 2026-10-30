@@ -8,16 +8,20 @@ class HeritageRoute {
   static const int _minutesPerStop = 15;
 
   final String name;
+  final String nameEn;
   final List<HeritagePlace> stops;
   final double distanceKm;
   final int durationMinutes;
 
   const HeritageRoute({
     required this.name,
+    this.nameEn = '',
     required this.stops,
     required this.distanceKm,
     required this.durationMinutes,
   });
+
+  String nameFor(bool en) => en && nameEn.isNotEmpty ? nameEn : name;
 
   String get distanceLabel => '${distanceKm.toStringAsFixed(1).replaceAll('.', ',')} km';
 
@@ -27,6 +31,17 @@ class HeritageRoute {
     if (h == 0) return '$m dk';
     if (m == 0) return '$h sa';
     return '$h sa $m dk';
+  }
+
+  String distanceLabelFor(bool en) => en ? distanceLabel.replaceAll(',', '.') : distanceLabel;
+
+  String durationLabelFor(bool en) {
+    if (!en) return durationLabel;
+    final h = durationMinutes ~/ 60;
+    final m = durationMinutes % 60;
+    if (h == 0) return '$m min';
+    if (m == 0) return '$h hr';
+    return '$h hr $m min';
   }
 
   /// Eserleri `route_name`'e göre gruplar; duraklar yürüyüş sırasına dizilir.
@@ -61,6 +76,9 @@ class HeritageRoute {
     final raw = (km / _walkKmPerHour * 60).round() + ordered.length * _minutesPerStop;
     final minutes = (raw / 5).round() * 5;
 
-    return HeritageRoute(name: name, stops: ordered, distanceKm: km, durationMinutes: minutes);
+    return HeritageRoute(
+        name: name,
+        nameEn: ordered.map((p) => p.routeNameEn).firstWhere((n) => n.isNotEmpty, orElse: () => ''),
+        stops: ordered, distanceKm: km, durationMinutes: minutes);
   }
 }

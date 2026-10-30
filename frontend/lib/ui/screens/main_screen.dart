@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/l10n/app_lang.dart';
+import '../../core/state/active_route.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'qr_scanner_screen.dart';
@@ -96,7 +98,7 @@ class _MainScreenState extends State<MainScreen> {
                       child: _buildNavItem(
                         icon: Icons.home_outlined,
                         activeIcon: Icons.home_rounded,
-                        label: 'Ana Sayfa',
+                        label: context.t('nav_home'),
                         index: 0,
                       ),
                     ),
@@ -104,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
                       child: _buildNavItem(
                         icon: Icons.place_outlined,
                         activeIcon: Icons.place_rounded,
-                        label: 'Harita',
+                        label: context.t('nav_map'),
                         index: 1,
                       ),
                     ),
@@ -113,15 +115,16 @@ class _MainScreenState extends State<MainScreen> {
                       child: _buildNavItem(
                         icon: Icons.alt_route_rounded,
                         activeIcon: Icons.alt_route_rounded,
-                        label: 'Rotalarım',
+                        label: context.t('nav_routes'),
                         index: 3,
+                        showRouteBadge: true,
                       ),
                     ),
                     Expanded(
                       child: _buildNavItem(
                         icon: Icons.person_outline_rounded,
                         activeIcon: Icons.person_rounded,
-                        label: 'Profil',
+                        label: context.t('nav_profile'),
                         index: 4,
                       ),
                     ),
@@ -142,6 +145,7 @@ class _MainScreenState extends State<MainScreen> {
     required IconData activeIcon,
     required String label,
     required int index,
+    bool showRouteBadge = false,
   }) {
     final isSelected = _currentIndex == index;
     final color = isSelected ? AppColors.primaryTeal : AppColors.textMuted;
@@ -153,7 +157,17 @@ class _MainScreenState extends State<MainScreen> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Icon(isSelected ? activeIcon : icon, color: color, size: 26),
+          showRouteBadge
+              ? ListenableBuilder(
+                  listenable: ActiveRoute.instance,
+                  builder: (_, __) => Badge(
+                    isLabelVisible: !ActiveRoute.instance.isEmpty,
+                    label: Text('${ActiveRoute.instance.length}'),
+                    backgroundColor: AppColors.ciniBordeaux,
+                    child: Icon(isSelected ? activeIcon : icon, color: color, size: 26),
+                  ),
+                )
+              : Icon(isSelected ? activeIcon : icon, color: color, size: 26),
           const SizedBox(height: 4),
           Text(
             label,
@@ -211,7 +225,7 @@ class _MainScreenState extends State<MainScreen> {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Text(
-          'QR Okut',
+          context.t('nav_qr'),
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: FontWeight.w700,
