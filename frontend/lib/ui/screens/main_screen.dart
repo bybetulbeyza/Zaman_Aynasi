@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
+import '../../data/models/heritage_place.dart';
+import 'historic_routes_screen.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'qr_scanner_screen.dart';
@@ -19,12 +21,35 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0; // Varsayılan olarak Ana Sayfa ile başlar
   final GlobalKey<MapScreenState> _mapKey = GlobalKey<MapScreenState>();
 
+  /// Haritaya geçip verilen rotayı çizer.
+  void _showRouteOnMap(List<HeritagePlace> places) {
+    setState(() => _currentIndex = 1);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mapKey.currentState?.loadCustomRoute(places);
+    });
+  }
+
+  /// Rota oluşturma formunu açar; rota hazır olunca forma geri dönmeden haritaya geçer.
+  void _openRouteBuilder() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RoutesScreen(
+          onRouteCreated: (places) {
+            Navigator.pop(context); // formu kapat
+            _showRouteOnMap(places);
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
       HomeScreen(
         onQrTap: () => setState(() => _currentIndex = 2),
-        onCreateRouteTap: () => setState(() => _currentIndex = 3),
+        onCreateRouteTap: _openRouteBuilder,
         onExploreMapTap: () {
           setState(() => _currentIndex = 1);
         },
@@ -38,13 +63,9 @@ class _MainScreenState extends State<MainScreen> {
       ),
       MapScreen(key: _mapKey),
       const QRScannerScreen(),
-      RoutesScreen(
-        onRouteCreated: (places) {
-          setState(() => _currentIndex = 1); // Harita sekmesine geç
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _mapKey.currentState?.loadCustomRoute(places);
-          });
-        },
+      HistoricRoutesScreen(
+        onRouteStarted: _showRouteOnMap,
+        onCreateRoute: _openRouteBuilder,
       ),
       const ProfileScreen(),
     ];

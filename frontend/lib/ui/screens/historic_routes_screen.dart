@@ -8,14 +8,19 @@ import '../../data/models/heritage_place.dart';
 import '../../data/models/heritage_route.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../widgets/common/pattern_background.dart';
+import '../widgets/common/active_route_card.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
 
 class HistoricRoutesScreen extends StatefulWidget {
+  /// Bir rota başlatılınca (veya aktif rota haritada gösterilince) haritaya geçmek için.
   final Function(List<HeritagePlace>)? onRouteStarted;
 
-  const HistoricRoutesScreen({super.key, this.onRouteStarted});
+  /// "Rota oluştur" butonu: rota oluşturma formunu açar.
+  final VoidCallback? onCreateRoute;
+
+  const HistoricRoutesScreen({super.key, this.onRouteStarted, this.onCreateRoute});
 
   @override
   State<HistoricRoutesScreen> createState() => _HistoricRoutesScreenState();
@@ -46,7 +51,6 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   void _start(HeritageRoute route) {
     ActiveRoute.instance.setRoute(route.stops, titleTr: route.name, titleEn: route.nameEn);
     widget.onRouteStarted?.call(route.stops);
-    Navigator.pop(context);
   }
 
   void _showStops(HeritageRoute route) {
@@ -115,65 +119,87 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
       backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        child: Column(
           children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Padding(
-                    padding: EdgeInsets.only(right: 12),
-                    child: Icon(Icons.arrow_back_ios_new,
-                        size: 20, color: AppColors.textDark),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                children: [
+                  Text(context.t('hr_title'), style: AppTheme.displayLarge),
+                  const SizedBox(height: 6),
+                  Text(context.t('hr_subtitle'),
+                      style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
+                  const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _cities
+                          .map((c) => Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: FilterChipPill(
+                                  label: c == 'Tümü' ? context.t('all_filter') : c,
+                                  selected: _city == c,
+                                  onTap: () => setState(() => _city = c),
+                                ),
+                              ))
+                          .toList(),
+                    ),
                   ),
-                ),
-                Text(context.t('hr_title'), style: AppTheme.displayLarge),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(context.t('hr_subtitle'),
-                style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
-            const SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _cities
-                    .map((c) => Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: FilterChipPill(
-                            label: c == 'Tümü' ? context.t('all_filter') : c,
-                            selected: _city == c,
-                            onTap: () => setState(() => _city = c),
-                          ),
-                        ))
-                    .toList(),
+                  const SizedBox(height: 20),
+                  ActiveRouteCard(onShowOnMap: (stops) => widget.onRouteStarted?.call(stops)),
+                  if (_isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 40),
+                      child: Center(
+                          child: CircularProgressIndicator(color: AppColors.primaryTeal)),
+                    )
+                  else if (visible.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 40),
+                      child: Center(
+                        child: Text(context.t('hr_soon').replaceAll('{city}', _city),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: AppColors.textMuted)),
+                      ),
+                    ),
+                  for (final route in visible) ...[
+                    _card(route),
+                    const SizedBox(height: 28),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.only(top: 40),
-                child: Center(
-                    child: CircularProgressIndicator(color: AppColors.primaryTeal)),
-              )
-            else if (visible.isEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: Center(
-                  child: Text(context.t('hr_soon').replaceAll('{city}', _city),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.textMuted)),
-                ),
-              ),
-            for (final route in visible) ...[
-              _card(route),
-              const SizedBox(height: 28),
-            ],
+            _buildCreateBar(),
           ],
         ),
       ),
     ));
+  }
+
+  /// Navigasyonun hemen üstünde sabit duran büyük "Rota oluştur" butonu.
+  Widget _buildCreateBar() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+      decoration: BoxDecoration(
+        color: AppColors.bgCanvas,
+        border: Border(
+          top: BorderSide(color: AppColors.chipBorder.withValues(alpha: 0.9)),
+        ),
+      ),
+      child: SizedBox(
+        height: 58,
+        child: ElevatedButton.icon(
+          onPressed: widget.onCreateRoute,
+          icon: const Icon(Icons.add_road_rounded, size: 24),
+          label: Text(context.t('rc_create')),
+          style: ElevatedButton.styleFrom(
+            shape: const StadiumBorder(),
+            textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _card(HeritageRoute route) {

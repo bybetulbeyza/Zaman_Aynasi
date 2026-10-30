@@ -52,13 +52,9 @@ const Map<String, String> appStringsTr = {
   'rc_types': 'Ne tür yerleri gezmek istersin?',
   'rc_summary': 'Yaklaşık {n} durak · {h} saat',
   'rc_create': 'Rota oluştur',
-  'rc_ready_q': 'Hazır rota mı arıyorsun?',
-  'rc_browse': "Tarihi Rotalar'a göz at",
   'route_created': '{n} duraklı özel rota oluşturuldu.',
 
   // Aktif rota
-  'sug_title': 'SANA ÖNERİLEN ROTA',
-  'sug_use': 'Bu rotayı başlat',
   'ar_title': 'Aktif rotam',
   'ar_stops': '{n} durak',
   'ar_show_map': 'Haritada göster',
@@ -185,13 +181,9 @@ const Map<String, String> appStringsEn = {
   'rc_types': 'What kind of places do you want to visit?',
   'rc_summary': 'About {n} stops · {h} hr',
   'rc_create': 'Create route',
-  'rc_ready_q': 'Looking for a ready-made route?',
-  'rc_browse': 'Browse Historic Routes',
   'route_created': 'Custom route with {n} stops created.',
 
   // Active route
-  'sug_title': 'SUGGESTED FOR YOU',
-  'sug_use': 'Start this route',
   'ar_title': 'My active route',
   'ar_stops': '{n} stops',
   'ar_show_map': 'Show on map',

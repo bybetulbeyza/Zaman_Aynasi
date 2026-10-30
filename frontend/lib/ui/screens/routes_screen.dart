@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/location_service.dart';
 import '../../data/models/heritage_place.dart';
-import '../../data/models/heritage_route.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_theme.dart';
@@ -13,7 +12,6 @@ import '../widgets/common/tulip_motif.dart';
 import '../../core/constants/app_categories.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
-import 'historic_routes_screen.dart';
 
 class RoutesScreen extends StatefulWidget {
   final Function(List<HeritagePlace>)? onRouteCreated;
@@ -34,7 +32,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
   late Set<PlaceCategory> _selectedCategories;
 
   List<HeritagePlace> _allPlaces = [];
-  HeritageRoute? _suggested;
   bool _isLoading = true;
 
   @override
@@ -50,8 +47,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
       if (mounted) {
         setState(() {
           _allPlaces = places;
-          final routes = HeritageRoute.fromPlaces(places);
-          _suggested = routes.isEmpty ? null : routes.first;
           _isLoading = false;
         });
       }
@@ -152,150 +147,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
         child: child,
       );
 
-  Widget _buildActiveRouteCard() {
-    return ListenableBuilder(
-      listenable: ActiveRoute.instance,
-      builder: (context, _) {
-        final route = ActiveRoute.instance;
-        final en = context.isEn;
-        if (route.isEmpty) return _buildSuggestionCard(en);
-        return Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 20),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.heroPetrol,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      route.titleFor(en) ?? context.t('ar_title'),
-                      style: const TextStyle(
-                        fontFamily: AppTheme.headingFont,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: route.clear,
-                    child: const Icon(Icons.close_rounded, color: Colors.white70),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                context.t('ar_stops').replaceAll('{n}', '${route.length}'),
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              const SizedBox(height: 14),
-              for (var i = 0; i < route.stops.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                            color: AppColors.primaryTeal, shape: BoxShape.circle),
-                        child: Text('${i + 1}',
-                            style: const TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.w700)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          route.stops[i].nameFor(en),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontSize: 15),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => route.remove(route.stops[i]),
-                        child: const Icon(Icons.remove_circle_outline_rounded,
-                            size: 20, color: Colors.white54),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 6),
-              SizedBox(
-                width: double.infinity,
-                child: PillButton(
-                  context.t('ar_show_map'),
-                  onPressed: () => widget.onRouteCreated?.call(route.stops),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  /// Aktif rota yokken, hazır rotalardan birini tek dokunuşla başlatmayı önerir.
-  Widget _buildSuggestionCard(bool en) {
-    final r = _suggested;
-    if (r == null) return const SizedBox.shrink();
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.ciniBordeaux.withValues(alpha: 0.45), width: 1.2),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.t('sug_title'),
-            style: const TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ciniBordeaux),
-          ),
-          const SizedBox(height: 6),
-          Text(r.nameFor(en), style: AppTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(
-            '${r.stops.length} ${context.t('stops_word')} · ${r.durationLabelFor(en)} · ${r.distanceLabelFor(en)}',
-            style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: PillButton(
-              context.t('sug_use'),
-              onPressed: () {
-                ActiveRoute.instance
-                    .setRoute(r.stops, titleTr: r.name, titleEn: r.nameEn);
-                widget.onRouteCreated?.call(r.stops);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _openHistoricRoutes() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HistoricRoutesScreen(onRouteStarted: widget.onRouteCreated),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return PatternBackground(child: Scaffold(
@@ -310,9 +161,20 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(context.t('rc_title'), style: AppTheme.displayLarge),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: Icon(Icons.arrow_back_ios_new,
+                                size: 20, color: AppColors.textDark),
+                          ),
+                        ),
+                        Text(context.t('rc_title'), style: AppTheme.displayLarge),
+                      ],
+                    ),
                     const SizedBox(height: 20),
-                    _buildActiveRouteCard(),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(22),
@@ -479,29 +341,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    Center(
-                      child: Column(
-                        children: [
-                          Text(context.t('rc_ready_q'),
-                              style: const TextStyle(
-                                  fontSize: 15, color: AppColors.textMuted)),
-                          const SizedBox(height: 6),
-                          GestureDetector(
-                            onTap: _openHistoricRoutes,
-                            child: Text(
-                              context.t('rc_browse'),
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primaryTeal,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          const TulipMotif(height: 96),
-                        ],
-                      ),
-                    ),
+                    const Center(child: TulipMotif(height: 96)),
                   ],
                 ),
               ),
