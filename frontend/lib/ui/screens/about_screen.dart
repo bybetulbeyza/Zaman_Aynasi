@@ -4,6 +4,7 @@ import '../../core/constants/app_links.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/utils/launcher_util.dart';
+import '../widgets/common/pattern_background.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/common/tulip_motif.dart';
@@ -14,8 +15,8 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+    return PatternBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -59,7 +60,7 @@ class AboutScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _body(String text) => Text(

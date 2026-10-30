@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/pattern_background.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/l10n/app_lang.dart';
@@ -115,10 +116,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     }
 
     // Ekran Tasarımı (Birebir Görseldeki Tasarım)
-    return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+    return PatternBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppColors.bgCanvas,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
@@ -229,6 +230,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

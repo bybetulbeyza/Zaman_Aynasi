@@ -5,6 +5,7 @@ import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../../core/constants/app_theme.dart';
+import '../widgets/common/pattern_background.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/tulip_motif.dart';
@@ -81,8 +82,8 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   @override
   Widget build(BuildContext context) {
     final canPop = Navigator.of(context).canPop();
-    return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+    return PatternBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -182,7 +183,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildSearchRow() {

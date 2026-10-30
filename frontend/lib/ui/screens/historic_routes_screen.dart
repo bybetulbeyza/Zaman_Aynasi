@@ -7,6 +7,7 @@ import '../../core/constants/app_theme.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/models/heritage_route.dart';
 import '../../data/repositories/heritage_repository.dart';
+import '../widgets/common/pattern_background.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
@@ -111,8 +112,8 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
     final visible =
         (_city == 'Tümü' || AppCities.isAvailable(_city)) ? _routes : <HeritageRoute>[];
 
-    return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+    return PatternBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -173,7 +174,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _card(HeritageRoute route) {

@@ -5,6 +5,7 @@ import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_theme.dart';
+import '../widgets/common/pattern_background.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/tulip_motif.dart';
@@ -248,8 +249,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+    return PatternBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: _isLoading
@@ -456,6 +457,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 ),
               ),
       ),
-    );
+    ));
   }
 }

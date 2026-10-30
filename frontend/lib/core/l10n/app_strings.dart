@@ -1,5 +1,9 @@
 /// Arayüz metinleri. Eser/hotspot içerikleri (ad, açıklama) veri tabanındaki `_en` kolonlarından gelir.
 const Map<String, String> appStringsTr = {
+  // Açılış
+  'splash_tagline': 'Vakıf mirasını hikâyeleriyle keşfet',
+  'splash_credit': 'Vakıf Katılım katkılarıyla',
+
   // Genel
   'all': 'Tümü',
   'all_filter': 'Tümü',
@@ -125,6 +129,10 @@ const Map<String, String> appStringsTr = {
 };
 
 const Map<String, String> appStringsEn = {
+  // Splash
+  'splash_tagline': 'Discover foundation heritage through its stories',
+  'splash_credit': 'With the contributions of Vakıf Katılım',
+
   // General
   'all': 'All',
   'all_filter': 'All',

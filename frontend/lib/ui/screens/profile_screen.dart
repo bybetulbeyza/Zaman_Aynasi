@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
+import '../widgets/common/pattern_background.dart';
 import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/tulip_motif.dart';
 import 'about_screen.dart';
@@ -17,8 +18,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+    return PatternBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -81,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _row(String title, {VoidCallback? onTap, Widget? trailing}) {

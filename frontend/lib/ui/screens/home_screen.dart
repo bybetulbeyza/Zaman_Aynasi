@@ -5,6 +5,7 @@ import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
+import '../widgets/common/pattern_background.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/city_picker_sheet.dart';
 import '../widgets/common/lang_toggle.dart';
@@ -83,8 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+    return PatternBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
@@ -112,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 28),
         ],
       ),
-    );
+    ));
   }
 
   // ---------- Hero ----------

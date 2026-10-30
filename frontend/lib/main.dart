@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/app_theme.dart';
 import 'core/l10n/app_lang.dart';
-import 'ui/screens/main_screen.dart';
+import 'ui/screens/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +27,7 @@ class ZamanAynasiApp extends StatelessWidget {
         title: 'Zaman Aynası',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        home: const MainScreen(),
+        home: const SplashScreen(),
       ),
     );
   }
