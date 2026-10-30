@@ -11,7 +11,6 @@ import '../widgets/common/pattern_background.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
-import '../widgets/common/tulip_motif.dart';
 
 class HistoricRoutesScreen extends StatefulWidget {
   final Function(List<HeritagePlace>)? onRouteStarted;
