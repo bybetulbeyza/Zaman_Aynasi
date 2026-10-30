@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/location_service.dart';
 import '../../../data/models/heritage_place.dart';
 import '../../../data/repositories/heritage_repository.dart';
 import '../widgets/map/map_top_search_bar.dart';
@@ -9,17 +10,20 @@ import '../widgets/map/route_stop_preview_sheet.dart';
 import 'slider_screen.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final bool startWithNearby;
+
+  const MapScreen({super.key, this.startWithNearby = false});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  State<MapScreen> createState() => MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   final HeritageRepository _heritageRepository = HeritageRepository();
 
-  final LatLng _bursaCenter = const LatLng(40.1838, 29.0635);
+  final LatLng _bursaCenter = LocationService.defaultCenter;
+  LatLng _userLocation = LocationService.defaultCenter;
 
   List<HeritagePlace> _allPlaces = [];
   List<HeritagePlace> _filteredPlaces = [];
@@ -32,18 +36,26 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchPlaces();
+    _initDataAndLocation();
   }
 
-  Future<void> _fetchPlaces() async {
+  Future<void> _initDataAndLocation() async {
     final places = await _heritageRepository.getPlaces();
+    _userLocation = await LocationService.getCurrentLocation();
+
     if (mounted) {
       setState(() {
         _allPlaces = places;
-        _applyFilters();
         _isLoading = false;
       });
 
+      if (widget.startWithNearby) {
+        applyNearbyRoute();
+      } else {
+        _applyFilters();
+      }
+
+      // Önceden görsel önbellekleme
       for (final place in places) {
         if (place.imageAfterUrl.isNotEmpty) {
           precacheImage(NetworkImage(place.imageAfterUrl), context);
@@ -55,9 +67,56 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  /// Dışarıdan veya butondan tetiklenebilen "Yakın Rota" Mantığı
+  void applyNearbyRoute() {
+    if (_allPlaces.isEmpty) return;
+
+    // Nearest Neighbor ile sıralanmış liste
+    final sorted = LocationService.optimizeRouteOrder(
+      places: _allPlaces,
+      startLocation: _userLocation,
+    );
+
+    setState(() {
+      // En yakından başlayarak ilk 4 durağı rotaya bağla
+      _filteredPlaces = sorted.take(4).toList();
+      _currentStopIndex = 0;
+    });
+
+    if (_filteredPlaces.isNotEmpty) {
+      _mapController.move(_filteredPlaces.first.location, 16.5);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.near_me_rounded, color: Colors.white, size: 18),
+            SizedBox(width: 8),
+            Text('Konumunuza yakın 4 duraklı rota hazırlandı.'),
+          ],
+        ),
+        backgroundColor: AppColors.primaryTeal,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// RoutesScreen üzerinden gelen özel rotayı haritaya yükleme
+  void loadCustomRoute(List<HeritagePlace> places) {
+    if (places.isEmpty) return;
+    setState(() {
+      _filteredPlaces = places;
+      _currentStopIndex = 0;
+    });
+    _mapController.move(places.first.location, 16.5);
+  }
+
   void _applyFilters() {
     setState(() {
-      _filteredPlaces = _allPlaces.where((place) {
+      final filtered = _allPlaces.where((place) {
         final matchesSearch = place.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
             place.shortDescription.toLowerCase().contains(_searchQuery.toLowerCase());
 
@@ -66,6 +125,12 @@ class _MapScreenState extends State<MapScreen> {
 
         return matchesSearch && matchesCategory;
       }).toList();
+
+      // Normal filtrede de zikzak olmaması için durakları optimize et
+      _filteredPlaces = LocationService.optimizeRouteOrder(
+        places: filtered,
+        startLocation: _userLocation,
+      );
 
       if (_currentStopIndex >= _filteredPlaces.length) {
         _currentStopIndex = 0;
@@ -103,7 +168,7 @@ class _MapScreenState extends State<MapScreen> {
               ElevatedButton(
                 onPressed: () {
                   setState(() => _isLoading = true);
-                  _fetchPlaces();
+                  _initDataAndLocation();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryTeal),
                 child: const Text('Tekrar Dene', style: TextStyle(color: Colors.white)),
@@ -135,7 +200,7 @@ class _MapScreenState extends State<MapScreen> {
                 userAgentPackageName: 'com.zamanaynasi.app',
               ),
 
-              // Rota Çizgisi
+              // Mantıksal Sıralı Rota Çizgisi
               if (routePoints.length > 1)
                 PolylineLayer(
                   polylines: [
@@ -147,7 +212,7 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
 
-              // Numaralı Durak Pinleri
+              // Numaralı Durak Pinleri (1, 2, 3...)
               MarkerLayer(
                 markers: List.generate(_filteredPlaces.length, (index) {
                   final place = _filteredPlaces[index];
@@ -214,45 +279,19 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
 
-          // 3. "Yol Tarifi" Hızlı Aksiyon Butonu
-          if (currentPlace != null)
-            Positioned(
-              bottom: 250,
-              right: 16,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${currentPlace.name} için yol tarifi başlatılıyor...'),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.navigation_outlined, size: 16, color: Colors.white),
-                label: const Text(
-                  'Yol tarifi ↗',
-                  style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 13),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryTeal,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  elevation: 4,
-                ),
-              ),
-            ),
-
-          // 4. Alt Durak Önizleme Kartı
+          // 3. Alt Durak Kartı
           if (currentPlace != null)
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: RouteStopPreviewSheet(
-                routeTitle: currentPlace.routeName.isNotEmpty ? currentPlace.routeName : 'Han ve Çarşı Hattı',
-                routeStats: 'Durak ${_currentStopIndex + 1} / ${_filteredPlaces.length} • 3,8 km • 2 sa 30 dk',
+                routeTitle: currentPlace.routeName.isNotEmpty ? currentPlace.routeName : 'Yakın Çevre Rotası',
+                routeStats: 'Durak ${_currentStopIndex + 1} / ${_filteredPlaces.length} • Yürüyüş Hattı',
                 placeName: currentPlace.name,
-                placeDistanceTime: '240 m • 3 dk yürüyüş',
+                placeDistanceTime: LocationService.formatDistance(
+                  LocationService.sortPlacesByDistance(places: [currentPlace], userLocation: _userLocation).first.distanceMeters,
+                ),
                 placeImageUrl: currentPlace.imageAfterUrl,
                 onDetailTap: () {
                   Navigator.push(

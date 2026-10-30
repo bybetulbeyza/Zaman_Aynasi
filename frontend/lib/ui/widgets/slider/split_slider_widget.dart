@@ -30,6 +30,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     with SingleTickerProviderStateMixin {
   double _sliderValue = 0.5;
   bool _showHotspots = true;
+  bool _coordinatePickerMode = false; // Koordinat yakalama anahtarı
   late AnimationController _pulseController;
 
   @override
@@ -74,9 +75,11 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   height: totalHeight,
                 ),
                 onValueChanged: (val) {
-                  setState(() {
-                    _sliderValue = val;
-                  });
+                  if (!_coordinatePickerMode) {
+                    setState(() {
+                      _sliderValue = val;
+                    });
+                  }
                 },
               ),
             ),
@@ -155,7 +158,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             ),
 
             // 5. Dinamik Hotspot'lar
-            if (_showHotspots)
+            if (_showHotspots && !_coordinatePickerMode)
               ...widget.hotspots.map((hotspot) {
                 final isBeforeSide = hotspot.targetSide.toLowerCase() == 'before';
                 final isVisible = isBeforeSide
@@ -179,6 +182,72 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   ),
                 );
               }),
+
+            // 6. En Üst Katman: KOORDİNAT YAKALAYICI PERDE (Aktifken dokunmaları doğrudan kapar)
+            if (_coordinatePickerMode)
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapDown: (details) {
+                    final x = (details.localPosition.dx / totalWidth).clamp(0.0, 1.0);
+                    final y = (details.localPosition.dy / totalHeight).clamp(0.0, 1.0);
+                    final side = (details.localPosition.dx < dividerX) ? 'after' : 'before';
+
+                    final xStr = x.toStringAsFixed(2);
+                    final yStr = y.toStringAsFixed(2);
+
+                    // 1. Terminale / Konsola yazdırır
+                    debugPrint('📍 YENİ HOTSPOT -> x_percent: $xStr | y_percent: $yStr | target_side: $side');
+
+                    // 2. Ekranda direkt bildirim olarak gösterir
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('x_percent: $xStr, y_percent: $yStr, side: $side'),
+                        duration: const Duration(seconds: 4),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: AppColors.ciniBordeaux,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    color: Colors.black.withOpacity(0.15),
+                    alignment: Alignment.topCenter,
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Nokta koymak istediğin yere tıkla',
+                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // 7. Modu Açıp Kapatma Butonu (Sol Alt Köşe)
+            Positioned(
+              left: 12,
+              bottom: 12,
+              child: FloatingActionButton.small(
+                heroTag: 'coordPickerBtn',
+                backgroundColor: _coordinatePickerMode ? AppColors.ciniBordeaux : Colors.white,
+                onPressed: () {
+                  setState(() {
+                    _coordinatePickerMode = !_coordinatePickerMode;
+                  });
+                },
+                child: Icon(
+                  _coordinatePickerMode ? Icons.check_rounded : Icons.add_location_alt_outlined,
+                  color: _coordinatePickerMode ? Colors.white : AppColors.textDark,
+                  size: 20,
+                ),
+              ),
+            ),
           ],
         );
       },

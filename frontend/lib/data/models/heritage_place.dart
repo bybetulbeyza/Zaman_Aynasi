@@ -34,6 +34,7 @@ class Hotspot {
   final String targetSide;
   final double xPercent;
   final double yPercent;
+  final String? targetPlaceId; // Külliyeden alt yapıya (Türbe, Hamam vb.) geçiş ID'si
 
   Hotspot({
     required this.id,
@@ -43,7 +44,10 @@ class Hotspot {
     required this.targetSide,
     required this.xPercent,
     required this.yPercent,
+    this.targetPlaceId,
   });
+
+  bool get hasSubPlaceNavigation => targetPlaceId != null && targetPlaceId!.isNotEmpty;
 
   factory Hotspot.fromJson(Map<String, dynamic> json) {
     return Hotspot(
@@ -54,12 +58,14 @@ class Hotspot {
       targetSide: (json['target_side'] as String?)?.toLowerCase() ?? 'after',
       xPercent: (json['x_percent'] as num?)?.toDouble() ?? 0.0,
       yPercent: (json['y_percent'] as num?)?.toDouble() ?? 0.0,
+      targetPlaceId: json['target_place_id']?.toString(),
     );
   }
 }
 
 class HeritagePlace {
   final String id;
+  final String? parentId; // Külliyenin alt parçası ise üst yapının ID'si
   final String name;
   final String routeName;
   final PlaceCategory category;
@@ -67,10 +73,17 @@ class HeritagePlace {
   final String shortDescription;
   final String imageBeforeUrl;
   final String imageAfterUrl;
+  final bool isFeatured;
+  final String constructionDate; // Supabase: construction_date
+  final String architect;        // Supabase: architect
+  final String patron;           // Supabase: patron (Bani)
+  final String inventoryLocation;// Supabase: inventory_location
   final List<Hotspot> hotspots;
+  final double? distanceMeters;
 
   HeritagePlace({
     required this.id,
+    this.parentId,
     required this.name,
     required this.routeName,
     required this.category,
@@ -78,8 +91,41 @@ class HeritagePlace {
     required this.shortDescription,
     required this.imageBeforeUrl,
     required this.imageAfterUrl,
+    this.isFeatured = false,
+    this.constructionDate = '15. Yüzyıl',
+    this.architect = 'Bilinmiyor',
+    this.patron = 'Bilinmiyor',
+    this.inventoryLocation = '',
     this.hotspots = const [],
+    this.distanceMeters,
   });
+
+  // Harita ve genel rotalarda alt yapıyı gizlemek için kontrol
+  bool get isSubPlace => parentId != null && parentId!.isNotEmpty;
+
+  // SliderScreen ile tam geriye dönük uyumluluk
+  String get period => constructionDate;
+
+  HeritagePlace copyWithDistance(double distance) {
+    return HeritagePlace(
+      id: id,
+      parentId: parentId,
+      name: name,
+      routeName: routeName,
+      category: category,
+      location: location,
+      shortDescription: shortDescription,
+      imageBeforeUrl: imageBeforeUrl,
+      imageAfterUrl: imageAfterUrl,
+      isFeatured: isFeatured,
+      constructionDate: constructionDate,
+      architect: architect,
+      patron: patron,
+      inventoryLocation: inventoryLocation,
+      hotspots: hotspots,
+      distanceMeters: distance,
+    );
+  }
 
   factory HeritagePlace.fromJson(Map<String, dynamic> json) {
     final rawHotspots = json['Hotspots'] ?? json['hotspots'];
@@ -93,6 +139,7 @@ class HeritagePlace {
 
     return HeritagePlace(
       id: json['id'].toString(),
+      parentId: json['parent_id']?.toString(),
       name: json['name'] as String? ?? '',
       routeName: json['route_name'] as String? ?? '',
       category: _parseCategory(json['category'] as String?),
@@ -103,6 +150,11 @@ class HeritagePlace {
       shortDescription: json['short_description'] as String? ?? '',
       imageBeforeUrl: json['image_before_url'] as String? ?? '',
       imageAfterUrl: json['image_after_url'] as String? ?? '',
+      isFeatured: json['is_featured'] as bool? ?? false,
+      constructionDate: (json['construction_date'] ?? json['period']) as String? ?? '15. Yüzyıl',
+      architect: json['architect'] as String? ?? 'Bilinmiyor',
+      patron: json['patron'] as String? ?? 'Bilinmiyor',
+      inventoryLocation: json['inventory_location'] as String? ?? '',
       hotspots: parsedHotspots,
     );
   }

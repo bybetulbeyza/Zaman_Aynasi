@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import 'home_screen.dart';
 import 'map_screen.dart';
+import 'qr_scanner_screen.dart';
+import 'routes_screen.dart';
+import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -10,22 +14,41 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1;
-
-  final List<Widget> _screens = [
-    const Center(child: Text('Ana Sayfa', style: TextStyle(color: AppColors.textDark))),
-    const MapScreen(),
-    const Center(child: Text('QR Okut Ekranı', style: TextStyle(color: AppColors.textDark))),
-    const Center(child: Text('Rotalarım', style: TextStyle(color: AppColors.textDark))),
-    const Center(child: Text('Profil', style: TextStyle(color: AppColors.textDark))),
-  ];
+  int _currentIndex = 0; // Varsayılan olarak Ana Sayfa ile başlar
+  final GlobalKey<MapScreenState> _mapKey = GlobalKey<MapScreenState>();
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      HomeScreen(
+        onExploreMapTap: () {
+          setState(() => _currentIndex = 1);
+        },
+        onNearbyTap: () {
+          setState(() => _currentIndex = 1);
+          // Harita sekmesine geçildiğinde çerçeve çizildikten sonra yakın rotayı tetikler
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _mapKey.currentState?.applyNearbyRoute();
+          });
+        },
+      ),
+      MapScreen(key: _mapKey),
+      const QRScannerScreen(),
+      RoutesScreen(
+        onRouteCreated: (places) {
+          setState(() => _currentIndex = 1); // Harita sekmesine geç
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _mapKey.currentState?.loadCustomRoute(places);
+          });
+        },
+      ),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
