@@ -5,8 +5,8 @@ import '../common/app_icon.dart';
 
 /// Kategori renginde, içinde kategori ikonu olan damla pin. Rota modunda sıra rozeti gösterir.
 class CategoryPin extends StatelessWidget {
-  static const double width = 46;
-  static const double height = 58;
+  static const double width = 50;
+  static const double height = 62;
 
   final PlaceCategory category;
   final bool selected;
@@ -39,8 +39,8 @@ class CategoryPin extends StatelessWidget {
               painter: _PinPainter(style.color, selected),
             ),
             Positioned(
-              top: 7,
-              child: AppIcon(style.icon, size: 28, color: Colors.white),
+              top: 8,
+              child: AppIcon(style.icon, size: 32, color: Colors.white),
             ),
             if (order != null)
               Positioned(

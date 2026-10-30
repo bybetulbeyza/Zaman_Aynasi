@@ -11,17 +11,17 @@ class CategoryStyle {
   static CategoryStyle of(PlaceCategory c) {
     switch (c) {
       case PlaceCategory.cami:
-        return const CategoryStyle(Color(0xFF0E807A), 'cat_cami');
+        return const CategoryStyle(Color(0xFF0E807A), 'pin_cami');
       case PlaceCategory.han:
-        return const CategoryStyle(Color(0xFF7A1C28), 'cat_han');
+        return const CategoryStyle(Color(0xFF7A1C28), 'pin_han');
       case PlaceCategory.hamam:
-        return const CategoryStyle(Color(0xFF1E3A8A), 'cat_hamam');
+        return const CategoryStyle(Color(0xFF1E3A8A), 'pin_hamam');
       case PlaceCategory.turbe:
-        return const CategoryStyle(Color(0xFF6B7A3A), 'cat_turbe');
+        return const CategoryStyle(Color(0xFF6B7A3A), 'pin_turbe');
       case PlaceCategory.kulliye:
-        return const CategoryStyle(Color(0xFF14414F), 'cat_kulliye');
+        return const CategoryStyle(Color(0xFF14414F), 'pin_kulliye');
       case PlaceCategory.sosyalSivilYapilar:
-        return const CategoryStyle(Color(0xFFB8913F), 'cat_sosyal');
+        return const CategoryStyle(Color(0xFFB8913F), 'pin_sosyal');
     }
   }
 }

@@ -17,7 +17,8 @@ class AppIcon extends StatelessWidget {
       height: size,
       color: color ?? IconTheme.of(context).color,
       colorBlendMode: BlendMode.srcIn,
-      filterQuality: FilterQuality.medium,
+      filterQuality: FilterQuality.high,
+      isAntiAlias: true,
     );
   }
 }
