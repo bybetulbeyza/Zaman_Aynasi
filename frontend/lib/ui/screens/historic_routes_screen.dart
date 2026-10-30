@@ -1,28 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../data/models/heritage_place.dart';
+import '../../data/models/heritage_route.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/tulip_motif.dart';
-
-/// Hazır rota paketi. Şimdilik örnek veri; backend'de rota tablosu olunca oradan gelecek.
-class _RoutePackage {
-  final String name;
-  final String city;
-  final int stops;
-  final String duration;
-  final String distance;
-
-  const _RoutePackage(this.name, this.city, this.stops, this.duration, this.distance);
-}
-
-const _packages = [
-  _RoutePackage('Han ve Çarşı Hattı', 'Bursa', 6, '2 sa 30 dk', '3,8 km'),
-  _RoutePackage('Selçuklu İzleri', 'Konya', 5, '2 sa', '3,1 km'),
-];
 
 class HistoricRoutesScreen extends StatefulWidget {
   final Function(List<HeritagePlace>)? onRouteStarted;
@@ -35,28 +21,92 @@ class HistoricRoutesScreen extends StatefulWidget {
 
 class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   final HeritageRepository _repository = HeritageRepository();
-  static const _cities = ['Tümü', 'Bursa', 'Konya', 'Hatay', 'Kütahya'];
+  static const _cities = ['Tümü', ...AppCities.all];
   String _city = 'Tümü';
-  List<HeritagePlace> _places = [];
+  List<HeritageRoute> _routes = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _repository.getPlaces().then((p) {
-      if (mounted) setState(() => _places = p);
-    }).catchError((_) {});
+      if (mounted) {
+        setState(() {
+          _routes = HeritageRoute.fromPlaces(p);
+          _isLoading = false;
+        });
+      }
+    }).catchError((_) {
+      if (mounted) setState(() => _isLoading = false);
+    });
   }
 
-  void _start(_RoutePackage pkg) {
-    if (_places.isEmpty) return;
-    widget.onRouteStarted?.call(_places.take(pkg.stops).toList());
+  void _start(HeritageRoute route) {
+    widget.onRouteStarted?.call(route.stops);
     Navigator.pop(context);
+  }
+
+  void _showStops(HeritageRoute route) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.bgCanvas,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (_) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+            children: [
+              Text(route.name, style: AppTheme.titleLarge),
+              const SizedBox(height: 14),
+              for (var i = 0; i < route.stops.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                            color: AppColors.primaryTeal, shape: BoxShape.circle),
+                        child: Text('${i + 1}',
+                            style: const TextStyle(
+                                color: Colors.white, fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(route.stops[i].name,
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w700)),
+                            Text(route.stops[i].category.label,
+                                style: const TextStyle(
+                                    fontSize: 13, color: AppColors.textMuted)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Rota verisi şimdilik yalnızca aktif şehir (Bursa) için var
     final visible =
-        _packages.where((p) => _city == 'Tümü' || p.city == _city).toList();
+        (_city == 'Tümü' || AppCities.isAvailable(_city)) ? _routes : <HeritageRoute>[];
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -98,16 +148,23 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            if (visible.isEmpty)
+            if (_isLoading)
               const Padding(
                 padding: EdgeInsets.only(top: 40),
                 child: Center(
-                  child: Text('Bu şehir için henüz hazır rota yok.',
-                      style: TextStyle(color: AppColors.textMuted)),
+                    child: CircularProgressIndicator(color: AppColors.primaryTeal)),
+              )
+            else if (visible.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Center(
+                  child: Text('$_city için hazır rotalar yakında eklenecek.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.textMuted)),
                 ),
               ),
-            for (final pkg in visible) ...[
-              _card(pkg),
+            for (final route in visible) ...[
+              _card(route),
               const SizedBox(height: 28),
             ],
           ],
@@ -116,9 +173,9 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
     );
   }
 
-  Widget _card(_RoutePackage pkg) {
+  Widget _card(HeritageRoute route) {
     const radius = BorderRadius.all(Radius.circular(20));
-    final cover = _places.isNotEmpty ? _places.first.imageAfterUrl : null;
+    final cover = route.stops.first.imageAfterUrl;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -136,7 +193,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                if (cover != null)
+                if (cover.isNotEmpty)
                   AppNetworkImage(imageUrl: cover)
                 else
                   const ColoredBox(color: AppColors.heroPetrol),
@@ -156,7 +213,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                   right: 20,
                   bottom: 16,
                   child: Text(
-                    pkg.name,
+                    route.name,
                     style: const TextStyle(
                       fontFamily: AppTheme.headingFont,
                       fontSize: 26,
@@ -171,15 +228,15 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          '${pkg.city} · ${pkg.stops} durak · ${pkg.duration} · ${pkg.distance}',
+          '${AppCities.active} · ${route.stops.length} durak · ${route.durationLabel} · ${route.distanceLabel}',
           style: const TextStyle(fontSize: 14.5, color: AppColors.textMuted),
         ),
         const SizedBox(height: 14),
         Row(
           children: [
-            Expanded(child: PillButton.outlined('Durakları gör', onPressed: () => _start(pkg))),
+            Expanded(child: PillButton.outlined('Durakları gör', onPressed: () => _showStops(route))),
             const SizedBox(width: 12),
-            Expanded(child: PillButton('Rotayı başlat', onPressed: () => _start(pkg))),
+            Expanded(child: PillButton('Rotayı başlat', onPressed: () => _start(route))),
           ],
         ),
       ],

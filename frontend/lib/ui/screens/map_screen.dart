@@ -297,13 +297,7 @@ class MapScreenState extends State<MapScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SliderScreen(
-                        title: currentPlace.name,
-                        beforeImageUrl: currentPlace.imageBeforeUrl,
-                        afterImageUrl: currentPlace.imageAfterUrl,
-                        description: currentPlace.shortDescription,
-                        hotspots: currentPlace.hotspots,
-                      ),
+                      builder: (context) => SliderScreen.fromPlace(currentPlace),
                     ),
                   );
                 },

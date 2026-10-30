@@ -77,7 +77,8 @@ class HeritagePlace {
   final String constructionDate; // Supabase: construction_date
   final String architect;        // Supabase: architect
   final String patron;           // Supabase: patron (Bani)
-  final String inventoryLocation;// Supabase: inventory_location
+  final String inventoryLocation;// Supabase: inventory_location (örn. 'Cilt 1, s. 37')
+  final String qrUrl;            // Supabase: qr_url (QR görselinin adresi; QR içeriği 'eser:<id>')
   final List<Hotspot> hotspots;
   final double? distanceMeters;
 
@@ -92,10 +93,11 @@ class HeritagePlace {
     required this.imageBeforeUrl,
     required this.imageAfterUrl,
     this.isFeatured = false,
-    this.constructionDate = '15. Yüzyıl',
-    this.architect = 'Bilinmiyor',
-    this.patron = 'Bilinmiyor',
+    this.constructionDate = '',
+    this.architect = '',
+    this.patron = '',
     this.inventoryLocation = '',
+    this.qrUrl = '',
     this.hotspots = const [],
     this.distanceMeters,
   });
@@ -122,6 +124,7 @@ class HeritagePlace {
       architect: architect,
       patron: patron,
       inventoryLocation: inventoryLocation,
+      qrUrl: qrUrl,
       hotspots: hotspots,
       distanceMeters: distance,
     );
@@ -151,10 +154,11 @@ class HeritagePlace {
       imageBeforeUrl: json['image_before_url'] as String? ?? '',
       imageAfterUrl: json['image_after_url'] as String? ?? '',
       isFeatured: json['is_featured'] as bool? ?? false,
-      constructionDate: (json['construction_date'] ?? json['period']) as String? ?? '15. Yüzyıl',
-      architect: json['architect'] as String? ?? 'Bilinmiyor',
-      patron: json['patron'] as String? ?? 'Bilinmiyor',
-      inventoryLocation: json['inventory_location'] as String? ?? '',
+      constructionDate: ((json['construction_date'] ?? json['period']) as String? ?? '').trim(),
+      architect: (json['architect'] as String? ?? '').trim(),
+      patron: (json['patron'] as String? ?? '').trim(),
+      inventoryLocation: (json['inventory_location'] as String? ?? '').trim(),
+      qrUrl: json['qr_url'] as String? ?? '',
       hotspots: parsedHotspots,
     );
   }

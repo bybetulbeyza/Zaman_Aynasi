@@ -3,6 +3,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/utils/location_service.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
+import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_theme.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
@@ -21,7 +22,7 @@ class RoutesScreen extends StatefulWidget {
 class _RoutesScreenState extends State<RoutesScreen> {
   final HeritageRepository _repository = HeritageRepository();
 
-  String _selectedCity = 'Bursa';
+  String _selectedCity = AppCities.active;
   int _selectedHours = 2; // 1, 2, 3 saat
 
   // Çoklu kategori seçimi
@@ -201,9 +202,21 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                     fontSize: 17,
                                     fontFamily: AppTheme.bodyFont,
                                     color: AppColors.textDark),
-                                items: ['Bursa', 'İstanbul', 'Edirne', 'Konya']
-                                    .map((c) =>
-                                        DropdownMenuItem(value: c, child: Text(c)))
+                                items: AppCities.all
+                                    .map((c) => DropdownMenuItem(
+                                          value: c,
+                                          enabled: AppCities.isAvailable(c),
+                                          child: Text(
+                                            AppCities.isAvailable(c)
+                                                ? c
+                                                : '$c · Yakında',
+                                            style: TextStyle(
+                                              color: AppCities.isAvailable(c)
+                                                  ? AppColors.textDark
+                                                  : AppColors.textMuted,
+                                            ),
+                                          ),
+                                        ))
                                     .toList(),
                                 onChanged: (v) {
                                   if (v != null) setState(() => _selectedCity = v);

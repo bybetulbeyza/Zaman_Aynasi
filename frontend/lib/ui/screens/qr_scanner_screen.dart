@@ -29,14 +29,30 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     setState(() => _isProcessing = true);
 
     try {
-      // Eserler arasından ID veya İsim eşleşmesini ara
+      // QR içeriği 'eser:<id>' biçiminde; düz id veya eser adı da kabul edilir
+      final value = scannedValue.trim();
+      final id = value.toLowerCase().startsWith('eser:')
+          ? value.substring(5).trim()
+          : value;
+
       final places = await _repository.getPlaces();
-      final matchedPlace = places.firstWhere(
-            (p) =>
-        p.id.toString() == scannedValue ||
-            p.name.toLowerCase().trim() == scannedValue.toLowerCase().trim(),
-        orElse: () => places.first, // Test ve demo için bulamazsa ilk eseri açar
-      );
+      HeritagePlace? matchedPlace;
+      for (final p in places) {
+        if (p.id == id || p.name.toLowerCase().trim() == value.toLowerCase()) {
+          matchedPlace = p;
+          break;
+        }
+      }
+
+      if (matchedPlace == null) {
+        if (mounted) {
+          setState(() => _isProcessing = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Bu karekod tanınmadı. Tarih Envanteri\'nden aramayı deneyin.')),
+          );
+        }
+        return;
+      }
 
       if (mounted) {
         // Kamerayı kapatıp SliderScreen'e geç
@@ -48,13 +64,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SliderScreen(
-              title: matchedPlace.name,
-              beforeImageUrl: matchedPlace.imageBeforeUrl,
-              afterImageUrl: matchedPlace.imageAfterUrl,
-              description: matchedPlace.shortDescription,
-              hotspots: matchedPlace.hotspots,
-            ),
+            builder: (context) => SliderScreen.fromPlace(matchedPlace!),
           ),
         );
       }

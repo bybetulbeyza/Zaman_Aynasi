@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../widgets/common/app_network_image.dart';
+import '../widgets/common/city_picker_sheet.dart';
 import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/common/tulip_motif.dart';
@@ -30,7 +32,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final HeritageRepository _repository = HeritageRepository();
-  static const String _city = 'Bursa';
+  static const String _city = AppCities.active;
 
   List<HeritagePlace> _featuredPlaces = [];
   List<HeritagePlace> _nearbyPlaces = [];
@@ -74,13 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SliderScreen(
-          title: place.name,
-          beforeImageUrl: place.imageBeforeUrl,
-          afterImageUrl: place.imageAfterUrl,
-          description: place.shortDescription,
-          hotspots: place.hotspots,
-        ),
+        builder: (_) => SliderScreen.fromPlace(place),
       ),
     );
   }
@@ -215,7 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
           _quickAction('Rota oluştur', Icons.alt_route_rounded, widget.onCreateRouteTap),
           _quickAction('QR okut', Icons.qr_code_scanner_rounded, widget.onQrTap,
               highlight: true),
-          _quickAction('Şehirler', Icons.location_city_rounded, _openPlaces),
+          _quickAction('Şehirler', Icons.location_city_rounded,
+              () => showCityPickerSheet(context)),
         ],
       ),
     );

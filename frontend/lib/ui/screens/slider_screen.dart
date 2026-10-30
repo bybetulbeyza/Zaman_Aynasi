@@ -10,6 +10,8 @@ class SliderScreen extends StatefulWidget {
   final String? description;
   final String period;
   final String architect;
+  final String patron;
+  final String inventoryLocation; // örn. 'Cilt 1, s. 37'
   final List<Hotspot> hotspots;
 
   const SliderScreen({
@@ -18,10 +20,25 @@ class SliderScreen extends StatefulWidget {
     required this.beforeImageUrl,
     required this.afterImageUrl,
     this.description,
-    this.period = '15. Yüzyıl (1491)',
-    this.architect = 'Abdülula bin Pulad Şah',
+    this.period = '',
+    this.architect = '',
+    this.patron = '',
+    this.inventoryLocation = '',
     this.hotspots = const [],
   });
+
+  /// Veri tabanındaki eserden tüm alanları taşıyarak ekranı açar.
+  factory SliderScreen.fromPlace(HeritagePlace place) => SliderScreen(
+        title: place.name,
+        beforeImageUrl: place.imageBeforeUrl,
+        afterImageUrl: place.imageAfterUrl,
+        description: place.shortDescription,
+        period: place.constructionDate,
+        architect: place.architect,
+        patron: place.patron,
+        inventoryLocation: place.inventoryLocation,
+        hotspots: place.hotspots,
+      );
 
   @override
   State<SliderScreen> createState() => _SliderScreenState();
@@ -146,8 +163,9 @@ class _SliderScreenState extends State<SliderScreen> {
                     // Dönem & Mimar
                     Row(
                       children: [
-                        _buildMetaItem('Dönem', widget.period),
-                        _buildMetaItem('Mimar', widget.architect),
+                        if (widget.period.isNotEmpty) _buildMetaItem('Dönem', widget.period),
+                        if (widget.architect.isNotEmpty) _buildMetaItem('Mimar', widget.architect),
+                        if (widget.patron.isNotEmpty) _buildMetaItem('Bani', widget.patron),
                       ],
                     ),
                     const SizedBox(height: 18),

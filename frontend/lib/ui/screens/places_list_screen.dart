@@ -78,13 +78,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SliderScreen(
-          title: place.name,
-          beforeImageUrl: place.imageBeforeUrl,
-          afterImageUrl: place.imageAfterUrl,
-          description: place.shortDescription,
-          hotspots: place.hotspots,
-        ),
+        builder: (_) => SliderScreen.fromPlace(place),
       ),
     );
   }
@@ -235,7 +229,6 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
     const radius = BorderRadius.all(Radius.circular(20));
     final subtitle = [
       place.category.label,
-      if (place.inventoryLocation.trim().isNotEmpty) place.inventoryLocation.trim(),
       if (place.constructionDate.trim().isNotEmpty) place.constructionDate.trim(),
     ].join(' · ');
 
