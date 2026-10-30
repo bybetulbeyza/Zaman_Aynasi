@@ -4,14 +4,17 @@ class AppColors {
   // --- Ana Karakter Renkleri ---
 
   // Zümrüt Yeşili / Koyu Petrol (Primary - Butonlar, Seçili Filtreler, Rota Çizgisi, Aktif Sekmeler)
-  static const Color primaryTeal = Color(0xFF0F6B5C);
-  static const Color primaryTealDark = Color(0xFF0A4F44);
-  static const Color primaryTealLight = Color(0xFFE6F2F0);
+  static const Color primaryTeal = Color(0xFF0E807A);
+  static const Color primaryTealDark = Color(0xFF0A5F5A);
+  static const Color primaryTealLight = Color(0xFFD5EBEC);
 
   // Çini Bordosu (Burgundy - Floating QR Butonu, Audio Play, AI Butonları, İnce Çerçeveler)
   static const Color ciniBordeaux = Color(0xFF7A1C28);
   static const Color ciniBordeauxDark = Color(0xFF5E131E);
   static const Color ciniBordeauxLight = Color(0xFFF9ECEE);
+
+  // Hero / Splash zemini (Koyu Petrol Mavisi)
+  static const Color heroPetrol = Color(0xFF14414F);
 
   // Kobalt Çini Mavisi (İkincil Vurgular, Dönem Karşılaştırma Etiketleri)
   static const Color ciniCobalt = Color(0xFF1E3A8A);
@@ -19,7 +22,7 @@ class AppColors {
   // --- Zemin ve Kart Tonları ---
 
   // Zemin Rengi (Ham Çini / Kağıt Dokulu Sıcak Kırık Beyaz)
-  static const Color bgCanvas = Color(0xFFF9F6F0);
+  static const Color bgCanvas = Color(0xFFF8F3E8);
 
   // Kartlar ve Modal Yüzeyleri (Saf Beyaz)
   static const Color cardBg = Colors.white;
