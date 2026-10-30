@@ -2,6 +2,7 @@ import '../common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_categories.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/category_style.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../data/models/heritage_place.dart';
 
@@ -133,43 +134,64 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
                     });
                     widget.onFilterSelected?.call(cat);
                   },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primaryTeal
-                          : AppColors.chipInactiveBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected
-                            ? AppColors.primaryTeal
-                            : AppColors.chipBorder,
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(
-                            isSelected ? 0.12 : 0.03,
+                  child: Builder(
+                    builder: (context) {
+                      final style = cat == null ? null : CategoryStyle.of(cat);
+                      final base = style?.color ?? AppColors.primaryTeal;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isSelected ? base : AppColors.chipInactiveBg,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isSelected
+                                ? base
+                                : (style == null
+                                      ? AppColors.chipBorder
+                                      : base.withValues(alpha: 0.45)),
+                            width: 1,
                           ),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: isSelected ? 0.12 : 0.03,
+                              ),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Text(
-                      cat == null
-                          ? context.t('all_filter')
-                          : cat.labelFor(context.isEn),
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textDark,
-                        fontSize: 13,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                      ),
-                    ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (style != null) ...[
+                              AppIcon(
+                                style.icon,
+                                size: 18,
+                                color: isSelected ? Colors.white : base,
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            Text(
+                              cat == null
+                                  ? context.t('all_filter')
+                                  : cat.labelFor(context.isEn),
+                              style: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textDark,
+                                fontSize: 13,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 );
               },

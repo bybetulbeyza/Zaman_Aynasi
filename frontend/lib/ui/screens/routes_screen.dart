@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/category_style.dart';
 import '../../core/utils/location_service.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
@@ -373,6 +374,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                     );
                                     return FilterChipPill(
                                       label: cat.labelFor(context.isEn),
+                                      icon: CategoryStyle.of(cat).icon,
+                                      accent: CategoryStyle.of(cat).color,
                                       selected: sel,
                                       onTap: () => setState(() {
                                         if (sel) {

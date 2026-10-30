@@ -2,6 +2,7 @@ import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_categories.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/category_style.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
@@ -127,6 +128,10 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                             ? context.t('all_filter')
                             : cat.labelFor(context.isEn),
                         selected: _selectedCategory == cat,
+                        icon: cat == null ? null : CategoryStyle.of(cat).icon,
+                        accent: cat == null
+                            ? null
+                            : CategoryStyle.of(cat).color,
                         onTap: () {
                           _selectedCategory = cat;
                           _applyFilter();
@@ -222,11 +227,8 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
 
   Widget _buildPlaceCard(HeritagePlace place) {
     const radius = BorderRadius.all(Radius.circular(20));
-    final subtitle = [
-      place.category.labelFor(context.isEn),
-      if (place.constructionDate.trim().isNotEmpty)
-        place.constructionDate.trim(),
-    ].join(' · ');
+    final style = CategoryStyle.of(place.category);
+    final date = place.constructionDate.trim();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,14 +273,41 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                     style: AppTheme.titleLarge,
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textMuted,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(6, 3, 10, 3),
+                        decoration: BoxDecoration(
+                          color: style.color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppIcon(style.icon, size: 18, color: style.color),
+                            const SizedBox(width: 5),
+                            Text(
+                              place.category.labelFor(context.isEn),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: style.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (date.isNotEmpty) ...[
+                        const SizedBox(width: 10),
+                        Text(
+                          date,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),

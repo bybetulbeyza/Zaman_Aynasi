@@ -4,6 +4,7 @@ import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
+import '../../core/utils/walking_route_service.dart';
 import '../../core/constants/app_theme.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/models/heritage_route.dart';
@@ -49,11 +50,28 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
               _routes = HeritageRoute.fromPlaces(p);
               _isLoading = false;
             });
+            _loadWalkingData();
           }
         })
         .catchError((_) {
           if (mounted) setState(() => _isLoading = false);
         });
+  }
+
+  /// Her rota için gerçek yürüyüş mesafesi ve süresini çeker; gelene kadar tahmin gösterilir.
+  Future<void> _loadWalkingData() async {
+    for (var i = 0; i < _routes.length; i++) {
+      final route = _routes[i];
+      WalkingRouteService.fetch(
+        route.stops.map((s) => s.location).toList(),
+      ).then((walk) {
+        if (walk == null || !mounted) return;
+        setState(() {
+          final idx = _routes.indexWhere((r) => r.name == route.name);
+          if (idx != -1) _routes[idx] = _routes[idx].withWalk(walk);
+        });
+      });
+    }
   }
 
   void _start(HeritageRoute route) {
@@ -307,7 +325,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          '${AppCities.active} · ${route.stops.length} ${context.t('stops_word')} · ${route.durationLabelFor(context.isEn)} · ${route.distanceLabelFor(context.isEn)}',
+          '${AppCities.active} · ${route.stops.length} ${context.t('stops_word')} · ${route.durationLabelFor(context.isEn)}${route.isWalkingExact ? ' ${context.t('walk_word')}' : ''} · ${route.distanceLabelFor(context.isEn)}',
           style: const TextStyle(fontSize: 14.5, color: AppColors.textMuted),
         ),
         const SizedBox(height: 14),

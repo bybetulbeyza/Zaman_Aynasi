@@ -1,4 +1,5 @@
 import 'package:latlong2/latlong.dart';
+import '../../core/utils/walking_route_service.dart';
 import 'heritage_place.dart';
 
 /// Aynı `route_name` değerini paylaşan eserlerden oluşan hazır rota.
@@ -13,13 +14,27 @@ class HeritageRoute {
   final double distanceKm;
   final int durationMinutes;
 
+  /// true ise mesafe ve süre Mapbox yürüyüş servisinden gelmiştir (yalnızca yürüme süresi);
+  /// false ise koordinatlardan yapılan tahmindir (durak ziyaret süresi dahil).
+  final bool isWalkingExact;
+
   const HeritageRoute({
     required this.name,
     this.nameEn = '',
     required this.stops,
     required this.distanceKm,
     required this.durationMinutes,
+    this.isWalkingExact = false,
   });
+
+  HeritageRoute withWalk(WalkingRoute walk) => HeritageRoute(
+    name: name,
+    nameEn: nameEn,
+    stops: stops,
+    distanceKm: walk.meters / 1000,
+    durationMinutes: walk.minutes,
+    isWalkingExact: true,
+  );
 
   String nameFor(bool en) => en && nameEn.isNotEmpty ? nameEn : name;
 
