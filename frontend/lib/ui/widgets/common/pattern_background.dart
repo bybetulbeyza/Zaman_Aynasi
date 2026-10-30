@@ -25,13 +25,14 @@ class PatternBackground extends StatelessWidget {
 
   /// Petrol zeminde (splash) kullanılan açık çizgili hâli.
   const PatternBackground.onDark({super.key, required this.child})
-      : color = AppColors.heroPetrol,
-        lineColor = const Color(0xFF9CCBD2),
-        lineOpacity = 0.17,
-        scale = 3.0;
+    : color = AppColors.heroPetrol,
+      lineColor = const Color(0xFF9CCBD2),
+      lineOpacity = 0.17,
+      scale = 3.0;
 
   /// Petrol zeminde çini desenli dekorasyon (Ana Sayfa hero'su gibi özel kapsayıcılar için).
-  static BoxDecoration onDarkDecoration({double lineOpacity = 0.17}) => BoxDecoration(
+  static BoxDecoration onDarkDecoration({double lineOpacity = 0.17}) =>
+      BoxDecoration(
         color: AppColors.heroPetrol,
         image: DecorationImage(
           image: const AssetImage(asset),

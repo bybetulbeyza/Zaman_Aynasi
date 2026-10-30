@@ -1,3 +1,4 @@
+import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_categories.dart';
 import '../../core/constants/app_colors.dart';
@@ -213,7 +214,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
           hintText: context.t('search_hint'),
           hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 15),
           border: InputBorder.none,
-          icon: const Icon(Icons.search_rounded, color: AppColors.textDark),
+          icon: const AppIcon('search', color: AppColors.textDark, size: 24),
         ),
       ),
     );

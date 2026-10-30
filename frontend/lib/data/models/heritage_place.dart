@@ -55,8 +55,10 @@ class Hotspot {
   final String titleEn;
   final String descriptionEn;
   final String? aiVideoEnUrl;
-  final String? aiVideoUrl; // Supabase: ai_video (boşsa 'AI hikâyesi' butonu gizlenir)
-  final String? targetPlaceId; // Külliyeden alt yapıya (Türbe, Hamam vb.) geçiş ID'si
+  final String?
+  aiVideoUrl; // Supabase: ai_video (boşsa 'AI hikâyesi' butonu gizlenir)
+  final String?
+  targetPlaceId; // Külliyeden alt yapıya (Türbe, Hamam vb.) geçiş ID'si
 
   Hotspot({
     required this.id,
@@ -74,7 +76,8 @@ class Hotspot {
   });
 
   String titleFor(bool en) => en && titleEn.isNotEmpty ? titleEn : title;
-  String descriptionFor(bool en) => en && descriptionEn.isNotEmpty ? descriptionEn : description;
+  String descriptionFor(bool en) =>
+      en && descriptionEn.isNotEmpty ? descriptionEn : description;
 
   /// Dile göre AI videosu; İngilizce yoksa Türkçeye döner. Hiçbiri yoksa null.
   String? videoFor(bool en) {
@@ -86,7 +89,8 @@ class Hotspot {
 
   bool get hasAiVideo => aiVideoUrl != null && aiVideoUrl!.trim().isNotEmpty;
 
-  bool get hasSubPlaceNavigation => targetPlaceId != null && targetPlaceId!.isNotEmpty;
+  bool get hasSubPlaceNavigation =>
+      targetPlaceId != null && targetPlaceId!.isNotEmpty;
 
   factory Hotspot.fromJson(Map<String, dynamic> json) {
     return Hotspot(
@@ -118,17 +122,20 @@ class HeritagePlace {
   final String imageAfterUrl;
   final bool isFeatured;
   final String constructionDate; // Supabase: construction_date
-  final String architect;        // Supabase: architect
-  final String patron;           // Supabase: patron (Bani)
-  final String inventoryLocation;// Supabase: inventory_location (örn. 'Cilt 1, s. 37')
+  final String architect; // Supabase: architect
+  final String patron; // Supabase: patron (Bani)
+  final String
+  inventoryLocation; // Supabase: inventory_location (örn. 'Cilt 1, s. 37')
   final String nameEn;
   final String shortDescriptionEn;
   final String routeNameEn;
   final String audioGuideEnUrl;
   final String aiVideoEnUrl;
-  final String aiVideoUrl;       // Supabase: ai_video (tarihî dönüşüm videosu)
-  final String audioGuideUrl;    // Supabase: audio_guide (sesli rehber ses dosyası)
-  final String qrUrl;            // Supabase: qr_url (QR görselinin adresi; QR içeriği 'eser:<id>')
+  final String aiVideoUrl; // Supabase: ai_video (tarihî dönüşüm videosu)
+  final String
+  audioGuideUrl; // Supabase: audio_guide (sesli rehber ses dosyası)
+  final String
+  qrUrl; // Supabase: qr_url (QR görselinin adresi; QR içeriği 'eser:<id>')
   final List<Hotspot> hotspots;
   final double? distanceMeters;
 
@@ -163,16 +170,19 @@ class HeritagePlace {
   bool get isSubPlace => parentId != null && parentId!.isNotEmpty;
 
   String nameFor(bool en) => en && nameEn.isNotEmpty ? nameEn : name;
-  String descriptionFor(bool en) =>
-      en && shortDescriptionEn.isNotEmpty ? shortDescriptionEn : shortDescription;
-  String routeNameFor(bool en) => en && routeNameEn.isNotEmpty ? routeNameEn : routeName;
+  String descriptionFor(bool en) => en && shortDescriptionEn.isNotEmpty
+      ? shortDescriptionEn
+      : shortDescription;
+  String routeNameFor(bool en) =>
+      en && routeNameEn.isNotEmpty ? routeNameEn : routeName;
 
   /// Dile göre sesli rehber adresi; İngilizce yoksa Türkçeye döner.
   String audioFor(bool en) =>
       en && audioGuideEnUrl.isNotEmpty ? audioGuideEnUrl : audioGuideUrl;
 
   /// Dile göre AI videosu adresi; İngilizce yoksa Türkçeye döner.
-  String videoFor(bool en) => en && aiVideoEnUrl.isNotEmpty ? aiVideoEnUrl : aiVideoUrl;
+  String videoFor(bool en) =>
+      en && aiVideoEnUrl.isNotEmpty ? aiVideoEnUrl : aiVideoUrl;
 
   bool get hasAiVideo => aiVideoUrl.isNotEmpty || aiVideoEnUrl.isNotEmpty;
   bool get hasAudioGuide => audioGuideUrl.isNotEmpty;
@@ -233,12 +243,15 @@ class HeritagePlace {
       imageBeforeUrl: json['image_before_url'] as String? ?? '',
       imageAfterUrl: json['image_after_url'] as String? ?? '',
       isFeatured: json['is_featured'] as bool? ?? false,
-      constructionDate: ((json['construction_date'] ?? json['period']) as String? ?? '').trim(),
+      constructionDate:
+          ((json['construction_date'] ?? json['period']) as String? ?? '')
+              .trim(),
       architect: (json['architect'] as String? ?? '').trim(),
       patron: (json['patron'] as String? ?? '').trim(),
       inventoryLocation: (json['inventory_location'] as String? ?? '').trim(),
       nameEn: (json['name_en'] as String? ?? '').trim(),
-      shortDescriptionEn: (json['short_description_en'] as String? ?? '').trim(),
+      shortDescriptionEn: (json['short_description_en'] as String? ?? '')
+          .trim(),
       routeNameEn: (json['route_name_en'] as String? ?? '').trim(),
       audioGuideEnUrl: (json['audio_guide_en'] as String? ?? '').trim(),
       aiVideoEnUrl: (json['ai_video_en'] as String? ?? '').trim(),
@@ -253,7 +266,8 @@ class HeritagePlace {
     final normalized = cat?.toLowerCase().trim() ?? '';
     if (normalized.contains('sosyal') || normalized.contains('sivil')) {
       return PlaceCategory.sosyalSivilYapilar;
-    } else if (normalized.contains('külliye') || normalized.contains('kulliye')) {
+    } else if (normalized.contains('külliye') ||
+        normalized.contains('kulliye')) {
       return PlaceCategory.kulliye;
     } else if (normalized.contains('cami')) {
       return PlaceCategory.cami;

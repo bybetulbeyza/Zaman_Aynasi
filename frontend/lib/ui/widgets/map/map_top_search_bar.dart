@@ -1,3 +1,4 @@
+import '../common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_categories.dart';
 import '../../../core/constants/app_colors.dart';
@@ -69,13 +70,18 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                         ),
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: AppColors.textMuted,
-                          size: 22,
+                        prefixIcon: const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: AppIcon(
+                            'search',
+                            color: AppColors.textMuted,
+                            size: 22,
+                          ),
                         ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 13),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 13,
+                        ),
                       ),
                     ),
                   ),
@@ -93,7 +99,9 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
-              itemCount: AppCategories.filters.length + (widget.routeLabel == null ? 0 : 1),
+              itemCount:
+                  AppCategories.filters.length +
+                  (widget.routeLabel == null ? 0 : 1),
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 if (widget.routeLabel != null && index == 0) {
@@ -114,7 +122,8 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
                     ),
                   );
                 }
-                final cat = AppCategories.filters[index - (widget.routeLabel == null ? 0 : 1)];
+                final cat = AppCategories
+                    .filters[index - (widget.routeLabel == null ? 0 : 1)];
                 final isSelected = cat == _selectedCategory;
 
                 return GestureDetector(
@@ -141,20 +150,24 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black
-                              .withOpacity(isSelected ? 0.12 : 0.03),
+                          color: Colors.black.withOpacity(
+                            isSelected ? 0.12 : 0.03,
+                          ),
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
                     child: Text(
-                      cat == null ? context.t('all_filter') : cat.labelFor(context.isEn),
+                      cat == null
+                          ? context.t('all_filter')
+                          : cat.labelFor(context.isEn),
                       style: TextStyle(
                         color: isSelected ? Colors.white : AppColors.textDark,
                         fontSize: 13,
-                        fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                       ),
                     ),
                   ),

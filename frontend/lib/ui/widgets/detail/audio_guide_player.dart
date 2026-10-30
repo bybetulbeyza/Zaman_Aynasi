@@ -96,7 +96,10 @@ class _AudioGuidePlayerState extends State<AudioGuidePlayer> {
                   Text(
                     context.t('audio_guide'),
                     style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   if (_available && player != null)
@@ -105,12 +108,15 @@ class _AudioGuidePlayerState extends State<AudioGuidePlayer> {
                       builder: (_, snap) {
                         final pos = snap.data ?? Duration.zero;
                         final total = _duration.inMilliseconds;
-                        final value =
-                            total == 0 ? 0.0 : (pos.inMilliseconds / total).clamp(0.0, 1.0);
+                        final value = total == 0
+                            ? 0.0
+                            : (pos.inMilliseconds / total).clamp(0.0, 1.0);
                         return LinearProgressIndicator(
                           value: value,
                           backgroundColor: Colors.white24,
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                           minHeight: 3,
                         );
                       },
@@ -118,15 +124,20 @@ class _AudioGuidePlayerState extends State<AudioGuidePlayer> {
                   else
                     Text(
                       context.t('coming_soon_short'),
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                 ],
               ),
             ),
             if (_available) ...[
               const SizedBox(width: 12),
-              Text(_fmt(_duration),
-                  style: const TextStyle(color: Colors.white70, fontSize: 14)),
+              Text(
+                _fmt(_duration),
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+              ),
             ],
           ],
         ),

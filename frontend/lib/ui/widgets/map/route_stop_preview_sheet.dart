@@ -101,21 +101,18 @@ class RouteStopPreviewSheet extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.bgCanvas,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.borderSubtle,
-                width: 0.8,
-              ),
+              border: Border.all(color: AppColors.borderSubtle, width: 0.8),
             ),
             child: Row(
               children: [
                 // Durak Görseli
                 (placeImageUrl != null && placeImageUrl!.isNotEmpty)
                     ? AppNetworkImage(
-                  imageUrl: placeImageUrl!,
-                  width: 72,
-                  height: 72,
-                  borderRadius: BorderRadius.circular(12),
-                )
+                        imageUrl: placeImageUrl!,
+                        width: 72,
+                        height: 72,
+                        borderRadius: BorderRadius.circular(12),
+                      )
                     : _buildPlaceholder(),
                 const SizedBox(width: 14),
 

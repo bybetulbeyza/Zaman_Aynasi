@@ -27,9 +27,25 @@ class AppAccessibility extends ChangeNotifier {
 
   /// Kontrastı artıran renk matrisi (yalnızca yüksek kontrast açıkken kullanılır).
   static const ColorFilter contrastFilter = ColorFilter.matrix(<double>[
-    1.3, 0, 0, 0, -38,
-    0, 1.3, 0, 0, -38,
-    0, 0, 1.3, 0, -38,
-    0, 0, 0, 1, 0,
+    1.3,
+    0,
+    0,
+    0,
+    -38,
+    0,
+    1.3,
+    0,
+    0,
+    -38,
+    0,
+    0,
+    1.3,
+    0,
+    -38,
+    0,
+    0,
+    0,
+    1,
+    0,
   ]);
 }

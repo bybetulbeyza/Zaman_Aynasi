@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
+import '../widgets/common/app_icon.dart';
 import '../../data/models/heritage_place.dart';
 import 'historic_routes_screen.dart';
 import 'slider_screen.dart';
@@ -167,16 +168,14 @@ class _MainScreenState extends State<MainScreen> {
                   children: [
                     Expanded(
                       child: _buildNavItem(
-                        icon: Icons.home_outlined,
-                        activeIcon: Icons.home_rounded,
+                        icon: 'home',
                         label: context.t('nav_home'),
                         index: 0,
                       ),
                     ),
                     Expanded(
                       child: _buildNavItem(
-                        icon: Icons.place_outlined,
-                        activeIcon: Icons.place_rounded,
+                        icon: 'map',
                         label: context.t('nav_map'),
                         index: 1,
                       ),
@@ -184,8 +183,7 @@ class _MainScreenState extends State<MainScreen> {
                     Expanded(child: _buildQrLabel()),
                     Expanded(
                       child: _buildNavItem(
-                        icon: Icons.alt_route_rounded,
-                        activeIcon: Icons.alt_route_rounded,
+                        icon: 'routes',
                         label: context.t('nav_routes'),
                         index: 3,
                         showRouteBadge: true,
@@ -193,8 +191,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     Expanded(
                       child: _buildNavItem(
-                        icon: Icons.person_outline_rounded,
-                        activeIcon: Icons.person_rounded,
+                        icon: 'profile',
                         label: context.t('nav_profile'),
                         index: 4,
                       ),
@@ -212,8 +209,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildNavItem({
-    required IconData icon,
-    required IconData activeIcon,
+    required String icon,
     required String label,
     required int index,
     bool showRouteBadge = false,
@@ -235,14 +231,10 @@ class _MainScreenState extends State<MainScreen> {
                     isLabelVisible: !ActiveRoute.instance.isEmpty,
                     label: Text('${ActiveRoute.instance.length}'),
                     backgroundColor: AppColors.ciniBordeaux,
-                    child: Icon(
-                      isSelected ? activeIcon : icon,
-                      color: color,
-                      size: 26,
-                    ),
+                    child: AppIcon(icon, color: color, size: 28),
                   ),
                 )
-              : Icon(isSelected ? activeIcon : icon, color: color, size: 26),
+              : AppIcon(icon, color: color, size: 28),
           const SizedBox(height: 4),
           Text(
             label,
@@ -284,10 +276,8 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.qr_code_scanner_rounded,
-            color: Colors.white,
-            size: 30,
+          child: const Center(
+            child: AppIcon('qr', color: Colors.white, size: 34),
           ),
         ),
       ),

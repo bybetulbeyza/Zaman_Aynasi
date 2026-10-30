@@ -9,10 +9,10 @@ class PillButton extends StatelessWidget {
   final Color? color;
 
   const PillButton(this.label, {super.key, this.onPressed, this.color})
-      : outlined = false;
+    : outlined = false;
 
   const PillButton.outlined(this.label, {super.key, this.onPressed, this.color})
-      : outlined = true;
+    : outlined = true;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,10 @@ class PillButton extends StatelessWidget {
               side: BorderSide(color: base, width: 1.2),
               padding: pad,
               shape: shape,
-              textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             child: text,
           )
@@ -41,7 +44,10 @@ class PillButton extends StatelessWidget {
               foregroundColor: Colors.white,
               padding: pad,
               shape: shape,
-              textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             child: text,
           );

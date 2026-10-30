@@ -45,8 +45,12 @@ class AppColors {
 
   // --- Tipografi ve Çizgiler ---
 
-  static const Color textDark = Color(0xFF1C1A17);       // Başlıklar ve Eser İsimleri
-  static const Color textMuted = Color(0xFF706B63);      // Açıklama, Mesafe ve İkincil Metinler
-  static const Color borderSubtle = Color(0xFFE8E3DA);   // Ayırıcı İnce Çizgiler
-  static const Color dividerLine = Color(0xFF7A1C28);    // Alt Navigation Bar üstündeki ince bordo hat
+  static const Color textDark = Color(0xFF1C1A17); // Başlıklar ve Eser İsimleri
+  static const Color textMuted = Color(
+    0xFF706B63,
+  ); // Açıklama, Mesafe ve İkincil Metinler
+  static const Color borderSubtle = Color(0xFFE8E3DA); // Ayırıcı İnce Çizgiler
+  static const Color dividerLine = Color(
+    0xFF7A1C28,
+  ); // Alt Navigation Bar üstündeki ince bordo hat
 }

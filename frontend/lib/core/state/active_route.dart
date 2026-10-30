@@ -15,7 +15,8 @@ class ActiveRoute extends ChangeNotifier {
   bool get isEmpty => _stops.isEmpty;
   int get length => _stops.length;
 
-  String? titleFor(bool en) => en && (_titleEn?.isNotEmpty ?? false) ? _titleEn : _titleTr;
+  String? titleFor(bool en) =>
+      en && (_titleEn?.isNotEmpty ?? false) ? _titleEn : _titleTr;
 
   bool contains(HeritagePlace place) => _stops.any((p) => p.id == place.id);
 

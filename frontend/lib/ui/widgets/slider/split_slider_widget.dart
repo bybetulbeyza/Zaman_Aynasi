@@ -61,7 +61,9 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        final totalHeight = constraints.maxHeight.isFinite ? constraints.maxHeight : 340.0;
+        final totalHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : 340.0;
         final dividerX = _sliderValue * totalWidth;
 
         return Stack(
@@ -175,15 +177,22 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             // 5. Dinamik Hotspot'lar
             if (_showHotspots && !_coordinatePickerMode)
               ...widget.hotspots.map((hotspot) {
-                final isBeforeSide = hotspot.targetSide.toLowerCase() == 'before';
+                final isBeforeSide =
+                    hotspot.targetSide.toLowerCase() == 'before';
                 final isVisible = isBeforeSide
                     ? (hotspot.xPercent > _sliderValue)
                     : (hotspot.xPercent < _sliderValue);
 
                 if (!isVisible) return const SizedBox.shrink();
 
-                final leftPos = (hotspot.xPercent * totalWidth).clamp(20.0, totalWidth - 40.0);
-                final topPos = (hotspot.yPercent * totalHeight).clamp(20.0, totalHeight - 40.0);
+                final leftPos = (hotspot.xPercent * totalWidth).clamp(
+                  20.0,
+                  totalWidth - 40.0,
+                );
+                final topPos = (hotspot.yPercent * totalHeight).clamp(
+                  20.0,
+                  totalHeight - 40.0,
+                );
 
                 return Positioned(
                   left: leftPos - 16,
@@ -204,21 +213,33 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTapDown: (details) {
-                    final x = (details.localPosition.dx / totalWidth).clamp(0.0, 1.0);
-                    final y = (details.localPosition.dy / totalHeight).clamp(0.0, 1.0);
-                    final side = (details.localPosition.dx < dividerX) ? 'after' : 'before';
+                    final x = (details.localPosition.dx / totalWidth).clamp(
+                      0.0,
+                      1.0,
+                    );
+                    final y = (details.localPosition.dy / totalHeight).clamp(
+                      0.0,
+                      1.0,
+                    );
+                    final side = (details.localPosition.dx < dividerX)
+                        ? 'after'
+                        : 'before';
 
                     final xStr = x.toStringAsFixed(2);
                     final yStr = y.toStringAsFixed(2);
 
                     // 1. Terminale / Konsola yazdırır
-                    debugPrint('📍 YENİ HOTSPOT -> x_percent: $xStr | y_percent: $yStr | target_side: $side');
+                    debugPrint(
+                      '📍 YENİ HOTSPOT -> x_percent: $xStr | y_percent: $yStr | target_side: $side',
+                    );
 
                     // 2. Ekranda direkt bildirim olarak gösterir
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('x_percent: $xStr, y_percent: $yStr, side: $side'),
+                        content: Text(
+                          'x_percent: $xStr, y_percent: $yStr, side: $side',
+                        ),
                         duration: const Duration(seconds: 4),
                         behavior: SnackBarBehavior.floating,
                         backgroundColor: AppColors.ciniBordeaux,
@@ -230,14 +251,21 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                     alignment: Alignment.topCenter,
                     padding: const EdgeInsets.only(top: 20),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black87,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
                         'Nokta koymak istediğin yere tıkla',
-                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -246,24 +274,30 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
 
             // 7. Modu Açıp Kapatma Butonu (Sol Alt Köşe)
             if (kDebugMode)
-            Positioned(
-              left: 12,
-              bottom: 12,
-              child: FloatingActionButton.small(
-                heroTag: 'coordPickerBtn',
-                backgroundColor: _coordinatePickerMode ? AppColors.ciniBordeaux : Colors.white,
-                onPressed: () {
-                  setState(() {
-                    _coordinatePickerMode = !_coordinatePickerMode;
-                  });
-                },
-                child: Icon(
-                  _coordinatePickerMode ? Icons.check_rounded : Icons.add_location_alt_outlined,
-                  color: _coordinatePickerMode ? Colors.white : AppColors.textDark,
-                  size: 20,
+              Positioned(
+                left: 12,
+                bottom: 12,
+                child: FloatingActionButton.small(
+                  heroTag: 'coordPickerBtn',
+                  backgroundColor: _coordinatePickerMode
+                      ? AppColors.ciniBordeaux
+                      : Colors.white,
+                  onPressed: () {
+                    setState(() {
+                      _coordinatePickerMode = !_coordinatePickerMode;
+                    });
+                  },
+                  child: Icon(
+                    _coordinatePickerMode
+                        ? Icons.check_rounded
+                        : Icons.add_location_alt_outlined,
+                    color: _coordinatePickerMode
+                        ? Colors.white
+                        : AppColors.textDark,
+                    size: 20,
+                  ),
                 ),
               ),
-            ),
           ],
         );
       },
@@ -342,7 +376,9 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.42 - _pulseController.value * 0.34),
+                    color: Colors.white.withValues(
+                      alpha: 0.42 - _pulseController.value * 0.34,
+                    ),
                     width: 1.4,
                   ),
                 ),
@@ -365,7 +401,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                       Colors.white.withValues(alpha: 0.14),
                     ],
                   ),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.75), width: 1.3),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.75),
+                    width: 1.3,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.22),
@@ -377,8 +416,16 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.chevron_left_rounded, size: 20, color: Colors.white),
-                    Icon(Icons.chevron_right_rounded, size: 20, color: Colors.white),
+                    Icon(
+                      Icons.chevron_left_rounded,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 20,
+                      color: Colors.white,
+                    ),
                   ],
                 ),
               ),
@@ -399,7 +446,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
           decoration: BoxDecoration(
             color: tint.withValues(alpha: 0.38),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.38), width: 0.9),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.38),
+              width: 0.9,
+            ),
           ),
           child: Text(
             text,

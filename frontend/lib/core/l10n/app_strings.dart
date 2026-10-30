@@ -38,7 +38,8 @@ const Map<String, String> appStringsTr = {
   'qa_cities': 'Şehirler',
   'home_featured': 'Öne çıkan vakıf eserleri',
   'home_nearby': 'Yakınımdaki eserler',
-  'location_off_note': 'Konum kapalı; eserler Bursa merkezine göre gösteriliyor.',
+  'location_off_note':
+      'Konum kapalı; eserler Bursa merkezine göre gösteriliyor.',
 
   // Envanter
   'inv_title': 'Tarih Envanteri',
@@ -80,6 +81,7 @@ const Map<String, String> appStringsTr = {
   'nearby_route_title': 'Yakın Çevre Rotası',
   'stop_of': 'Durak {i} / {n}',
   'next_stop': 'Sonraki durak',
+  'map_places_count': 'Haritada {n} eser',
   'route_chip': 'Rota: {name}',
   'geo_nearby': 'Yakınındasın: {name}',
   'geo_open': 'Aç',
@@ -87,7 +89,8 @@ const Map<String, String> appStringsTr = {
   // QR
   'qr_align': 'Karekodu Hizalayın',
   'qr_heading': 'Tabeladaki karekodu okut',
-  'qr_body': "Tarihi yapının tabelasındaki karekodu okut. Eserin sayfası önce/bugün fotoğrafıyla açılır. Karekod yoksa Tarih Envanteri'nden ara.",
+  'qr_body':
+      "Tarihi yapının tabelasındaki karekodu okut. Eserin sayfası önce/bugün fotoğrafıyla açılır. Karekod yoksa Tarih Envanteri'nden ara.",
   'qr_open_camera': 'Kamerayı aç',
   'qr_unknown': "Bu karekod tanınmadı. Tarih Envanteri'nden aramayı deneyin.",
 
@@ -126,16 +129,20 @@ const Map<String, String> appStringsTr = {
   'font_xlarge': 'Çok büyük',
   'high_contrast': 'Yüksek kontrast',
   'feedback_row': 'Geri bildirim gönder',
-  'profile_footer': 'İçerikler Vakıf Katılım envanter\nkaynaklarından alınmıştır.',
+  'profile_footer':
+      'İçerikler Vakıf Katılım envanter\nkaynaklarından alınmıştır.',
 
   // Hakkında
   'about_title': 'Hakkında ve kaynaklar',
   'about_project': 'Proje',
-  'about_project_body': 'Zaman Aynası; tarihi vakıf eserlerinin geçmişi ile bugünkü halini etkileşimli karşılaştırma, konum bazlı rotalar ve sesli hikâyelerle sunar.',
+  'about_project_body':
+      'Zaman Aynası; tarihi vakıf eserlerinin geçmişi ile bugünkü halini etkileşimli karşılaştırma, konum bazlı rotalar ve sesli hikâyelerle sunar.',
   'about_goal': 'Projenin amacı',
-  'about_goal_body': 'Uzun ve sıkıcı bulunabilen envanter metinlerini; görsel karşılaştırma, yapay zekâ destekli videolar ve sesli anlatımlarla ilgi çekici hâle getirerek kültürel mirasın daha çok kişiye ulaşmasını sağlamak.',
+  'about_goal_body':
+      'Uzun ve sıkıcı bulunabilen envanter metinlerini; görsel karşılaştırma, yapay zekâ destekli videolar ve sesli anlatımlarla ilgi çekici hâle getirerek kültürel mirasın daha çok kişiye ulaşmasını sağlamak.',
   'about_sources': 'Arşiv kaynakları',
-  'about_sources_body': 'İçerikler Vakıf Katılım envanter kitaplarından alınmıştır. Her eserin sayfasında, kitaptaki cilt ve sayfa numarası belirtilir.',
+  'about_sources_body':
+      'İçerikler Vakıf Katılım envanter kitaplarından alınmıştır. Her eserin sayfasında, kitaptaki cilt ve sayfa numarası belirtilir.',
   'about_open_inventory': 'Envanter yayınlarını aç',
 };
 
@@ -178,7 +185,8 @@ const Map<String, String> appStringsEn = {
   'qa_cities': 'Cities',
   'home_featured': 'Featured landmarks',
   'home_nearby': 'Landmarks near me',
-  'location_off_note': 'Location is off; landmarks are shown relative to central Bursa.',
+  'location_off_note':
+      'Location is off; landmarks are shown relative to central Bursa.',
 
   // Inventory
   'inv_title': 'Heritage Inventory',
@@ -220,6 +228,7 @@ const Map<String, String> appStringsEn = {
   'nearby_route_title': 'Nearby Route',
   'stop_of': 'Stop {i} / {n}',
   'next_stop': 'Next stop',
+  'map_places_count': '{n} landmarks on the map',
   'route_chip': 'Route: {name}',
   'geo_nearby': 'You are near: {name}',
   'geo_open': 'Open',
@@ -227,9 +236,11 @@ const Map<String, String> appStringsEn = {
   // QR
   'qr_align': 'Align the QR code',
   'qr_heading': 'Scan the QR code on the sign',
-  'qr_body': "Scan the QR code on the historic building's sign. The page opens with the then/now photos. If there is no code, search in the Heritage Inventory.",
+  'qr_body':
+      "Scan the QR code on the historic building's sign. The page opens with the then/now photos. If there is no code, search in the Heritage Inventory.",
   'qr_open_camera': 'Open camera',
-  'qr_unknown': 'This QR code was not recognized. Try searching the Heritage Inventory.',
+  'qr_unknown':
+      'This QR code was not recognized. Try searching the Heritage Inventory.',
 
   // Detail
   'period_label': 'Then',
@@ -266,15 +277,19 @@ const Map<String, String> appStringsEn = {
   'font_xlarge': 'Extra large',
   'high_contrast': 'High contrast',
   'feedback_row': 'Send feedback',
-  'profile_footer': 'Content is taken from the Vakıf Katılım\ninventory sources.',
+  'profile_footer':
+      'Content is taken from the Vakıf Katılım\ninventory sources.',
 
   // About
   'about_title': 'About and sources',
   'about_project': 'The project',
-  'about_project_body': 'Zaman Aynası presents historic foundation (waqf) buildings through interactive then-and-now comparisons, location-based routes and audio stories.',
+  'about_project_body':
+      'Zaman Aynası presents historic foundation (waqf) buildings through interactive then-and-now comparisons, location-based routes and audio stories.',
   'about_goal': 'Our goal',
-  'about_goal_body': 'To turn long, dry inventory texts into engaging experiences with visual comparison, AI-assisted videos and audio narration, so that cultural heritage reaches more people.',
+  'about_goal_body':
+      'To turn long, dry inventory texts into engaging experiences with visual comparison, AI-assisted videos and audio narration, so that cultural heritage reaches more people.',
   'about_sources': 'Archive sources',
-  'about_sources_body': 'Content is taken from the Vakıf Katılım inventory books. Each landmark page lists the volume and page number in the book.',
+  'about_sources_body':
+      'Content is taken from the Vakıf Katılım inventory books. Each landmark page lists the volume and page number in the book.',
   'about_open_inventory': 'Open inventory publications',
 };

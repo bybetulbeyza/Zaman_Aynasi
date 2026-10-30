@@ -23,7 +23,10 @@ Future<void> showCityPickerSheet(BuildContext context) {
             for (final city in AppCities.all)
               Container(
                 margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
@@ -55,13 +58,19 @@ Future<void> showCityPickerSheet(BuildContext context) {
                     ),
                     const Spacer(),
                     if (AppCities.isAvailable(city))
-                      const Icon(Icons.check_circle_rounded, color: AppColors.primaryTeal)
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.primaryTeal,
+                      )
                     else
-                      const Text('Yakında',
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.ciniBordeaux)),
+                      const Text(
+                        'Yakında',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.ciniBordeaux,
+                        ),
+                      ),
                   ],
                 ),
               ),

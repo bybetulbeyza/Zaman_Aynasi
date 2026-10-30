@@ -46,7 +46,10 @@ class ActiveRouteCard extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: route.clear,
-                    child: const Icon(Icons.close_rounded, color: Colors.white70),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               ),
@@ -66,10 +69,16 @@ class ActiveRouteCard extends StatelessWidget {
                         height: 28,
                         alignment: Alignment.center,
                         decoration: const BoxDecoration(
-                            color: AppColors.primaryTeal, shape: BoxShape.circle),
-                        child: Text('${i + 1}',
-                            style: const TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.w700)),
+                          color: AppColors.primaryTeal,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${i + 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -77,13 +86,19 @@ class ActiveRouteCard extends StatelessWidget {
                           route.stops[i].nameFor(en),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontSize: 15),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                       GestureDetector(
                         onTap: () => route.remove(route.stops[i]),
-                        child: const Icon(Icons.remove_circle_outline_rounded,
-                            size: 20, color: Colors.white54),
+                        child: const Icon(
+                          Icons.remove_circle_outline_rounded,
+                          size: 20,
+                          color: Colors.white54,
+                        ),
                       ),
                     ],
                   ),

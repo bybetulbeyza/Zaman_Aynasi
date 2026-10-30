@@ -23,7 +23,8 @@ class HeritageRoute {
 
   String nameFor(bool en) => en && nameEn.isNotEmpty ? nameEn : name;
 
-  String get distanceLabel => '${distanceKm.toStringAsFixed(1).replaceAll('.', ',')} km';
+  String get distanceLabel =>
+      '${distanceKm.toStringAsFixed(1).replaceAll('.', ',')} km';
 
   String get durationLabel {
     final h = durationMinutes ~/ 60;
@@ -33,7 +34,8 @@ class HeritageRoute {
     return '$h sa $m dk';
   }
 
-  String distanceLabelFor(bool en) => en ? distanceLabel.replaceAll(',', '.') : distanceLabel;
+  String distanceLabelFor(bool en) =>
+      en ? distanceLabel.replaceAll(',', '.') : distanceLabel;
 
   String durationLabelFor(bool en) {
     if (!en) return durationLabel;
@@ -62,23 +64,35 @@ class HeritageRoute {
     final ordered = <HeritagePlace>[remaining.removeAt(0)];
     while (remaining.isNotEmpty) {
       final last = ordered.last.location;
-      remaining.sort((a, b) => _distance
-          .as(LengthUnit.Meter, last, a.location)
-          .compareTo(_distance.as(LengthUnit.Meter, last, b.location)));
+      remaining.sort(
+        (a, b) => _distance
+            .as(LengthUnit.Meter, last, a.location)
+            .compareTo(_distance.as(LengthUnit.Meter, last, b.location)),
+      );
       ordered.add(remaining.removeAt(0));
     }
 
     double meters = 0;
     for (var i = 1; i < ordered.length; i++) {
-      meters += _distance.as(LengthUnit.Meter, ordered[i - 1].location, ordered[i].location);
+      meters += _distance.as(
+        LengthUnit.Meter,
+        ordered[i - 1].location,
+        ordered[i].location,
+      );
     }
     final km = meters / 1000;
-    final raw = (km / _walkKmPerHour * 60).round() + ordered.length * _minutesPerStop;
+    final raw =
+        (km / _walkKmPerHour * 60).round() + ordered.length * _minutesPerStop;
     final minutes = (raw / 5).round() * 5;
 
     return HeritageRoute(
-        name: name,
-        nameEn: ordered.map((p) => p.routeNameEn).firstWhere((n) => n.isNotEmpty, orElse: () => ''),
-        stops: ordered, distanceKm: km, durationMinutes: minutes);
+      name: name,
+      nameEn: ordered
+          .map((p) => p.routeNameEn)
+          .firstWhere((n) => n.isNotEmpty, orElse: () => ''),
+      stops: ordered,
+      distanceKm: km,
+      durationMinutes: minutes,
+    );
   }
 }

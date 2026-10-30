@@ -1,3 +1,4 @@
+import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/pattern_background.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -151,9 +152,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child: Icon(
-                    Icons.qr_code_scanner_rounded,
-                    size: 76,
+                  child: const AppIcon(
+                    'qr',
+                    size: 84,
                     color: AppColors.primaryTealDark,
                   ),
                 ),

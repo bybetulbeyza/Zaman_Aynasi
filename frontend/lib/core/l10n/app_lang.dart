@@ -19,7 +19,7 @@ class AppLang extends ChangeNotifier {
 /// `context.t('anahtar')` / `context.isEn` kullanan widget'lar dil değişince kendiliğinden yenilenir.
 class AppLangScope extends InheritedNotifier<AppLang> {
   const AppLangScope({super.key, required AppLang lang, required super.child})
-      : super(notifier: lang);
+    : super(notifier: lang);
 }
 
 extension AppLangContext on BuildContext {

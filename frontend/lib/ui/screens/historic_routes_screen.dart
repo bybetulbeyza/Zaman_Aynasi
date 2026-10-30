@@ -1,3 +1,4 @@
+import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
@@ -238,7 +239,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
         height: 58,
         child: ElevatedButton.icon(
           onPressed: widget.onCreateRoute,
-          icon: const Icon(Icons.add_road_rounded, size: 24),
+          icon: const AppIcon('create_route', size: 28, color: Colors.white),
           label: Text(context.t('rc_create')),
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),

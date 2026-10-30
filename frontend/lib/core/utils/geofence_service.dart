@@ -24,22 +24,23 @@ class GeofenceService {
     if (LocationService.lastWasFallback) return;
 
     final targets = places.where((p) => !p.isSubPlace).toList();
-    _subscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-      ),
-    ).listen((position) {
-      final here = LatLng(position.latitude, position.longitude);
-      for (final place in targets) {
-        final meters = _distance.as(LengthUnit.Meter, here, place.location);
-        if (meters <= radiusMeters && _inside.add(place.id)) {
-          onEnter(place);
-        } else if (meters > resetMeters) {
-          _inside.remove(place.id);
-        }
-      }
-    }, onError: (_) {});
+    _subscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 10,
+          ),
+        ).listen((position) {
+          final here = LatLng(position.latitude, position.longitude);
+          for (final place in targets) {
+            final meters = _distance.as(LengthUnit.Meter, here, place.location);
+            if (meters <= radiusMeters && _inside.add(place.id)) {
+              onEnter(place);
+            } else if (meters > resetMeters) {
+              _inside.remove(place.id);
+            }
+          }
+        }, onError: (_) {});
   }
 
   Future<void> stop() async {

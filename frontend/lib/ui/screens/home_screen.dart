@@ -1,3 +1,4 @@
+import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
@@ -222,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.search_rounded, color: AppColors.textDark),
+                  const AppIcon('search', color: AppColors.textDark, size: 24),
                   const SizedBox(width: 12),
                   Text(
                     context.t('search_hint'),
@@ -278,17 +279,17 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _quickAction(
             context.t('qa_nearby'),
-            Icons.near_me_outlined,
+            'nearby',
             widget.onNearbyTap ?? widget.onExploreMapTap,
           ),
           _quickAction(
             context.t('qa_create_route'),
-            Icons.alt_route_rounded,
+            'create_route',
             widget.onCreateRouteTap,
           ),
           _quickAction(
             context.t('qa_stories'),
-            Icons.play_circle_outline_rounded,
+            'stories',
             () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ReelsScreen()),
@@ -297,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _quickAction(
             context.t('qa_cities'),
-            Icons.location_city_rounded,
+            'cities',
             () => showCityPickerSheet(context),
           ),
         ],
@@ -307,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _quickAction(
     String label,
-    IconData icon,
+    String icon,
     VoidCallback? onTap, {
     bool highlight = false,
   }) {
@@ -328,9 +329,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? Border.all(color: AppColors.ciniBordeaux, width: 1.4)
                     : null,
               ),
-              child: Icon(
+              child: AppIcon(
                 icon,
-                size: 24,
+                size: 32,
                 color: highlight
                     ? AppColors.ciniBordeaux
                     : AppColors.primaryTeal,

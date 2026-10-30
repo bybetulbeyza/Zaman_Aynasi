@@ -28,14 +28,16 @@ class _VideoDialogState extends State<_VideoDialog> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-      ..initialize().then((_) {
-        if (mounted) {
-          setState(() {});
-          _controller.play();
-        }
-      }).catchError((_) {
-        if (mounted) setState(() => _hasError = true);
-      });
+      ..initialize()
+          .then((_) {
+            if (mounted) {
+              setState(() {});
+              _controller.play();
+            }
+          })
+          .catchError((_) {
+            if (mounted) setState(() => _hasError = true);
+          });
   }
 
   @override
@@ -54,14 +56,18 @@ class _VideoDialogState extends State<_VideoDialog> {
           alignment: Alignment.center,
           children: [
             if (_hasError)
-              Text(context.t('video_error'),
-                  style: const TextStyle(color: Colors.white70))
+              Text(
+                context.t('video_error'),
+                style: const TextStyle(color: Colors.white70),
+              )
             else if (!ready)
               const CircularProgressIndicator(color: AppColors.primaryTeal)
             else
               GestureDetector(
                 onTap: () => setState(() {
-                  _controller.value.isPlaying ? _controller.pause() : _controller.play();
+                  _controller.value.isPlaying
+                      ? _controller.pause()
+                      : _controller.play();
                 }),
                 child: AspectRatio(
                   aspectRatio: _controller.value.aspectRatio,
@@ -78,8 +84,11 @@ class _VideoDialogState extends State<_VideoDialog> {
                       ),
                       if (!_controller.value.isPlaying)
                         const Center(
-                          child: Icon(Icons.play_circle_fill_rounded,
-                              size: 72, color: Colors.white70),
+                          child: Icon(
+                            Icons.play_circle_fill_rounded,
+                            size: 72,
+                            color: Colors.white70,
+                          ),
                         ),
                     ],
                   ),
@@ -89,7 +98,11 @@ class _VideoDialogState extends State<_VideoDialog> {
               top: 8,
               right: 8,
               child: IconButton(
-                icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ),

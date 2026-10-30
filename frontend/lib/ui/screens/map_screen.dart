@@ -1,3 +1,4 @@
+import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -9,6 +10,7 @@ import '../../../core/utils/launcher_util.dart';
 import '../../../core/utils/location_service.dart';
 import '../../../data/models/heritage_place.dart';
 import '../../../data/repositories/heritage_repository.dart';
+import '../widgets/map/category_pin.dart';
 import '../widgets/map/map_top_search_bar.dart';
 import '../widgets/map/route_stop_preview_sheet.dart';
 import 'slider_screen.dart';
@@ -262,14 +264,18 @@ class MapScreenState extends State<MapScreen> {
                 ],
               ),
 
-              // Mantıksal Sıralı Rota Çizgisi
-              if (routePoints.length > 1)
+              // Rota hattı yalnızca bir rota seçiliyken çizilir (cam hissi: açık halka + canlı çekirdek)
+              if (_routeChip != null && routePoints.length > 1)
                 PolylineLayer(
                   polylines: [
                     Polyline(
                       points: routePoints,
-                      strokeWidth: 4.0,
+                      strokeWidth: 5.0,
                       color: AppColors.primaryTeal,
+                      borderStrokeWidth: 4.0,
+                      borderColor: Colors.white.withValues(alpha: 0.75),
+                      strokeCap: StrokeCap.round,
+                      strokeJoin: StrokeJoin.round,
                     ),
                   ],
                 ),
@@ -302,46 +308,27 @@ class MapScreenState extends State<MapScreen> {
                   ],
                 ),
 
-              // Numaralı Durak Pinleri (1, 2, 3...)
+              // Kategori pinleri (rota modunda sıra rozetiyle)
               MarkerLayer(
                 markers: List.generate(_filteredPlaces.length, (index) {
                   final place = _filteredPlaces[index];
                   final isSelected = index == _currentStopIndex;
-
                   return Marker(
                     point: place.location,
-                    width: isSelected ? 44 : 36,
-                    height: isSelected ? 44 : 36,
+                    width: CategoryPin.width * 1.2,
+                    height: CategoryPin.height * 1.2,
+                    alignment: Alignment.topCenter,
                     child: GestureDetector(
                       onTap: () {
-                        setState(() {
-                          _currentStopIndex = index;
-                        });
+                        setState(() => _currentStopIndex = index);
                         _moveMap(place.location, 16.8);
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.ciniBordeaux
-                              : AppColors.primaryTeal,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2.2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.25),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: CategoryPin(
+                          category: place.category,
+                          selected: isSelected,
+                          order: _routeChip != null ? index + 1 : null,
                         ),
                       ),
                     ),
@@ -406,9 +393,10 @@ class MapScreenState extends State<MapScreen> {
                             onTap: _recenter,
                             child: const Padding(
                               padding: EdgeInsets.all(15),
-                              child: Icon(
-                                Icons.my_location_rounded,
+                              child: AppIcon(
+                                'locate',
                                 color: AppColors.primaryTeal,
+                                size: 26,
                               ),
                             ),
                           ),
@@ -417,7 +405,11 @@ class MapScreenState extends State<MapScreen> {
                           onPressed: () => LauncherUtil.openDirections(
                             currentPlace.location,
                           ),
-                          icon: const Icon(Icons.north_east_rounded, size: 18),
+                          icon: const AppIcon(
+                            'directions',
+                            size: 24,
+                            color: Colors.white,
+                          ),
                           label: Text(context.t('directions')),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
@@ -435,13 +427,20 @@ class MapScreenState extends State<MapScreen> {
                     ),
                   ),
                   RouteStopPreviewSheet(
-                    routeTitle: currentPlace.routeName.isNotEmpty
-                        ? currentPlace.routeNameFor(context.isEn)
-                        : context.t('nearby_route_title'),
-                    routeStats: context
-                        .t('stop_of')
-                        .replaceAll('{i}', '${_currentStopIndex + 1}')
-                        .replaceAll('{n}', '${_filteredPlaces.length}'),
+                    // Rota seçili değilse kart yalnızca eserin kategorisini gösterir (sahte "rota" yok)
+                    routeTitle: _routeChip == null
+                        ? currentPlace.category.labelFor(context.isEn)
+                        : (currentPlace.routeName.isNotEmpty
+                              ? currentPlace.routeNameFor(context.isEn)
+                              : context.t('nearby_route_title')),
+                    routeStats: _routeChip == null
+                        ? context
+                              .t('map_places_count')
+                              .replaceAll('{n}', '${_filteredPlaces.length}')
+                        : context
+                              .t('stop_of')
+                              .replaceAll('{i}', '${_currentStopIndex + 1}')
+                              .replaceAll('{n}', '${_filteredPlaces.length}'),
                     placeName: currentPlace.nameFor(context.isEn),
                     placeDistanceTime: LocationService.formatDistance(
                       LocationService.sortPlacesByDistance(

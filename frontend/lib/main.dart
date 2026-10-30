@@ -35,13 +35,17 @@ class ZamanAynasiApp extends StatelessWidget {
             final scaled = MediaQuery(
               data: media.copyWith(
                 textScaler: TextScaler.linear(
-                  media.textScaler.scale(1) * AppAccessibility.instance.textScale,
+                  media.textScaler.scale(1) *
+                      AppAccessibility.instance.textScale,
                 ),
               ),
               child: child!,
             );
             return AppAccessibility.instance.highContrast
-                ? ColorFiltered(colorFilter: AppAccessibility.contrastFilter, child: scaled)
+                ? ColorFiltered(
+                    colorFilter: AppAccessibility.contrastFilter,
+                    child: scaled,
+                  )
                 : scaled;
           },
         ),

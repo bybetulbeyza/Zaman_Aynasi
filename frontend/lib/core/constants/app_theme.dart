@@ -43,8 +43,10 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: bodyFont,
-      textTheme: _textTheme
-          .apply(bodyColor: AppColors.textDark, displayColor: AppColors.textDark),
+      textTheme: _textTheme.apply(
+        bodyColor: AppColors.textDark,
+        displayColor: AppColors.textDark,
+      ),
       scaffoldBackgroundColor: AppColors.bgCanvas,
       primaryColor: AppColors.primaryTeal,
       colorScheme: const ColorScheme.light(
@@ -73,10 +75,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -90,10 +89,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
 

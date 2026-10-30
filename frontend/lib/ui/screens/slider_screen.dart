@@ -1,3 +1,4 @@
+import '../widgets/common/app_icon.dart';
 import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
@@ -574,10 +575,9 @@ class _SliderScreenState extends State<SliderScreen> {
                 final inRoute = ActiveRoute.instance.contains(_place);
                 return ElevatedButton.icon(
                   onPressed: _toggleRoute,
-                  icon: Icon(
-                    inRoute ? Icons.check_rounded : Icons.add_rounded,
-                    size: 20,
-                  ),
+                  icon: inRoute
+                      ? const Icon(Icons.check_rounded, size: 22)
+                      : const AppIcon('add', size: 24, color: Colors.white),
                   label: Text(
                     inRoute ? context.t('in_route') : context.t('add_to_route'),
                   ),
