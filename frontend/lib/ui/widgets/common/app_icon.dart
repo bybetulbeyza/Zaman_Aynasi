@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-/// Uygulamanın özel (çini esinli) çizgi ikonları. Beyaz maske olarak saklanır, rengi koddan verilir.
-/// Adlar assets/icons/ altındaki dosya adlarıdır (örn. 'home', 'cat_han').
+/// Uygulamanın özel (çini esinli) vektör ikonları. Beyaz çizgi olarak saklanır, rengi koddan verilir.
+/// Adlar assets/icons/ altındaki dosya adlarıdır (örn. 'home', 'pin_han').
 class AppIcon extends StatelessWidget {
   final String name;
   final double size;
@@ -11,14 +12,14 @@ class AppIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/icons/$name.png',
+    return SvgPicture.asset(
+      'assets/icons/$name.svg',
       width: size,
       height: size,
-      color: color ?? IconTheme.of(context).color,
-      colorBlendMode: BlendMode.srcIn,
-      filterQuality: FilterQuality.high,
-      isAntiAlias: true,
+      colorFilter: ColorFilter.mode(
+        color ?? IconTheme.of(context).color ?? Colors.black,
+        BlendMode.srcIn,
+      ),
     );
   }
 }
