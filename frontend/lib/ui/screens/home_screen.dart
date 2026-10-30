@@ -149,6 +149,15 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: PatternBackground.onDarkDecoration(),
       child: Stack(
         children: [
+          // Sağda silik lale motifi
+          Positioned(
+            right: -24,
+            bottom: 36,
+            child: Opacity(
+              opacity: 0.2,
+              child: const TulipMotif(height: 230),
+            ),
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -156,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Vakıf Yolu',
+                    'Zaman Aynası',
                     style: TextStyle(
                       fontFamily: AppTheme.headingFont,
                       fontSize: 22,

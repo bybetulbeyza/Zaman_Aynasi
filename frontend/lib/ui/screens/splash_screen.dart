@@ -90,17 +90,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       child: const TulipMotif(height: 150),
                     ),
                     const SizedBox(height: 34),
-                    const Text(
-                      'Vakıf Yolu',
-                      style: TextStyle(
-                        fontFamily: AppTheme.headingFont,
-                        fontSize: 54,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFFB8283D),
-                        shadows: [
-                          Shadow(color: Color(0xAAD0344B), blurRadius: 18),
-                          Shadow(color: Color(0x66D0344B), blurRadius: 36),
-                        ],
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 36),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Zaman Aynası',
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontFamily: AppTheme.headingFont,
+                            fontSize: 54,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFB8283D),
+                            shadows: [
+                              Shadow(color: Color(0xAAD0344B), blurRadius: 18),
+                              Shadow(color: Color(0x66D0344B), blurRadius: 36),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),

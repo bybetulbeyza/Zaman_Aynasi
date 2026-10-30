@@ -128,7 +128,7 @@ const Map<String, String> appStringsTr = {
   // Hakkında
   'about_title': 'Hakkında ve kaynaklar',
   'about_project': 'Proje',
-  'about_project_body': 'Vakıf Yolu; tarihi vakıf eserlerinin geçmişi ile bugünkü halini etkileşimli karşılaştırma, konum bazlı rotalar ve sesli hikâyelerle sunar.',
+  'about_project_body': 'Zaman Aynası; tarihi vakıf eserlerinin geçmişi ile bugünkü halini etkileşimli karşılaştırma, konum bazlı rotalar ve sesli hikâyelerle sunar.',
   'about_goal': 'Projenin amacı',
   'about_goal_body': 'Uzun ve sıkıcı bulunabilen envanter metinlerini; görsel karşılaştırma, yapay zekâ destekli videolar ve sesli anlatımlarla ilgi çekici hâle getirerek kültürel mirasın daha çok kişiye ulaşmasını sağlamak.',
   'about_sources': 'Arşiv kaynakları',
@@ -265,7 +265,7 @@ const Map<String, String> appStringsEn = {
   // About
   'about_title': 'About and sources',
   'about_project': 'The project',
-  'about_project_body': 'Vakıf Yolu presents historic foundation (waqf) buildings through interactive then-and-now comparisons, location-based routes and audio stories.',
+  'about_project_body': 'Zaman Aynası presents historic foundation (waqf) buildings through interactive then-and-now comparisons, location-based routes and audio stories.',
   'about_goal': 'Our goal',
   'about_goal_body': 'To turn long, dry inventory texts into engaging experiences with visual comparison, AI-assisted videos and audio narration, so that cultural heritage reaches more people.',
   'about_sources': 'Archive sources',
