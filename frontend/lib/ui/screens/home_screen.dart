@@ -146,18 +146,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final top = MediaQuery.of(context).padding.top;
     return Container(
       padding: EdgeInsets.fromLTRB(20, top + 14, 20, 0),
-      decoration: const BoxDecoration(color: AppColors.heroPetrol),
+      decoration: PatternBackground.onDarkDecoration(),
       child: Stack(
         children: [
-          // Dekoratif lale (silik) — hero'ya doku verir
-          Positioned(
-            right: -24,
-            bottom: 36,
-            child: Opacity(
-              opacity: 0.12,
-              child: const TulipMotif(height: 220),
-            ),
-          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -358,7 +349,10 @@ class _PlaceCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              AppNetworkImage(imageUrl: place.imageAfterUrl),
+              AppNetworkImage(
+                imageUrl: place.imageAfterUrl,
+                semanticLabel: place.nameFor(context.isEn),
+              ),
               const DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(

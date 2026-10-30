@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
+import '../../../core/state/active_route.dart';
 import '../../../core/utils/launcher_util.dart';
 import '../../../core/utils/location_service.dart';
 import '../../../data/models/heritage_place.dart';
@@ -33,6 +34,8 @@ class MapScreenState extends State<MapScreen> {
   int _currentStopIndex = 0;
 
   String _searchQuery = '';
+  bool _hasRealLocation = false;
+  String? _routeChip; // null | 'active' | 'nearby'
   PlaceCategory? _selectedCategory; // null = Tümü
 
   @override
@@ -44,6 +47,7 @@ class MapScreenState extends State<MapScreen> {
   Future<void> _initDataAndLocation() async {
     final places = await _heritageRepository.getPlaces();
     _userLocation = await LocationService.getCurrentLocation();
+    _hasRealLocation = !LocationService.lastWasFallback;
 
     if (mounted) {
       setState(() {
@@ -80,6 +84,7 @@ class MapScreenState extends State<MapScreen> {
     );
 
     setState(() {
+      _routeChip = 'nearby';
       // En yakından başlayarak ilk 4 durağı rotaya bağla
       _filteredPlaces = sorted.take(4).toList();
       _currentStopIndex = 0;
@@ -110,10 +115,20 @@ class MapScreenState extends State<MapScreen> {
   void loadCustomRoute(List<HeritagePlace> places) {
     if (places.isEmpty) return;
     setState(() {
+      _routeChip = 'active';
       _filteredPlaces = places;
       _currentStopIndex = 0;
     });
     _mapController.move(places.first.location, 16.5);
+  }
+
+  void _recenter() {
+    if (!_hasRealLocation) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.t('location_off_note'))));
+      return;
+    }
+    _mapController.move(_userLocation, 16.5);
   }
 
   void _applyFilters() {
@@ -216,6 +231,34 @@ class MapScreenState extends State<MapScreen> {
                   ],
                 ),
 
+              // Kullanıcının konumu (gerçek konum varsa)
+              if (_hasRealLocation)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _userLocation,
+                      width: 56,
+                      height: 56,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primaryTeal.withValues(alpha: 0.22),
+                        ),
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryTeal,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
               // Numaralı Durak Pinleri (1, 2, 3...)
               MarkerLayer(
                 markers: List.generate(_filteredPlaces.length, (index) {
@@ -271,11 +314,21 @@ class MapScreenState extends State<MapScreen> {
             left: 0,
             right: 0,
             child: MapTopSearchBar(
+              routeLabel: _routeChip == null
+                  ? null
+                  : context.t('route_chip').replaceAll(
+                      '{name}',
+                      _routeChip == 'active'
+                          ? (ActiveRoute.instance.titleFor(context.isEn) ??
+                              context.t('ar_title'))
+                          : context.t('nearby_route_title')),
               onSearchChanged: (query) {
+                _routeChip = null;
                 _searchQuery = query;
                 _applyFilters();
               },
               onFilterSelected: (category) {
+                _routeChip = null;
                 _selectedCategory = category;
                 _applyFilters();
               },
@@ -293,16 +346,37 @@ class MapScreenState extends State<MapScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(right: 16, bottom: 12),
-                    child: ElevatedButton.icon(
-                      onPressed: () => LauncherUtil.openDirections(currentPlace.location),
-                      icon: const Icon(Icons.north_east_rounded, size: 18),
-                      label: Text(context.t('directions')),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-                        shape: const StadiumBorder(),
-                        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                      ),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Konumuma dön
+                        Material(
+                          color: Colors.white,
+                          shape: const CircleBorder(),
+                          elevation: 3,
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: _recenter,
+                            child: const Padding(
+                              padding: EdgeInsets.all(15),
+                              child: Icon(Icons.my_location_rounded,
+                                  color: AppColors.primaryTeal),
+                            ),
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () => LauncherUtil.openDirections(currentPlace.location),
+                          icon: const Icon(Icons.north_east_rounded, size: 18),
+                          label: Text(context.t('directions')),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                            shape: const StadiumBorder(),
+                            textStyle:
+                                const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   RouteStopPreviewSheet(

@@ -17,7 +17,14 @@ class LocationService {
 
   // Kullanıcının anlık koordinatını döner.
   // İzin verilmezse veya servis kapalıysa defaultCenter döner.
-  static Future<LatLng> getCurrentLocation() async {
+  static Future<LatLng>? _pending;
+
+  static Future<LatLng> getCurrentLocation() {
+    // Aynı anda birden çok ekran isterse tek izin penceresi / tek konum isteği kullanılır
+    return _pending ??= _resolve().whenComplete(() => _pending = null);
+  }
+
+  static Future<LatLng> _resolve() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return _fallback();

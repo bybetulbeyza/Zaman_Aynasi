@@ -4,6 +4,9 @@ import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
 import '../../data/models/heritage_place.dart';
 import 'historic_routes_screen.dart';
+import 'slider_screen.dart';
+import '../../core/utils/geofence_service.dart';
+import '../../data/repositories/heritage_repository.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'qr_scanner_screen.dart';
@@ -20,6 +23,54 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0; // Varsayılan olarak Ana Sayfa ile başlar
   final GlobalKey<MapScreenState> _mapKey = GlobalKey<MapScreenState>();
+
+  final GeofenceService _geofence = GeofenceService();
+
+  @override
+  void initState() {
+    super.initState();
+    _startGeofence();
+  }
+
+  @override
+  void dispose() {
+    _geofence.stop();
+    super.dispose();
+  }
+
+  Future<void> _startGeofence() async {
+    final places = await HeritageRepository().getPlaces();
+    if (!mounted || places.isEmpty) return;
+    await _geofence.start(places, (place) {
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 8),
+          content: Row(
+            children: [
+              const Icon(Icons.place_rounded, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(context
+                    .t('geo_nearby')
+                    .replaceAll('{name}', place.nameFor(context.isEn))),
+              ),
+            ],
+          ),
+          action: SnackBarAction(
+            label: context.t('geo_open'),
+            textColor: Colors.white,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
+            ),
+          ),
+        ),
+      );
+    });
+  }
 
   /// Haritaya geçip verilen rotayı çizer.
   void _showRouteOnMap(List<HeritagePlace> places) {

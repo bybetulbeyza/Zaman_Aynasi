@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:before_after/before_after.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/heritage_place.dart';
@@ -30,6 +34,8 @@ class SplitSliderWidget extends StatefulWidget {
 class _SplitSliderWidgetState extends State<SplitSliderWidget>
     with SingleTickerProviderStateMixin {
   double _sliderValue = 0.5;
+  bool _active = false; // kullanıcı slider'ı sürüklerken tutamaç büyür
+  Timer? _activeTimer;
   bool _showHotspots = true;
   bool _coordinatePickerMode = false; // Koordinat yakalama anahtarı
   late AnimationController _pulseController;
@@ -45,6 +51,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
 
   @override
   void dispose() {
+    _activeTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
@@ -77,60 +84,67 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 ),
                 onValueChanged: (val) {
                   if (!_coordinatePickerMode) {
+                    // Dörtte bir çizgilerini geçerken hafif titreşim
+                    if ((val * 4).floor() != (_sliderValue * 4).floor()) {
+                      HapticFeedback.selectionClick();
+                    }
+                    _activeTimer?.cancel();
+                    _activeTimer = Timer(const Duration(milliseconds: 260), () {
+                      if (mounted) setState(() => _active = false);
+                    });
                     setState(() {
                       _sliderValue = val;
+                      _active = true;
                     });
                   }
                 },
               ),
             ),
 
-            // 2. Çift Oklu Tutamaç
+            // 2. Cam efektli bölücü çizgi ve tutamaç
             Positioned(
-              left: dividerX - 1.0,
+              left: dividerX - 1.25,
               top: 0,
               bottom: 0,
               child: IgnorePointer(
                 child: Container(
-                  width: 2.0,
-                  color: Colors.white.withOpacity(0.9),
+                  width: 2.5,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: const [0.0, 0.2, 0.8, 1.0],
+                      colors: [
+                        Colors.white.withValues(alpha: 0.0),
+                        Colors.white.withValues(alpha: 0.95),
+                        Colors.white.withValues(alpha: 0.95),
+                        Colors.white.withValues(alpha: 0.0),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
             Positioned(
-              left: dividerX - 18.0,
-              top: (totalHeight / 2) - 18.0,
+              left: dividerX - 28.0,
+              top: (totalHeight * 0.5) - 28.0,
               child: IgnorePointer(
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.30),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: AppColors.borderSubtle,
-                      width: 1.2,
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.arrow_left_rounded, size: 16, color: AppColors.textDark),
-                      Icon(Icons.arrow_right_rounded, size: 16, color: AppColors.textDark),
-                    ],
-                  ),
+                child: AnimatedScale(
+                  scale: _active ? 1.14 : 1.0,
+                  duration: const Duration(milliseconds: 160),
+                  curve: Curves.easeOut,
+                  child: _buildGlassKnob(),
                 ),
               ),
             ),
 
-            // 3. Sol Üst: "Günümüz" Rozeti
+            // 3. Sol üst: Dönem rozeti (cam)
             Positioned(
               left: 16,
               top: 68,
@@ -139,12 +153,12 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 opacity: (_sliderValue > 0.12) ? 1.0 : 0.0,
                 child: _buildBadge(
                   widget.afterLabel,
-                  backgroundColor: AppColors.primaryTealDark.withOpacity(0.85),
+                  tint: AppColors.primaryTealDark,
                 ),
               ),
             ),
 
-            // 4. Sağ Üst: "Tarihi Dönem" Rozeti
+            // 4. Sağ üst: Bugün rozeti (cam)
             Positioned(
               right: 16,
               top: 68,
@@ -153,7 +167,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 opacity: (_sliderValue < 0.88) ? 1.0 : 0.0,
                 child: _buildBadge(
                   widget.beforeLabel,
-                  backgroundColor: AppColors.ciniCobalt.withOpacity(0.85),
+                  tint: AppColors.ciniCobalt,
                 ),
               ),
             ),
@@ -310,28 +324,93 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     );
   }
 
-  Widget _buildBadge(String text, {required Color backgroundColor}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white24, width: 0.6),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+  /// Buzlu cam görünümlü tutamaç: dıştaki halka nabız gibi atar, ortada iki ok vardır.
+  Widget _buildGlassKnob() {
+    return SizedBox(
+      width: 56,
+      height: 56,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _pulseController,
+            builder: (_, __) => Transform.scale(
+              scale: 1.0 + _pulseController.value * 0.28,
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.42 - _pulseController.value * 0.34),
+                    width: 1.4,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          ClipOval(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.46),
+                      Colors.white.withValues(alpha: 0.14),
+                    ],
+                  ),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.75), width: 1.3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.22),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.chevron_left_rounded, size: 20, color: Colors.white),
+                    Icon(Icons.chevron_right_rounded, size: 20, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 11.5,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.2,
+    );
+  }
+
+  Widget _buildBadge(String text, {required Color tint}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            color: tint.withValues(alpha: 0.38),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.38), width: 0.9),
+          ),
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+              shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+            ),
+          ),
         ),
       ),
     );

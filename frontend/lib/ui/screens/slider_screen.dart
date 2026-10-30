@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
@@ -157,13 +158,28 @@ class _SliderScreenState extends State<SliderScreen> {
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white.withValues(alpha: 0.9),
-                      radius: 22,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            size: 18, color: AppColors.textDark),
-                        onPressed: () => Navigator.pop(context),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: ClipOval(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.6), width: 1),
+                            ),
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(Icons.arrow_back_ios_new,
+                                  size: 18, color: Colors.white),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

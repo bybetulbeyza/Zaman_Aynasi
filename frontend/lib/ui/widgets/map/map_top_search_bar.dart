@@ -8,10 +8,14 @@ class MapTopSearchBar extends StatefulWidget {
   final ValueChanged<String>? onSearchChanged;
   final ValueChanged<PlaceCategory?>? onFilterSelected;
 
+  /// Doluysa kategori çiplerinin başında dolu teal bir rota çipi gösterir.
+  final String? routeLabel;
+
   const MapTopSearchBar({
     super.key,
     this.onSearchChanged,
     this.onFilterSelected,
+    this.routeLabel,
   });
 
   @override
@@ -89,10 +93,28 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
-              itemCount: AppCategories.filters.length,
+              itemCount: AppCategories.filters.length + (widget.routeLabel == null ? 0 : 1),
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
-                final cat = AppCategories.filters[index];
+                if (widget.routeLabel != null && index == 0) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryTeal,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      widget.routeLabel!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  );
+                }
+                final cat = AppCategories.filters[index - (widget.routeLabel == null ? 0 : 1)];
                 final isSelected = cat == _selectedCategory;
 
                 return GestureDetector(

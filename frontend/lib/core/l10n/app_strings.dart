@@ -77,6 +77,9 @@ const Map<String, String> appStringsTr = {
   'nearby_route_title': 'Yakın Çevre Rotası',
   'stop_of': 'Durak {i} / {n}',
   'next_stop': 'Sonraki durak',
+  'route_chip': 'Rota: {name}',
+  'geo_nearby': 'Yakınındasın: {name}',
+  'geo_open': 'Aç',
 
   // QR
   'qr_align': 'Karekodu Hizalayın',
@@ -93,7 +96,7 @@ const Map<String, String> appStringsTr = {
   'patron': 'Bani',
   'swipe_up': 'Detaylar için yukarı kaydır',
   'hotspot_hint': 'Noktalara dokun',
-  'ai_generated': 'AI üretimi',
+  'ai_generated': 'AI üretimi · Canlandırma',
   'transform_video': 'Tarihî dönüşüm videosu',
   'video_soon': 'Video yakında',
   'video_error': 'Video yüklenemedi.',
@@ -114,6 +117,11 @@ const Map<String, String> appStringsTr = {
   'about_row': 'Hakkında ve kaynaklar',
   'language_row': 'Dil',
   'font_row': 'Yazı boyutu ve kontrast',
+  'font_size': 'Yazı boyutu',
+  'font_normal': 'Normal',
+  'font_large': 'Büyük',
+  'font_xlarge': 'Çok büyük',
+  'high_contrast': 'Yüksek kontrast',
   'feedback_row': 'Geri bildirim gönder',
   'profile_footer': 'İçerikler Vakıf Katılım envanter\nkaynaklarından alınmıştır.',
 
@@ -206,6 +214,9 @@ const Map<String, String> appStringsEn = {
   'nearby_route_title': 'Nearby Route',
   'stop_of': 'Stop {i} / {n}',
   'next_stop': 'Next stop',
+  'route_chip': 'Route: {name}',
+  'geo_nearby': 'You are near: {name}',
+  'geo_open': 'Open',
 
   // QR
   'qr_align': 'Align the QR code',
@@ -222,7 +233,7 @@ const Map<String, String> appStringsEn = {
   'patron': 'Patron',
   'swipe_up': 'Swipe up for details',
   'hotspot_hint': 'Tap the dots',
-  'ai_generated': 'AI generated',
+  'ai_generated': 'AI generated · Reenactment',
   'transform_video': 'Historic transformation video',
   'video_soon': 'Video coming soon',
   'video_error': 'The video could not be loaded.',
@@ -243,6 +254,11 @@ const Map<String, String> appStringsEn = {
   'about_row': 'About and sources',
   'language_row': 'Language',
   'font_row': 'Text size and contrast',
+  'font_size': 'Text size',
+  'font_normal': 'Normal',
+  'font_large': 'Large',
+  'font_xlarge': 'Extra large',
+  'high_contrast': 'High contrast',
   'feedback_row': 'Send feedback',
   'profile_footer': 'Content is taken from the Vakıf Katılım\ninventory sources.',
 

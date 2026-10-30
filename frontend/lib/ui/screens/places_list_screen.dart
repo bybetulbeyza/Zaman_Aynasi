@@ -234,7 +234,10 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  AppNetworkImage(imageUrl: place.imageAfterUrl),
+                  AppNetworkImage(
+                    imageUrl: place.imageAfterUrl,
+                    semanticLabel: place.nameFor(context.isEn),
+                  ),
                 ],
               ),
             ),

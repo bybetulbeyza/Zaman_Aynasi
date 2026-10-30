@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Tabeladaki karekodu okuyup eserin sayfasını açmak için kamera gerekir.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Yakınınızdaki vakıf eserlerini ve rotaları göstermek için konumunuz kullanılır.</string>
 </dict>
 </plist>

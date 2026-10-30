@@ -9,6 +9,9 @@ class AppNetworkImage extends StatelessWidget {
   final BoxFit fit;
   final BorderRadius? borderRadius;
 
+  /// Ekran okuyucular için görsel açıklaması (örn. eser adı).
+  final String? semanticLabel;
+
   const AppNetworkImage({
     super.key,
     required this.imageUrl,
@@ -16,6 +19,7 @@ class AppNetworkImage extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.borderRadius,
+    this.semanticLabel,
   });
 
   @override
@@ -53,12 +57,13 @@ class AppNetworkImage extends StatelessWidget {
     );
 
     if (borderRadius != null) {
-      return ClipRRect(
+      imageWidget = ClipRRect(
         borderRadius: borderRadius!,
         child: imageWidget,
       );
     }
 
-    return imageWidget;
+    if (semanticLabel == null) return imageWidget;
+    return Semantics(image: true, label: semanticLabel, child: imageWidget);
   }
 }
