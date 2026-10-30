@@ -44,6 +44,8 @@ dependencies:
   just_audio: ^0.10.6
   video_player: ^2.14.1
   url_launcher: ^6.3.3
+  http: ^1.6.0
+  flutter_map_marker_cluster: ^1.4.0
 
 dev_dependencies:
   flutter_test:

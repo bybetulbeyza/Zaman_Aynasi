@@ -10,6 +10,8 @@ import '../../../core/utils/launcher_util.dart';
 import '../../../core/utils/location_service.dart';
 import '../../../data/models/heritage_place.dart';
 import '../../../data/repositories/heritage_repository.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import '../../core/utils/walking_route_service.dart';
 import '../widgets/map/category_pin.dart';
 import '../widgets/map/map_top_search_bar.dart';
 import '../widgets/map/route_stop_preview_sheet.dart';
@@ -39,6 +41,7 @@ class MapScreenState extends State<MapScreen> {
   String _searchQuery = '';
   bool _hasRealLocation = false;
   String? _routeChip; // null | 'active' | 'nearby'
+  WalkingRoute? _walk; // rota modunda sokakları izleyen hat
   PlaceCategory? _selectedCategory; // null = Tümü
 
   @override
@@ -88,6 +91,7 @@ class MapScreenState extends State<MapScreen> {
 
     setState(() {
       _routeChip = 'nearby';
+      _walk = null;
       // En yakından başlayarak ilk 4 durağı rotaya bağla
       _filteredPlaces = sorted.take(4).toList();
       _currentStopIndex = 0;
@@ -96,6 +100,7 @@ class MapScreenState extends State<MapScreen> {
     if (_filteredPlaces.isNotEmpty) {
       _moveMap(_filteredPlaces.first.location, 16.5);
     }
+    _loadWalkingRoute();
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -119,10 +124,12 @@ class MapScreenState extends State<MapScreen> {
     if (places.isEmpty) return;
     setState(() {
       _routeChip = 'active';
+      _walk = null;
       _filteredPlaces = places;
       _currentStopIndex = 0;
     });
     _moveMap(places.first.location, 16.5);
+    _loadWalkingRoute();
   }
 
   /// Harita henüz çizilmediyse (ilk açılış) hareketi ilk çerçeveden sonraya bırakır.
@@ -137,6 +144,42 @@ class MapScreenState extends State<MapScreen> {
         } catch (_) {}
       });
     }
+  }
+
+  List<Marker> _buildPinMarkers() {
+    return List.generate(_filteredPlaces.length, (index) {
+      final place = _filteredPlaces[index];
+      final isSelected = index == _currentStopIndex;
+      return Marker(
+        point: place.location,
+        width: CategoryPin.width * 1.2,
+        height: CategoryPin.height * 1.2,
+        alignment: Alignment.topCenter,
+        child: GestureDetector(
+          onTap: () {
+            setState(() => _currentStopIndex = index);
+            _moveMap(place.location, 16.8);
+          },
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: CategoryPin(
+              category: place.category,
+              selected: isSelected,
+              order: _routeChip != null ? index + 1 : null,
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  /// Rota modunda duraklar arası gerçek yürüyüş hattını çeker; olmazsa düz çizgi kullanılır.
+  Future<void> _loadWalkingRoute() async {
+    final stops = _filteredPlaces.map((p) => p.location).toList();
+    final key = _routeChip;
+    final route = await WalkingRouteService.fetch(stops);
+    if (!mounted || _routeChip != key) return;
+    setState(() => _walk = route);
   }
 
   void _recenter() {
@@ -269,7 +312,7 @@ class MapScreenState extends State<MapScreen> {
                 PolylineLayer(
                   polylines: [
                     Polyline(
-                      points: routePoints,
+                      points: _walk?.points ?? routePoints,
                       strokeWidth: 5.0,
                       color: AppColors.primaryTeal,
                       borderStrokeWidth: 4.0,
@@ -308,33 +351,43 @@ class MapScreenState extends State<MapScreen> {
                   ],
                 ),
 
-              // Kategori pinleri (rota modunda sıra rozetiyle)
-              MarkerLayer(
-                markers: List.generate(_filteredPlaces.length, (index) {
-                  final place = _filteredPlaces[index];
-                  final isSelected = index == _currentStopIndex;
-                  return Marker(
-                    point: place.location,
-                    width: CategoryPin.width * 1.2,
-                    height: CategoryPin.height * 1.2,
-                    alignment: Alignment.topCenter,
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() => _currentStopIndex = index);
-                        _moveMap(place.location, 16.8);
-                      },
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: CategoryPin(
-                          category: place.category,
-                          selected: isSelected,
-                          order: _routeChip != null ? index + 1 : null,
+              // Kategori pinleri: rota modunda sıra rozetli, gezinmede yakın olanlar kümelenir
+              if (_routeChip != null)
+                MarkerLayer(markers: _buildPinMarkers())
+              else
+                MarkerClusterLayerWidget(
+                  options: MarkerClusterLayerOptions(
+                    maxClusterRadius: 48,
+                    size: const Size(44, 44),
+                    markers: _buildPinMarkers(),
+                    builder: (context, markers) => Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.heroPetrol,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFFBF6EA),
+                          width: 2.4,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${markers.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
                         ),
                       ),
                     ),
-                  );
-                }),
-              ),
+                  ),
+                ),
             ],
           ),
 
@@ -357,11 +410,13 @@ class MapScreenState extends State<MapScreen> {
                         ),
               onSearchChanged: (query) {
                 _routeChip = null;
+                _walk = null;
                 _searchQuery = query;
                 _applyFilters();
               },
               onFilterSelected: (category) {
                 _routeChip = null;
+                _walk = null;
                 _selectedCategory = category;
                 _applyFilters();
               },
@@ -438,9 +493,15 @@ class MapScreenState extends State<MapScreen> {
                               .t('map_places_count')
                               .replaceAll('{n}', '${_filteredPlaces.length}')
                         : context
-                              .t('stop_of')
-                              .replaceAll('{i}', '${_currentStopIndex + 1}')
-                              .replaceAll('{n}', '${_filteredPlaces.length}'),
+                                  .t('stop_of')
+                                  .replaceAll('{i}', '${_currentStopIndex + 1}')
+                                  .replaceAll(
+                                    '{n}',
+                                    '${_filteredPlaces.length}',
+                                  ) +
+                              (_walk == null
+                                  ? ''
+                                  : ' · ${_walk!.distanceLabel} · ${_walk!.minutes} ${context.t('min_walk')}'),
                     placeName: currentPlace.nameFor(context.isEn),
                     placeDistanceTime: LocationService.formatDistance(
                       LocationService.sortPlacesByDistance(
