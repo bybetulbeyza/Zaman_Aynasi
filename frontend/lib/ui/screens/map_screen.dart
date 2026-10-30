@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/map_config.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/state/active_route.dart';
 import '../../../core/utils/launcher_util.dart';
@@ -230,8 +231,19 @@ class MapScreenState extends State<MapScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: MapConfig.tileUrl,
+                tileSize: MapConfig.tileSize,
+                zoomOffset: MapConfig.zoomOffset,
                 userAgentPackageName: 'com.zamanaynasi.app',
+              ),
+              RichAttributionWidget(
+                alignment: AttributionAlignment.bottomLeft,
+                showFlutterMapAttribution: false,
+                attributions: [
+                  TextSourceAttribution(MapConfig.useMapbox
+                      ? '© Mapbox © OpenStreetMap'
+                      : '© OpenStreetMap contributors'),
+                ],
               ),
 
               // Mantıksal Sıralı Rota Çizgisi
