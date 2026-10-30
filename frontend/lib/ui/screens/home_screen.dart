@@ -11,7 +11,7 @@ import '../widgets/common/app_network_image.dart';
 import '../widgets/common/city_picker_sheet.dart';
 import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
-import '../widgets/common/tulip_motif.dart';
+import '../widgets/common/app_logo.dart';
 import 'places_list_screen.dart';
 import 'slider_screen.dart';
 
@@ -184,24 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 14),
-              Container(
-                width: 72,
-                height: 72,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFBF6EA),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.ciniBordeaux, width: 2.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      blurRadius: 14,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: const TulipMotif(height: 52),
-              ),
+              const AppLogo(size: 76, shadow: true),
             ],
           ),
           const SizedBox(height: 24),

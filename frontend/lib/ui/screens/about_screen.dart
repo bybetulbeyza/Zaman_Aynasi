@@ -7,7 +7,7 @@ import '../../core/utils/launcher_util.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/section_title.dart';
-import '../widgets/common/tulip_motif.dart';
+import '../widgets/common/app_logo.dart';
 
 /// Proje, amaç ve arşiv kaynaklarını tek sayfada toplar.
 class AboutScreen extends StatelessWidget {
@@ -56,7 +56,7 @@ class AboutScreen extends StatelessWidget {
               onPressed: () => LauncherUtil.openUrl(AppLinks.inventoryBooks),
             ),
             const SizedBox(height: 32),
-            const Center(child: TulipMotif(height: 84)),
+            const Center(child: AppLogo(size: 88)),
           ],
         ),
       ),

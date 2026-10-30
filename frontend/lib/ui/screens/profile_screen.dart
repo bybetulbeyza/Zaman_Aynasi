@@ -4,7 +4,7 @@ import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/lang_toggle.dart';
-import '../widgets/common/tulip_motif.dart';
+import '../widgets/common/app_logo.dart';
 import '../../core/state/app_accessibility.dart';
 import 'about_screen.dart';
 
@@ -162,7 +162,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 22),
-              const Center(child: TulipMotif(height: 96)),
+              const Center(child: AppLogo(size: 92)),
             ],
           ),
         ),

@@ -8,7 +8,7 @@ import '../../core/constants/app_theme.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
-import '../widgets/common/tulip_motif.dart';
+import '../widgets/common/app_logo.dart';
 import '../../core/constants/app_categories.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
@@ -341,7 +341,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const Center(child: TulipMotif(height: 96)),
+                    const Center(child: AppLogo(size: 92)),
                   ],
                 ),
               ),

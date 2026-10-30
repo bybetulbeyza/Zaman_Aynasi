@@ -3,7 +3,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../widgets/common/pattern_background.dart';
-import '../widgets/common/tulip_motif.dart';
+import '../widgets/common/app_logo.dart';
 import 'main_screen.dart';
 
 /// Açılış ekranı: petrol zemin, çini deseni, lale logosu. Kısa süre sonra ana ekrana geçer.
@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void didChangeDependencies() {
     super.didChangeDependencies();
     precacheImage(const AssetImage(PatternBackground.asset), context);
-    precacheImage(const AssetImage('assets/images/tulip_motif.png'), context);
+    precacheImage(const AssetImage(AppLogo.asset), context);
   }
 
   @override
@@ -78,17 +78,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 child: Column(
                   children: [
                     const Spacer(flex: 5),
-                    Container(
-                      width: 196,
-                      height: 196,
-                      padding: const EdgeInsets.all(22),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFBF6EA),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.ciniBordeaux, width: 4),
-                      ),
-                      child: const TulipMotif(height: 150),
-                    ),
+                    const AppLogo(size: 210, shadow: true),
                     const SizedBox(height: 34),
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 36),
