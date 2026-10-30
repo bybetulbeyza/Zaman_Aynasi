@@ -236,7 +236,6 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                 fit: StackFit.expand,
                 children: [
                   AppNetworkImage(imageUrl: place.imageAfterUrl),
-                  const Positioned(top: 0, right: 0, child: TulipBadge()),
                 ],
               ),
             ),

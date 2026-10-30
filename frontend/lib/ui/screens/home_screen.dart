@@ -313,7 +313,6 @@ class _HomeScreenState extends State<HomeScreen> {
           place: places[i],
           city: _city,
           width: large ? 164 : 150,
-          showBadge: large,
           distanceLabel: (!large && !_locationOff)
               ? LocationService.formatDistance(places[i].distanceMeters)
               : '',
@@ -329,7 +328,6 @@ class _PlaceCard extends StatelessWidget {
   final HeritagePlace place;
   final String city;
   final double width;
-  final bool showBadge;
   final String distanceLabel;
   final VoidCallback onTap;
 
@@ -337,7 +335,6 @@ class _PlaceCard extends StatelessWidget {
     required this.place,
     required this.city,
     required this.width,
-    required this.showBadge,
     this.distanceLabel = '',
     required this.onTap,
   });
@@ -372,8 +369,6 @@ class _PlaceCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (showBadge)
-                const Positioned(top: 0, right: 0, child: TulipBadge()),
               Positioned(
                 left: 12,
                 right: 12,

@@ -211,7 +211,6 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                     ),
                   ),
                 ),
-                const Positioned(top: 0, right: 0, child: TulipBadge()),
                 Positioned(
                   left: 20,
                   right: 20,
