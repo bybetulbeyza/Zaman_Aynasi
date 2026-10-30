@@ -5,6 +5,9 @@ class AppTheme {
   static const String headingFont = 'Fraunces';
   static const String bodyFont = 'DMSans';
 
+  /// Yalnızca marka adı ("Zaman Aynası") için kullanılan yüksek kontrastlı serif.
+  static const String brandFont = 'Playfair';
+
   // Başlık stilleri (Fraunces) — ekranlarda TextStyle yerine bunlar kullanılır
   static const TextStyle displayLarge = TextStyle(
     fontFamily: headingFont,

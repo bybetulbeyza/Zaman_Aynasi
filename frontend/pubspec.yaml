@@ -75,6 +75,9 @@ flutter:
     - family: Fraunces
       fonts:
         - asset: assets/fonts/Fraunces.ttf
+    - family: Playfair
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay.ttf
     - family: DMSans
       fonts:
         - asset: assets/fonts/DMSans.ttf

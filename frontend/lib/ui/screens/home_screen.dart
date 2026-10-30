@@ -54,8 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       setState(() {
         final featured = all.where((p) => p.isFeatured).toList();
-        _featuredPlaces =
-            featured.isNotEmpty ? featured.take(6).toList() : all.take(6).toList();
+        _featuredPlaces = featured.isNotEmpty
+            ? featured.take(6).toList()
+            : all.take(6).toList();
         _nearbyPlaces = all.take(6).toList(); // konum gelene kadar geçici
         _isLoading = false;
       });
@@ -63,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
       // Konum izni içeriği bekletmesin diye ayrıca çözülür
       final user = await LocationService.getCurrentLocation();
       if (!mounted) return;
-      final sorted = LocationService.sortPlacesByDistance(places: all, userLocation: user);
+      final sorted = LocationService.sortPlacesByDistance(
+        places: all,
+        userLocation: user,
+      );
       setState(() {
         _nearbyPlaces = sorted.take(6).toList();
         _locationOff = LocationService.lastWasFallback;
@@ -83,61 +87,65 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openSlider(HeritagePlace place) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => SliderScreen(place: place),
-      ),
+      MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return PatternBackground(child: Scaffold(
-      backgroundColor: Colors.transparent,
-      body: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          _buildHero(),
-          const SizedBox(height: 20),
-          _buildQuickActions(),
-          const SizedBox(height: 26),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SectionTitle(
-              context.t('home_featured'),
-              actionLabel: context.t('all'),
-              onAction: _openPlaces,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _buildHorizontalList(_featuredPlaces, large: true),
-          const SizedBox(height: 28),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SectionTitle(context.t('home_nearby')),
-          ),
-          if (_locationOff)
+    return PatternBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            _buildHero(),
+            const SizedBox(height: 26),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-              child: Row(
-                children: [
-                  const Icon(Icons.location_off_outlined,
-                      size: 16, color: AppColors.textMuted),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      context.t('location_off_note'),
-                      style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SectionTitle(
+                context.t('home_featured'),
+                actionLabel: context.t('all'),
+                onAction: _openPlaces,
               ),
             ),
-          const SizedBox(height: 14),
-          _buildHorizontalList(_nearbyPlaces, large: false),
-          const SizedBox(height: 28),
-        ],
+            const SizedBox(height: 14),
+            _buildHorizontalList(_featuredPlaces, large: true),
+            const SizedBox(height: 28),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SectionTitle(context.t('home_nearby')),
+            ),
+            if (_locationOff)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.location_off_outlined,
+                      size: 16,
+                      color: AppColors.textMuted,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        context.t('location_off_note'),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 14),
+            _buildHorizontalList(_nearbyPlaces, large: false),
+            const SizedBox(height: 28),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   // ---------- Hero ----------
@@ -145,46 +153,62 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHero() {
     final top = MediaQuery.of(context).padding.top;
     return Container(
-      padding: EdgeInsets.fromLTRB(20, top + 14, 20, 24),
-      // Desen hero'da çok silik tutulur; başlık ve arama çubuğu öne çıksın
-      decoration: PatternBackground.onDarkDecoration(lineOpacity: 0.10),
+      padding: EdgeInsets.fromLTRB(20, top + 10, 20, 24),
+      // Desen hero'da silik tutulur; marka, arama ve kısayollar öne çıksın
+      decoration: PatternBackground.onDarkDecoration(lineOpacity: 0.12)
+          .copyWith(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(30),
+            ),
+          ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Zaman Aynası',
-                style: TextStyle(
-                  fontFamily: AppTheme.headingFont,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              const LangToggle(onDark: true),
-            ],
+          const Align(
+            alignment: Alignment.centerRight,
+            child: LangToggle(onDark: true),
           ),
-          const SizedBox(height: 26),
-          // Başlık solda, lale amblemi sağda: iki blok yan yana, çakışma yok
+          const SizedBox(height: 14),
+          // Marka bloğu: süslü dikey çizgi, ad ve slogan solda; logo sağda
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              _brandOrnament(),
+              const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  context.t('hero_title').replaceAll('\n', ' '),
-                  style: const TextStyle(
-                    fontFamily: AppTheme.headingFont,
-                    fontSize: 26,
-                    height: 1.2,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Zaman Aynası',
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontFamily: AppTheme.brandFont,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      context.t('hero_title').replaceAll('\n', ' '),
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        height: 1.55,
+                        letterSpacing: 1.3,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 14),
-              const AppLogo(size: 76, shadow: true),
+              const SizedBox(width: 12),
+              const AppLogo(size: 84, shadow: true),
             ],
           ),
           const SizedBox(height: 24),
@@ -194,19 +218,58 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 54,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.creamSoft,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.search_rounded, color: AppColors.textDark),
+                  const Icon(Icons.search_rounded, color: AppColors.logoNavy),
                   const SizedBox(width: 12),
                   Text(
                     context.t('search_hint'),
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+                    style: const TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 15,
+                    ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 26),
+          _buildQuickActions(),
+        ],
+      ),
+    );
+  }
+
+  /// İnce dikey çizginin ortasında küçük elmas süs.
+  Widget _brandOrnament() {
+    return SizedBox(
+      width: 14,
+      height: 92,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 1,
+            color: AppColors.ornamentGold.withValues(alpha: 0.75),
+          ),
+          Transform.rotate(
+            angle: 0.7853981634,
+            child: Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                color: AppColors.heroPetrol,
+                border: Border.all(color: AppColors.ornamentGold, width: 1.2),
               ),
             ),
           ),
@@ -215,60 +278,69 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ---------- Hızlı eylemler ----------
+  // ---------- Hızlı eylemler (hero içinde) ----------
 
   Widget _buildQuickActions() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _quickAction(context.t('qa_nearby'), Icons.near_me_outlined,
-              widget.onNearbyTap ?? widget.onExploreMapTap),
-          _quickAction(context.t('qa_create_route'), Icons.alt_route_rounded, widget.onCreateRouteTap),
-          _quickAction(context.t('qa_scan_qr'), Icons.qr_code_scanner_rounded, widget.onQrTap,
-              highlight: true),
-          _quickAction(context.t('qa_cities'), Icons.location_city_rounded,
-              () => showCityPickerSheet(context)),
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _quickAction(
+          context.t('qa_nearby'),
+          Icons.near_me_outlined,
+          widget.onNearbyTap ?? widget.onExploreMapTap,
+        ),
+        _quickAction(
+          context.t('qa_create_route'),
+          Icons.alt_route_rounded,
+          widget.onCreateRouteTap,
+        ),
+        _quickAction(
+          context.t('qa_scan_qr'),
+          Icons.qr_code_scanner_rounded,
+          widget.onQrTap,
+        ),
+        _quickAction(
+          context.t('qa_cities'),
+          Icons.location_city_rounded,
+          () => showCityPickerSheet(context),
+        ),
+      ],
     );
   }
 
-  Widget _quickAction(String label, IconData icon, VoidCallback? onTap,
-      {bool highlight = false}) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: SizedBox(
-        width: 80,
+  Widget _quickAction(String label, IconData icon, VoidCallback? onTap) {
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
         child: Column(
           children: [
             Container(
-              width: 56,
-              height: 56,
+              width: 58,
+              height: 58,
               decoration: BoxDecoration(
-                color: AppColors.primaryTealLight,
+                color: AppColors.creamSoft,
                 shape: BoxShape.circle,
-                border: highlight
-                    ? Border.all(color: AppColors.ciniBordeaux, width: 1.4)
-                    : null,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Icon(
-                icon,
-                size: 24,
-                color: highlight ? AppColors.ciniBordeaux : AppColors.primaryTeal,
-              ),
+              child: Icon(icon, size: 26, color: AppColors.logoNavy),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 9),
             Text(
               label,
               maxLines: 1,
+              textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ],
@@ -279,7 +351,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ---------- Yatay kart listeleri ----------
 
-  Widget _buildHorizontalList(List<HeritagePlace> places, {required bool large}) {
+  Widget _buildHorizontalList(
+    List<HeritagePlace> places, {
+    required bool large,
+  }) {
     final height = large ? 232.0 : 168.0;
     if (_isLoading) {
       return SizedBox(
@@ -293,8 +368,10 @@ class _HomeScreenState extends State<HomeScreen> {
       return SizedBox(
         height: 80,
         child: Center(
-          child: Text(context.t('no_places'),
-              style: const TextStyle(color: AppColors.textMuted)),
+          child: Text(
+            context.t('no_places'),
+            style: const TextStyle(color: AppColors.textMuted),
+          ),
         ),
       );
     }

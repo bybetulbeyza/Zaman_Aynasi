@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
-import '../widgets/common/pattern_background.dart';
 import '../widgets/common/app_logo.dart';
 import 'main_screen.dart';
 
-/// Açılış ekranı: petrol zemin, çini deseni, lale logosu. Kısa süre sonra ana ekrana geçer.
+/// Açılış ekranı: krem zeminde logo, marka adı, lale süslü ayraç ve slogan.
+/// Kısa süre sonra ana ekrana geçer.
 class SplashScreen extends StatefulWidget {
   static const Duration duration = Duration(milliseconds: 2400);
+  static const String ornamentAsset = 'assets/images/tulip_ornament.png';
 
   const SplashScreen({super.key});
 
@@ -17,9 +18,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late final AnimationController _fade = AnimationController(
+  late final AnimationController _anim = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 900),
+    duration: const Duration(milliseconds: 1000),
   )..forward();
 
   @override
@@ -41,106 +42,89 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    precacheImage(const AssetImage(PatternBackground.asset), context);
     precacheImage(const AssetImage(AppLogo.asset), context);
+    precacheImage(const AssetImage(SplashScreen.ornamentAsset), context);
   }
 
   @override
   void dispose() {
-    _fade.dispose();
+    _anim.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final curved = CurvedAnimation(parent: _anim, curve: Curves.easeOutCubic);
     return Scaffold(
-      backgroundColor: AppColors.heroPetrol,
-      body: PatternBackground.onDark(
-        child: SafeArea(
-          child: Stack(
-            children: [
-              // İnce çift bordo çerçeve
-              Positioned.fill(
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: _frame(radius: 36, opacity: 0.75),
+      backgroundColor: const Color(0xFFF9F7F0),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.94, end: 1.0).animate(curved),
+            child: Column(
+              children: [
+                const Spacer(flex: 5),
+                const AppLogo(size: 220),
+                const SizedBox(height: 26),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 32),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Zaman Aynası',
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontFamily: AppTheme.brandFont,
+                        fontSize: 48,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.logoNavy,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              Positioned.fill(
-                child: Padding(
-                  padding: const EdgeInsets.all(26),
-                  child: _frame(radius: 30, opacity: 0.45),
-                ),
-              ),
-
-              FadeTransition(
-                opacity: CurvedAnimation(parent: _fade, curve: Curves.easeOut),
-                child: Column(
+                const SizedBox(height: 16),
+                // Ortada küçük lale olan ince ayraç
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Spacer(flex: 5),
-                    const AppLogo(size: 210, shadow: true),
-                    const SizedBox(height: 34),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 36),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          'Zaman Aynası',
-                          maxLines: 1,
-                          style: TextStyle(
-                            fontFamily: AppTheme.headingFont,
-                            fontSize: 54,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFB8283D),
-                            shadows: [
-                              Shadow(color: Color(0xAAD0344B), blurRadius: 18),
-                              Shadow(color: Color(0x66D0344B), blurRadius: 36),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 56),
-                      child: Text(
-                        context.t('splash_tagline'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 19,
-                          height: 1.4,
-                          color: Color(0xFFF3EBDD),
-                        ),
-                      ),
-                    ),
-                    const Spacer(flex: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 44),
-                      child: Text(
-                        context.t('splash_credit'),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xCCF3EBDD),
-                        ),
-                      ),
-                    ),
+                    _line(),
+                    const SizedBox(width: 12),
+                    Image.asset(SplashScreen.ornamentAsset, height: 32),
+                    const SizedBox(width: 12),
+                    _line(),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 14),
+                Text(
+                  context.t('splash_motto'),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 3.4,
+                    color: AppColors.logoNavy.withValues(alpha: 0.85),
+                  ),
+                ),
+                const Spacer(flex: 6),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 36),
+                  child: Text(
+                    context.t('splash_credit'),
+                    style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _frame({required double radius, required double opacity}) => DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            color: AppColors.ciniBordeaux.withValues(alpha: opacity),
-            width: 1.2,
-          ),
-        ),
+  Widget _line() => Container(
+        width: 64,
+        height: 1.2,
+        color: AppColors.logoNavy.withValues(alpha: 0.7),
       );
 }

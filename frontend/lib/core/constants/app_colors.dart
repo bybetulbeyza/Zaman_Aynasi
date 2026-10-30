@@ -13,6 +13,15 @@ class AppColors {
   static const Color ciniBordeauxDark = Color(0xFF5E131E);
   static const Color ciniBordeauxLight = Color(0xFFF9ECEE);
 
+  // Logo ve marka başlığının laciverti
+  static const Color logoNavy = Color(0xFF12255F);
+
+  // Krem tonu (arama çubuğu, kısayol daireleri, açılış ekranı)
+  static const Color creamSoft = Color(0xFFFBF6EA);
+
+  // İnce süs çizgilerinin altın tonu
+  static const Color ornamentGold = Color(0xFFD9C79A);
+
   // Hero / Splash zemini (Koyu Petrol Mavisi)
   static const Color heroPetrol = Color(0xFF14414F);
 
