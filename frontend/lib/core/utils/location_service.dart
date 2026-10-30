@@ -7,20 +7,28 @@ class LocationService {
   static const LatLng defaultCenter = LatLng(40.1838, 29.0635);
   static const Distance _distanceCalculator = Distance();
 
+  /// Son konum denemesi başarısız olup varsayılan merkez kullanıldıysa true.
+  static bool lastWasFallback = false;
+
+  static LatLng _fallback() {
+    lastWasFallback = true;
+    return defaultCenter;
+  }
+
   // Kullanıcının anlık koordinatını döner.
   // İzin verilmezse veya servis kapalıysa defaultCenter döner.
   static Future<LatLng> getCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return defaultCenter;
+      if (!serviceEnabled) return _fallback();
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return defaultCenter;
+        if (permission == LocationPermission.denied) return _fallback();
       }
 
-      if (permission == LocationPermission.deniedForever) return defaultCenter;
+      if (permission == LocationPermission.deniedForever) return _fallback();
 
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -29,9 +37,10 @@ class LocationService {
         ),
       );
 
+      lastWasFallback = false;
       return LatLng(position.latitude, position.longitude);
     } catch (_) {
-      return defaultCenter;
+      return _fallback();
     }
   }
 

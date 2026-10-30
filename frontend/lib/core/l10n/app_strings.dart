@@ -35,6 +35,7 @@ const Map<String, String> appStringsTr = {
   'qa_cities': 'Şehirler',
   'home_featured': 'Öne çıkan vakıf eserleri',
   'home_nearby': 'Yakınımdaki eserler',
+  'location_off_note': 'Konum kapalı; eserler Bursa merkezine göre gösteriliyor.',
 
   // Envanter
   'inv_title': 'Tarih Envanteri',
@@ -56,6 +57,8 @@ const Map<String, String> appStringsTr = {
   'route_created': '{n} duraklı özel rota oluşturuldu.',
 
   // Aktif rota
+  'sug_title': 'SANA ÖNERİLEN ROTA',
+  'sug_use': 'Bu rotayı başlat',
   'ar_title': 'Aktif rotam',
   'ar_stops': '{n} durak',
   'ar_show_map': 'Haritada göster',
@@ -93,6 +96,7 @@ const Map<String, String> appStringsTr = {
   'architect': 'Mimar',
   'patron': 'Bani',
   'swipe_up': 'Detaylar için yukarı kaydır',
+  'hotspot_hint': 'Noktalara dokun',
   'ai_generated': 'AI üretimi',
   'transform_video': 'Tarihî dönüşüm videosu',
   'video_soon': 'Video yakında',
@@ -164,6 +168,7 @@ const Map<String, String> appStringsEn = {
   'qa_cities': 'Cities',
   'home_featured': 'Featured landmarks',
   'home_nearby': 'Landmarks near me',
+  'location_off_note': 'Location is off; landmarks are shown relative to central Bursa.',
 
   // Inventory
   'inv_title': 'Heritage Inventory',
@@ -185,6 +190,8 @@ const Map<String, String> appStringsEn = {
   'route_created': 'Custom route with {n} stops created.',
 
   // Active route
+  'sug_title': 'SUGGESTED FOR YOU',
+  'sug_use': 'Start this route',
   'ar_title': 'My active route',
   'ar_stops': '{n} stops',
   'ar_show_map': 'Show on map',
@@ -222,6 +229,7 @@ const Map<String, String> appStringsEn = {
   'architect': 'Architect',
   'patron': 'Patron',
   'swipe_up': 'Swipe up for details',
+  'hotspot_hint': 'Tap the dots',
   'ai_generated': 'AI generated',
   'transform_video': 'Historic transformation video',
   'video_soon': 'Video coming soon',

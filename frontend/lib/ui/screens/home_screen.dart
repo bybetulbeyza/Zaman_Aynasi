@@ -3,6 +3,7 @@ import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
+import '../../core/utils/location_service.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../widgets/common/pattern_background.dart';
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<HeritagePlace> _featuredPlaces = [];
   List<HeritagePlace> _nearbyPlaces = [];
   bool _isLoading = true;
+  bool _locationOff = false;
 
   @override
   void initState() {
@@ -54,12 +56,17 @@ class _HomeScreenState extends State<HomeScreen> {
         final featured = all.where((p) => p.isFeatured).toList();
         _featuredPlaces =
             featured.isNotEmpty ? featured.take(6).toList() : all.take(6).toList();
-
-        final byDistance = [...all]..sort((a, b) =>
-            (a.distanceMeters ?? double.infinity)
-                .compareTo(b.distanceMeters ?? double.infinity));
-        _nearbyPlaces = byDistance.take(6).toList();
+        _nearbyPlaces = all.take(6).toList(); // konum gelene kadar geçici
         _isLoading = false;
+      });
+
+      // Konum izni içeriği bekletmesin diye ayrıca çözülür
+      final user = await LocationService.getCurrentLocation();
+      if (!mounted) return;
+      final sorted = LocationService.sortPlacesByDistance(places: all, userLocation: user);
+      setState(() {
+        _nearbyPlaces = sorted.take(6).toList();
+        _locationOff = LocationService.lastWasFallback;
       });
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
@@ -108,6 +115,23 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SectionTitle(context.t('home_nearby')),
           ),
+          if (_locationOff)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+              child: Row(
+                children: [
+                  const Icon(Icons.location_off_outlined,
+                      size: 16, color: AppColors.textMuted),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      context.t('location_off_note'),
+                      style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 14),
           _buildHorizontalList(_nearbyPlaces, large: false),
           const SizedBox(height: 28),
@@ -290,6 +314,9 @@ class _HomeScreenState extends State<HomeScreen> {
           city: _city,
           width: large ? 164 : 150,
           showBadge: large,
+          distanceLabel: (!large && !_locationOff)
+              ? LocationService.formatDistance(places[i].distanceMeters)
+              : '',
           onTap: () => _openSlider(places[i]),
         ),
       ),
@@ -303,6 +330,7 @@ class _PlaceCard extends StatelessWidget {
   final String city;
   final double width;
   final bool showBadge;
+  final String distanceLabel;
   final VoidCallback onTap;
 
   const _PlaceCard({
@@ -310,6 +338,7 @@ class _PlaceCard extends StatelessWidget {
     required this.city,
     required this.width,
     required this.showBadge,
+    this.distanceLabel = '',
     required this.onTap,
   });
 
@@ -367,7 +396,7 @@ class _PlaceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${place.category.labelFor(context.isEn)} · $city',
+                      '${place.category.labelFor(context.isEn)} · ${distanceLabel.isNotEmpty ? distanceLabel : city}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.white70,

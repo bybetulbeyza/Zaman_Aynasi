@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_links.dart';
@@ -28,11 +30,26 @@ class _SliderScreenState extends State<SliderScreen> {
 
   final DraggableScrollableController _sheetController = DraggableScrollableController();
   Hotspot? _selectedHotspot;
+  bool _showHint = false;
+  Timer? _hintTimer;
 
   HeritagePlace get _place => widget.place;
 
   @override
+  void initState() {
+    super.initState();
+    // Hotspot'ların varlığını ilk bakışta anlatan kısa ipucu
+    if (_place.hotspots.isNotEmpty) {
+      _showHint = true;
+      _hintTimer = Timer(const Duration(seconds: 6), () {
+        if (mounted) setState(() => _showHint = false);
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    _hintTimer?.cancel();
     _sheetController.dispose();
     super.dispose();
   }
@@ -92,7 +109,43 @@ class _SliderScreenState extends State<SliderScreen> {
                   afterLabel: context.t('period_label'),
                   beforeLabel: context.t('today_label'),
                   hotspots: _place.hotspots,
-                  onHotspotSelected: (h) => setState(() => _selectedHotspot = h),
+                  onHotspotSelected: (h) => setState(() {
+                    _selectedHotspot = h;
+                    _showHint = false;
+                  }),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: size.height * 0.6 - size.height * 0.2,
+                  child: IgnorePointer(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 400),
+                      opacity: _showHint && _selectedHotspot == null ? 1 : 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.62),
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.touch_app_outlined,
+                                  size: 18, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text(context.t('hotspot_hint'),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 if (_selectedHotspot != null)
                   Positioned(

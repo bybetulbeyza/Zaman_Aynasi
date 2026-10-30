@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/location_service.dart';
 import '../../data/models/heritage_place.dart';
+import '../../data/models/heritage_route.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_theme.dart';
@@ -33,6 +34,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
   late Set<PlaceCategory> _selectedCategories;
 
   List<HeritagePlace> _allPlaces = [];
+  HeritageRoute? _suggested;
   bool _isLoading = true;
 
   @override
@@ -48,6 +50,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
       if (mounted) {
         setState(() {
           _allPlaces = places;
+          final routes = HeritageRoute.fromPlaces(places);
+          _suggested = routes.isEmpty ? null : routes.first;
           _isLoading = false;
         });
       }
@@ -153,8 +157,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
       listenable: ActiveRoute.instance,
       builder: (context, _) {
         final route = ActiveRoute.instance;
-        if (route.isEmpty) return const SizedBox.shrink();
         final en = context.isEn;
+        if (route.isEmpty) return _buildSuggestionCard(en);
         return Container(
           width: double.infinity,
           margin: const EdgeInsets.only(bottom: 20),
@@ -235,6 +239,51 @@ class _RoutesScreenState extends State<RoutesScreen> {
           ),
         );
       },
+    );
+  }
+
+  /// Aktif rota yokken, hazır rotalardan birini tek dokunuşla başlatmayı önerir.
+  Widget _buildSuggestionCard(bool en) {
+    final r = _suggested;
+    if (r == null) return const SizedBox.shrink();
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.ciniBordeaux.withValues(alpha: 0.45), width: 1.2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.t('sug_title'),
+            style: const TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ciniBordeaux),
+          ),
+          const SizedBox(height: 6),
+          Text(r.nameFor(en), style: AppTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text(
+            '${r.stops.length} ${context.t('stops_word')} · ${r.durationLabelFor(en)} · ${r.distanceLabelFor(en)}',
+            style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: PillButton(
+              context.t('sug_use'),
+              onPressed: () {
+                ActiveRoute.instance
+                    .setRoute(r.stops, titleTr: r.name, titleEn: r.nameEn);
+                widget.onRouteCreated?.call(r.stops);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
