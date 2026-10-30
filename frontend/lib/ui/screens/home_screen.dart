@@ -158,12 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: EdgeInsets.fromLTRB(20, top + 10, 20, 24),
       // Desen hero'da silik tutulur; marka, arama ve kısayollar öne çıksın
-      decoration: PatternBackground.onDarkDecoration(lineOpacity: 0.12)
-          .copyWith(
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(30),
-            ),
-          ),
+      decoration: PatternBackground.onDarkDecoration(lineOpacity: 0.12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
