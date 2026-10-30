@@ -83,6 +83,7 @@ class HeritagePlace {
   final String architect;        // Supabase: architect
   final String patron;           // Supabase: patron (Bani)
   final String inventoryLocation;// Supabase: inventory_location (örn. 'Cilt 1, s. 37')
+  final String aiVideoUrl;       // Supabase: ai_video (tarihî dönüşüm videosu)
   final String audioGuideUrl;    // Supabase: audio_guide (sesli rehber ses dosyası)
   final String qrUrl;            // Supabase: qr_url (QR görselinin adresi; QR içeriği 'eser:<id>')
   final List<Hotspot> hotspots;
@@ -103,6 +104,7 @@ class HeritagePlace {
     this.architect = '',
     this.patron = '',
     this.inventoryLocation = '',
+    this.aiVideoUrl = '',
     this.audioGuideUrl = '',
     this.qrUrl = '',
     this.hotspots = const [],
@@ -112,6 +114,7 @@ class HeritagePlace {
   // Harita ve genel rotalarda alt yapıyı gizlemek için kontrol
   bool get isSubPlace => parentId != null && parentId!.isNotEmpty;
 
+  bool get hasAiVideo => aiVideoUrl.isNotEmpty;
   bool get hasAudioGuide => audioGuideUrl.isNotEmpty;
 
   // SliderScreen ile tam geriye dönük uyumluluk
@@ -133,6 +136,7 @@ class HeritagePlace {
       architect: architect,
       patron: patron,
       inventoryLocation: inventoryLocation,
+      aiVideoUrl: aiVideoUrl,
       audioGuideUrl: audioGuideUrl,
       qrUrl: qrUrl,
       hotspots: hotspots,
@@ -168,6 +172,7 @@ class HeritagePlace {
       architect: (json['architect'] as String? ?? '').trim(),
       patron: (json['patron'] as String? ?? '').trim(),
       inventoryLocation: (json['inventory_location'] as String? ?? '').trim(),
+      aiVideoUrl: (json['ai_video'] as String? ?? '').trim(),
       audioGuideUrl: (json['audio_guide'] as String? ?? '').trim(),
       qrUrl: json['qr_url'] as String? ?? '',
       hotspots: parsedHotspots,

@@ -13,6 +13,7 @@ class SliderScreen extends StatefulWidget {
   final String patron;
   final String inventoryLocation; // örn. 'Cilt 1, s. 37'
   final String audioGuideUrl;
+  final String aiVideoUrl;
   final List<Hotspot> hotspots;
 
   const SliderScreen({
@@ -26,6 +27,7 @@ class SliderScreen extends StatefulWidget {
     this.patron = '',
     this.inventoryLocation = '',
     this.audioGuideUrl = '',
+    this.aiVideoUrl = '',
     this.hotspots = const [],
   });
 
@@ -40,6 +42,7 @@ class SliderScreen extends StatefulWidget {
         patron: place.patron,
         inventoryLocation: place.inventoryLocation,
         audioGuideUrl: place.audioGuideUrl,
+        aiVideoUrl: place.aiVideoUrl,
         hotspots: place.hotspots,
       );
 
