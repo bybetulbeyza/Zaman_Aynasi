@@ -34,6 +34,7 @@ class Hotspot {
   final String targetSide;
   final double xPercent;
   final double yPercent;
+  final String? aiVideoUrl; // Supabase: ai_video (boşsa 'AI hikâyesi' butonu gizlenir)
   final String? targetPlaceId; // Külliyeden alt yapıya (Türbe, Hamam vb.) geçiş ID'si
 
   Hotspot({
@@ -44,8 +45,11 @@ class Hotspot {
     required this.targetSide,
     required this.xPercent,
     required this.yPercent,
+    this.aiVideoUrl,
     this.targetPlaceId,
   });
+
+  bool get hasAiVideo => aiVideoUrl != null && aiVideoUrl!.trim().isNotEmpty;
 
   bool get hasSubPlaceNavigation => targetPlaceId != null && targetPlaceId!.isNotEmpty;
 
@@ -58,6 +62,7 @@ class Hotspot {
       targetSide: (json['target_side'] as String?)?.toLowerCase() ?? 'after',
       xPercent: (json['x_percent'] as num?)?.toDouble() ?? 0.0,
       yPercent: (json['y_percent'] as num?)?.toDouble() ?? 0.0,
+      aiVideoUrl: (json['ai_video'] as String?)?.trim(),
       targetPlaceId: json['target_place_id']?.toString(),
     );
   }
@@ -78,6 +83,7 @@ class HeritagePlace {
   final String architect;        // Supabase: architect
   final String patron;           // Supabase: patron (Bani)
   final String inventoryLocation;// Supabase: inventory_location (örn. 'Cilt 1, s. 37')
+  final String audioGuideUrl;    // Supabase: audio_guide (sesli rehber ses dosyası)
   final String qrUrl;            // Supabase: qr_url (QR görselinin adresi; QR içeriği 'eser:<id>')
   final List<Hotspot> hotspots;
   final double? distanceMeters;
@@ -97,6 +103,7 @@ class HeritagePlace {
     this.architect = '',
     this.patron = '',
     this.inventoryLocation = '',
+    this.audioGuideUrl = '',
     this.qrUrl = '',
     this.hotspots = const [],
     this.distanceMeters,
@@ -104,6 +111,8 @@ class HeritagePlace {
 
   // Harita ve genel rotalarda alt yapıyı gizlemek için kontrol
   bool get isSubPlace => parentId != null && parentId!.isNotEmpty;
+
+  bool get hasAudioGuide => audioGuideUrl.isNotEmpty;
 
   // SliderScreen ile tam geriye dönük uyumluluk
   String get period => constructionDate;
@@ -124,6 +133,7 @@ class HeritagePlace {
       architect: architect,
       patron: patron,
       inventoryLocation: inventoryLocation,
+      audioGuideUrl: audioGuideUrl,
       qrUrl: qrUrl,
       hotspots: hotspots,
       distanceMeters: distance,
@@ -158,6 +168,7 @@ class HeritagePlace {
       architect: (json['architect'] as String? ?? '').trim(),
       patron: (json['patron'] as String? ?? '').trim(),
       inventoryLocation: (json['inventory_location'] as String? ?? '').trim(),
+      audioGuideUrl: (json['audio_guide'] as String? ?? '').trim(),
       qrUrl: json['qr_url'] as String? ?? '',
       hotspots: parsedHotspots,
     );
