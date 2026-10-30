@@ -3,6 +3,11 @@ import '../../core/constants/app_colors.dart';
 import '../../core/utils/location_service.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
+import '../../core/constants/app_theme.dart';
+import '../widgets/common/filter_chip_pill.dart';
+import '../widgets/common/pill_button.dart';
+import '../widgets/common/tulip_motif.dart';
+import 'historic_routes_screen.dart';
 
 class RoutesScreen extends StatefulWidget {
   final Function(List<HeritagePlace>)? onRouteCreated;
@@ -125,282 +130,228 @@ class _RoutesScreenState extends State<RoutesScreen> {
     }
   }
 
+  static const _fieldBg = Color(0xFFF6F0E3);
+
+  Widget _label(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Text(text,
+            style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark)),
+      );
+
+  Widget _field({required Widget child, EdgeInsets? padding}) => Container(
+        width: double.infinity,
+        padding: padding ?? const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        decoration: BoxDecoration(
+          color: _fieldBg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.chipBorder),
+        ),
+        child: child,
+      );
+
+  void _openHistoricRoutes() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => HistoricRoutesScreen(onRouteStarted: widget.onRouteCreated),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBF8F2), // Görseldeki krem/bej zemin rengi
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFBF8F2),
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        title: const Padding(
-          padding: EdgeInsets.only(left: 8.0, top: 8.0),
-          child: Text(
-            'Rota oluştur',
-            style: TextStyle(
-              fontSize: 26,
-              fontFamily: 'Serif',
-              fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
-            ),
-          ),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primaryTeal))
-          : SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        child: Column(
-          children: [
-            // Ana Beyaz Form Kartı
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.borderSubtle, width: 0.8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Şehir Seçimi
-                  const Text(
-                    'Şehir',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF6F3ED),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedCity,
-                        isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textDark, size: 20),
-                        items: ['Bursa', 'İstanbul', 'Edirne', 'Konya'].map((city) {
-                          return DropdownMenuItem(
-                            value: city,
-                            child: Text(
-                              city,
-                              style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, color: AppColors.textDark),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) setState(() => _selectedCity = val);
-                        },
+      backgroundColor: AppColors.bgCanvas,
+      body: SafeArea(
+        bottom: false,
+        child: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryTeal))
+            : SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Rota oluştur', style: AppTheme.displayLarge),
+                    const SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(color: AppColors.chipBorder),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Başlangıç Noktası
-                  const Text(
-                    'Başlangıç noktası',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF6F3ED),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFB3261E), // Kırmızı konum noktası
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Konumum',
-                          style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, color: AppColors.textDark),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.borderSubtle, width: 0.8),
-                          ),
-                          child: const Text(
-                            'Şimdi',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Süre Seçimi
-                  const Text(
-                    'Süre',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [1, 2, 3].map((hours) {
-                      final isSelected = _selectedHours == hours;
-                      return Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: hours != 3 ? 8.0 : 0),
-                          child: GestureDetector(
-                            onTap: () => setState(() => _selectedHours = hours),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: isSelected ? AppColors.primaryTealDark : Colors.white,
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  color: isSelected ? AppColors.primaryTealDark : AppColors.borderSubtle,
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: Text(
-                                '$hours saat',
-                                style: TextStyle(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSelected ? Colors.white : AppColors.textDark,
-                                ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _label('Şehir'),
+                          _field(
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedCity,
+                                isExpanded: true,
+                                icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                                    color: AppColors.textDark),
+                                style: const TextStyle(
+                                    fontSize: 17,
+                                    fontFamily: AppTheme.bodyFont,
+                                    color: AppColors.textDark),
+                                items: ['Bursa', 'İstanbul', 'Edirne', 'Konya']
+                                    .map((c) =>
+                                        DropdownMenuItem(value: c, child: Text(c)))
+                                    .toList(),
+                                onChanged: (v) {
+                                  if (v != null) setState(() => _selectedCity = v);
+                                },
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 22),
-
-                  // Ne tür yerleri gezmek istersin?
-                  const Text(
-                    'Ne tür yerleri gezmek istersin?',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _availableCategories.map((cat) {
-                      final isSelected = _selectedCategories.contains(cat);
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (isSelected) {
-                              if (_selectedCategories.length > 1) {
-                                _selectedCategories.remove(cat);
-                              }
-                            } else {
-                              _selectedCategories.add(cat);
-                            }
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primaryTealDark : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isSelected ? AppColors.primaryTealDark : AppColors.borderSubtle,
-                              width: 1.0,
+                          const SizedBox(height: 20),
+                          _label('Başlangıç noktası'),
+                          _field(
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: const BoxDecoration(
+                                      color: AppColors.ciniBordeaux,
+                                      shape: BoxShape.circle),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text('Konumum',
+                                    style: TextStyle(
+                                        fontSize: 17, color: AppColors.textDark)),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: AppColors.chipBorder),
+                                  ),
+                                  child: const Text('Şimdi',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textDark)),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Text(
-                            cat,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: isSelected ? Colors.white : AppColors.textDark,
-                            ),
+                          const SizedBox(height: 20),
+                          _label('Süre'),
+                          Row(
+                            children: [1, 2, 3].map((h) {
+                              final sel = _selectedHours == h;
+                              return Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: h != 3 ? 10 : 0),
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _selectedHours = h),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 160),
+                                      padding:
+                                          const EdgeInsets.symmetric(vertical: 14),
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: sel
+                                            ? AppColors.primaryTeal
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(26),
+                                        border: Border.all(
+                                          color: sel
+                                              ? AppColors.primaryTeal
+                                              : AppColors.chipBorder,
+                                          width: 1.2,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        '$h saat',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          color: sel
+                                              ? Colors.white
+                                              : AppColors.textDark,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Dinamik Durak & Süre Özeti
-                  Text(
-                    'Yaklaşık $_calculatedStopsCount durak • $_selectedHours saat',
-                    style: const TextStyle(fontSize: 12.5, color: AppColors.textMuted, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Rota Oluştur Butonu
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _handleCreateRoute,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryTealDark,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-                      ),
-                      child: const Text(
-                        'Rota oluştur',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                          const SizedBox(height: 22),
+                          _label('Ne tür yerleri gezmek istersin?'),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: _availableCategories.map((cat) {
+                              final sel = _selectedCategories.contains(cat);
+                              return FilterChipPill(
+                                label: cat,
+                                selected: sel,
+                                onTap: () => setState(() {
+                                  if (sel) {
+                                    if (_selectedCategories.length > 1) {
+                                      _selectedCategories.remove(cat);
+                                    }
+                                  } else {
+                                    _selectedCategories.add(cat);
+                                  }
+                                }),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Yaklaşık $_calculatedStopsCount durak · $_selectedHours saat',
+                            style: const TextStyle(
+                                fontSize: 14, color: AppColors.textMuted),
+                          ),
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            width: double.infinity,
+                            child: PillButton('Rota oluştur',
+                                onPressed: _handleCreateRoute),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Hazır Rota Yönlendirmesi
-            const Text(
-              'Hazır rota mı arıyorsun?',
-              style: TextStyle(fontSize: 13, color: AppColors.textMuted),
-            ),
-            const SizedBox(height: 4),
-            GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Tematik hazır rotalar listeleniyor...')),
-                );
-              },
-              child: const Text(
-                'Tarihi Rotalar\'a göz at',
-                style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryTealDark,
+                    const SizedBox(height: 28),
+                    Center(
+                      child: Column(
+                        children: [
+                          const Text('Hazır rota mı arıyorsun?',
+                              style: TextStyle(
+                                  fontSize: 15, color: AppColors.textMuted)),
+                          const SizedBox(height: 6),
+                          GestureDetector(
+                            onTap: _openHistoricRoutes,
+                            child: const Text(
+                              "Tarihi Rotalar'a göz at",
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryTeal,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          const TulipMotif(height: 96),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Alt Kısımdaki Çini / Lale İllüstrasyonu (Görseldeki Gibi)
-            Icon(
-              Icons.local_florist_rounded,
-              size: 42,
-              color: AppColors.ciniBordeaux.withOpacity(0.85),
-            ),
-          ],
-        ),
       ),
     );
   }

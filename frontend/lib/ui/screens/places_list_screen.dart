@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
+import '../../core/constants/app_theme.dart';
 import '../widgets/common/app_network_image.dart';
+import '../widgets/common/filter_chip_pill.dart';
+import '../widgets/common/tulip_motif.dart';
+import '../widgets/common/pill_button.dart';
 import 'slider_screen.dart';
 
 class PlacesListScreen extends StatefulWidget {
@@ -20,13 +24,15 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   List<HeritagePlace> _filteredPlaces = [];
   bool _isLoading = true;
   String _selectedCategory = 'Tümü';
+  bool _sortAlphabetical = false;
 
   final List<String> _categories = [
     'Tümü',
-    'Han & Çarşı',
-    'Cami & Külliye',
+    'Cami',
+    'Han',
     'Hamam',
-    'Medrese',
+    'Türbe',
+    'Külliye',
   ];
 
   @override
@@ -62,200 +68,233 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
             place.category.label.toLowerCase().trim() == _selectedCategory.toLowerCase().trim();
         return matchesSearch && matchesCat;
       }).toList();
+      if (_sortAlphabetical) {
+        _filteredPlaces.sort((a, b) => a.name.compareTo(b.name));
+      }
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
-      appBar: AppBar(
-        backgroundColor: AppColors.bgCanvas,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppColors.textDark),
-          onPressed: () => Navigator.pop(context),
+  void _openPlace(HeritagePlace place) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SliderScreen(
+          title: place.name,
+          beforeImageUrl: place.imageBeforeUrl,
+          afterImageUrl: place.imageAfterUrl,
+          description: place.shortDescription,
+          hotspots: place.hotspots,
         ),
-        title: const Text(
-          'Kültür Mirası Kataloğu',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // 1. Arama Çubuğu
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.borderSubtle, width: 0.8),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (_) => _applyFilter(),
-                decoration: const InputDecoration(
-                  hintText: 'Eser adı veya mimari terim ara...',
-                  hintStyle: TextStyle(fontSize: 13, color: AppColors.textMuted),
-                  border: InputBorder.none,
-                  icon: Icon(Icons.search, color: AppColors.textMuted, size: 20),
-                ),
-              ),
-            ),
-          ),
-
-          // 2. Kategori Çipleri
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            child: Row(
-              children: _categories.map((cat) {
-                final isSelected = _selectedCategory == cat;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(cat),
-                    selected: isSelected,
-                    onSelected: (val) {
-                      setState(() => _selectedCategory = cat);
-                      _applyFilter();
-                    },
-                    backgroundColor: Colors.white,
-                    selectedColor: AppColors.primaryTeal.withOpacity(0.15),
-                    checkmarkColor: AppColors.primaryTeal,
-                    side: BorderSide(
-                      color: isSelected ? AppColors.primaryTeal : AppColors.borderSubtle,
-                      width: 0.8,
-                    ),
-                    labelStyle: TextStyle(
-                      fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      color: isSelected ? AppColors.primaryTeal : AppColors.textDark,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // 3. Eser Listesi
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primaryTeal))
-                : _filteredPlaces.isEmpty
-                ? const Center(
-              child: Text(
-                'Eşleşen eser bulunamadı.',
-                style: TextStyle(color: AppColors.textMuted),
-              ),
-            )
-                : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              itemCount: _filteredPlaces.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final place = _filteredPlaces[index];
-                return _buildPlaceCard(place);
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildPlaceCard(HeritagePlace place) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SliderScreen(
-              title: place.name,
-              beforeImageUrl: place.imageBeforeUrl,
-              afterImageUrl: place.imageAfterUrl,
-              description: place.shortDescription,
-              hotspots: place.hotspots,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderSubtle, width: 0.8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
+  @override
+  Widget build(BuildContext context) {
+    final canPop = Navigator.of(context).canPop();
+    return Scaffold(
+      backgroundColor: AppColors.bgCanvas,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppNetworkImage(
-              imageUrl: place.imageAfterUrl,
-              width: 76,
-              height: 76,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.chipInactiveBg,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      place.category.label,
-                      style: const TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textMuted,
+                  if (canPop)
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 12),
+                        child: Icon(Icons.arrow_back_ios_new,
+                            size: 20, color: AppColors.textDark),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    place.name,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
+                  const Text('Tarih Envanteri', style: AppTheme.displayLarge),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _buildSearchRow(),
+            ),
+            const SizedBox(height: 14),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: _categories.map((cat) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: FilterChipPill(
+                      label: cat,
+                      selected: _selectedCategory == cat,
+                      onTap: () {
+                        _selectedCategory = cat;
+                        _applyFilter();
+                      },
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
+                  );
+                }).toList(),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Text(
-                    place.shortDescription,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    "Bursa'da ${_filteredPlaces.length} eser",
+                    style: const TextStyle(
+                        fontSize: 15, color: AppColors.textDark),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      _sortAlphabetical = !_sortAlphabetical;
+                      _applyFilter();
+                    },
+                    child: Text(
+                      _sortAlphabetical ? 'Sırala · A-Z' : 'Sırala',
+                      style: const TextStyle(
+                        color: AppColors.primaryTeal,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                          color: AppColors.primaryTeal))
+                  : _filteredPlaces.isEmpty
+                      ? const Center(
+                          child: Text('Eşleşen eser bulunamadı.',
+                              style: TextStyle(color: AppColors.textMuted)),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                          itemCount: _filteredPlaces.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 20),
+                          itemBuilder: (_, i) =>
+                              _buildPlaceCard(_filteredPlaces[i]),
+                        ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSearchRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 54,
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (_) => _applyFilter(),
+              style: const TextStyle(fontSize: 15),
+              decoration: const InputDecoration(
+                hintText: 'Eser adı veya semt ara',
+                hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 15),
+                border: InputBorder.none,
+                icon: Icon(Icons.search_rounded, color: AppColors.textDark),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          width: 54,
+          height: 54,
+          decoration: const BoxDecoration(
+            color: AppColors.primaryTeal,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.tune_rounded, color: Colors.white),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlaceCard(HeritagePlace place) {
+    const radius = BorderRadius.all(Radius.circular(20));
+    final subtitle = [
+      place.category.label,
+      if (place.inventoryLocation.trim().isNotEmpty) place.inventoryLocation.trim(),
+      if (place.constructionDate.trim().isNotEmpty) place.constructionDate.trim(),
+    ].join(' · ');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => _openPlace(place),
+          child: Container(
+            height: 190,
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(
+                color: AppColors.ciniBordeaux.withValues(alpha: 0.45),
+                width: 1.1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: radius,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  AppNetworkImage(imageUrl: place.imageAfterUrl),
+                  const Positioned(top: 0, right: 0, child: TulipBadge()),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    place.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 14, color: AppColors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            PillButton('Keşfet', onPressed: () => _openPlace(place)),
+          ],
+        ),
+      ],
     );
   }
 }
