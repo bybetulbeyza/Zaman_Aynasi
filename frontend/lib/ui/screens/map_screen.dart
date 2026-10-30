@@ -92,7 +92,7 @@ class MapScreenState extends State<MapScreen> {
     });
 
     if (_filteredPlaces.isNotEmpty) {
-      _mapController.move(_filteredPlaces.first.location, 16.5);
+      _moveMap(_filteredPlaces.first.location, 16.5);
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -120,7 +120,21 @@ class MapScreenState extends State<MapScreen> {
       _filteredPlaces = places;
       _currentStopIndex = 0;
     });
-    _mapController.move(places.first.location, 16.5);
+    _moveMap(places.first.location, 16.5);
+  }
+
+  /// Harita henüz çizilmediyse (ilk açılış) hareketi ilk çerçeveden sonraya bırakır.
+  void _moveMap(LatLng target, double zoom) {
+    try {
+      _mapController.move(target, zoom);
+    } catch (_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        try {
+          _mapController.move(target, zoom);
+        } catch (_) {}
+      });
+    }
   }
 
   void _recenter() {
@@ -130,7 +144,7 @@ class MapScreenState extends State<MapScreen> {
       ).showSnackBar(SnackBar(content: Text(context.t('location_off_note'))));
       return;
     }
-    _mapController.move(_userLocation, 16.5);
+    _moveMap(_userLocation, 16.5);
   }
 
   void _applyFilters() {
@@ -161,7 +175,7 @@ class MapScreenState extends State<MapScreen> {
     });
 
     if (!_isLoading && _filteredPlaces.isNotEmpty) {
-      _mapController.move(_filteredPlaces[_currentStopIndex].location, 16.5);
+      _moveMap(_filteredPlaces[_currentStopIndex].location, 16.5);
     }
   }
 
@@ -240,9 +254,11 @@ class MapScreenState extends State<MapScreen> {
                 alignment: AttributionAlignment.bottomLeft,
                 showFlutterMapAttribution: false,
                 attributions: [
-                  TextSourceAttribution(MapConfig.useMapbox
-                      ? '© Mapbox © OpenStreetMap'
-                      : '© OpenStreetMap contributors'),
+                  TextSourceAttribution(
+                    MapConfig.useMapbox
+                        ? '© Mapbox © OpenStreetMap'
+                        : '© OpenStreetMap contributors',
+                  ),
                 ],
               ),
 
@@ -301,7 +317,7 @@ class MapScreenState extends State<MapScreen> {
                         setState(() {
                           _currentStopIndex = index;
                         });
-                        _mapController.move(place.location, 16.8);
+                        _moveMap(place.location, 16.8);
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -448,7 +464,7 @@ class MapScreenState extends State<MapScreen> {
                         _currentStopIndex =
                             (_currentStopIndex + 1) % _filteredPlaces.length;
                       });
-                      _mapController.move(
+                      _moveMap(
                         _filteredPlaces[_currentStopIndex].location,
                         16.8,
                       );
