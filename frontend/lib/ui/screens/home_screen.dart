@@ -2,7 +2,6 @@ import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/squircle_frame.dart';
-import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
@@ -226,32 +225,34 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 24),
-            GestureDetector(
-              onTap: _openPlaces,
-              child: Container(
-                height: 54,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: bordeauxOf(context), width: 1.3),
-                ),
-                child: Row(
-                  children: [
-                    const AppIcon(
-                      'search',
-                      color: AppColors.textDark,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      context.t('search_hint'),
-                      style: const TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 15,
+            DarkReapply(
+              child: GestureDetector(
+                onTap: _openPlaces,
+                child: Container(
+                  height: 54,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: bordeauxOf(context), width: 1.3),
+                  ),
+                  child: Row(
+                    children: [
+                      const AppIcon(
+                        'search',
+                        color: AppColors.textDark,
+                        size: 24,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Text(
+                        context.t('search_hint'),
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

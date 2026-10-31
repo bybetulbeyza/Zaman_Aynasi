@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dark_cancel.dart';
-import '../../../core/constants/app_colors.dart';
 
 /// Eser kartlarının ortak şekli: iki çapraz köşe büyük ve akıcı, diğer iki çapraz köşe sivri
 /// (sol üst ve sağ alt), görselin etrafında ince bir çerçeve (aralarında küçük bir boşluk).

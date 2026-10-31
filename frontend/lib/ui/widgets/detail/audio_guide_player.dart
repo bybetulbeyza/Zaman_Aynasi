@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../common/dark_cancel.dart';
+import 'guide_card.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -62,95 +62,51 @@ class _AudioGuidePlayerState extends State<AudioGuidePlayer> {
   @override
   Widget build(BuildContext context) {
     final player = _player;
-    return Opacity(
-      opacity: _available ? 1 : 0.6,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.primaryTeal,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
-          children: [
-            StreamBuilder<PlayerState>(
-              stream: player?.playerStateStream,
-              builder: (_, snap) {
-                final playing = snap.data?.playing ?? false;
-                return GestureDetector(
-                  onTap: _hasError
-                      ? () {
-                          setState(() => _hasError = false);
-                          _init();
-                        }
-                      : (!_available || player == null)
-                      ? null
-                      : () => playing ? player.pause() : player.play(),
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: bordeauxOf(context),
-                    child: Icon(
-                      playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+    return StreamBuilder<PlayerState>(
+      stream: player?.playerStateStream,
+      builder: (_, stateSnap) {
+        final playing = stateSnap.data?.playing ?? false;
+        return GuideCard(
+          dimmed: !_available,
+          playing: playing,
+          title: context.t('audio_guide'),
+          trailing: _available ? _fmt(_duration) : null,
+          onTap: _hasError
+              ? () {
+                  setState(() => _hasError = false);
+                  _init();
+                }
+              : (!_available || player == null)
+              ? null
+              : () => playing ? player.pause() : player.play(),
+          bottom: (_available && player != null)
+              ? StreamBuilder<Duration>(
+                  stream: player.positionStream,
+                  builder: (_, snap) {
+                    final pos = snap.data ?? Duration.zero;
+                    final total = _duration.inMilliseconds;
+                    final value = total == 0
+                        ? 0.0
+                        : (pos.inMilliseconds / total).clamp(0.0, 1.0);
+                    return Waveform(
+                      progress: value,
+                      onSeek: total == 0
+                          ? null
+                          : (f) => player.seek(
+                              Duration(milliseconds: (f * total).round()),
+                            ),
+                    );
+                  },
+                )
+              : Text(
+                  context.t('coming_soon_short'),
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 13,
                   ),
-                );
-              },
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.t('audio_guide'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (_available && player != null)
-                    StreamBuilder<Duration>(
-                      stream: player.positionStream,
-                      builder: (_, snap) {
-                        final pos = snap.data ?? Duration.zero;
-                        final total = _duration.inMilliseconds;
-                        final value = total == 0
-                            ? 0.0
-                            : (pos.inMilliseconds / total).clamp(0.0, 1.0);
-                        return LinearProgressIndicator(
-                          value: value,
-                          backgroundColor: Colors.white24,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                          minHeight: 3,
-                        );
-                      },
-                    )
-                  else
-                    Text(
-                      context.t('coming_soon_short'),
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            if (_available) ...[
-              const SizedBox(width: 12),
-              Text(
-                _fmt(_duration),
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-            ],
-          ],
-        ),
-      ),
+                ),
+        );
+      },
     );
   }
 }

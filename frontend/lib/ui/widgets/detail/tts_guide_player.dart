@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../common/dark_cancel.dart';
+import 'guide_card.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -76,64 +76,19 @@ class _TtsGuidePlayerState extends State<TtsGuidePlayer> {
     return Semantics(
       button: true,
       label: context.t('audio_guide'),
-      child: GestureDetector(
+      child: GuideCard(
+        playing: _speaking,
         onTap: _failed ? null : _toggle,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.primaryTeal,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: bordeauxOf(context),
-                child: Icon(
-                  _speaking ? Icons.stop_rounded : Icons.play_arrow_rounded,
-                  color: Colors.white,
-                  size: 28,
+        title: context.t('audio_guide'),
+        bottom: _speaking
+            ? Waveform(progress: _progress)
+            : Text(
+                _failed ? context.t('tts_unavailable') : context.t('tts_hint'),
+                style: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 13,
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.t('audio_guide'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    if (_speaking)
-                      LinearProgressIndicator(
-                        value: _progress == 0 ? null : _progress,
-                        backgroundColor: Colors.white24,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                        minHeight: 3,
-                      )
-                    else
-                      Text(
-                        _failed
-                            ? context.t('tts_unavailable')
-                            : context.t('tts_hint'),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
