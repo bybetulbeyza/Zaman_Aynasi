@@ -5,11 +5,29 @@ import 'package:latlong2/latlong.dart';
 import '../constants/map_config.dart';
 
 /// Mapbox yürüyüş yolu: sokakları izleyen hat, gerçek mesafe ve süre.
+/// Ardışık iki durak arasındaki yürüyüş bölümü.
+class WalkLeg {
+  final double meters;
+  final double seconds;
+  const WalkLeg(this.meters, this.seconds);
+
+  int get minutes => (seconds / 60).ceil();
+  String get distanceLabel => meters < 1000
+      ? '${meters.round()} m'
+      : '${(meters / 1000).toStringAsFixed(1).replaceAll('.', ',')} km';
+}
+
 class WalkingRoute {
   final List<LatLng> points;
   final double meters;
   final double seconds;
-  const WalkingRoute(this.points, this.meters, this.seconds);
+  final List<WalkLeg> legs;
+  const WalkingRoute(
+    this.points,
+    this.meters,
+    this.seconds, [
+    this.legs = const [],
+  ]);
 
   String get distanceLabel => meters < 1000
       ? '${meters.round()} m'
@@ -48,6 +66,14 @@ class WalkingRouteService {
         pts,
         (route['distance'] as num).toDouble(),
         (route['duration'] as num).toDouble(),
+        ((route['legs'] as List?) ?? [])
+            .map(
+              (l) => WalkLeg(
+                (l['distance'] as num).toDouble(),
+                (l['duration'] as num).toDouble(),
+              ),
+            )
+            .toList(),
       );
       _cache[coords] = result;
       return result;

@@ -14,10 +14,14 @@ import '../widgets/common/active_route_card.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pill_button.dart';
+import '../widgets/route/route_stops_sheet.dart';
 
 class HistoricRoutesScreen extends StatefulWidget {
   /// Bir rota başlatılınca (veya aktif rota haritada gösterilince) haritaya geçmek için.
   final Function(List<HeritagePlace>)? onRouteStarted;
+
+  /// Duraklar listesinde bir durağa dokununca: haritaya geçip o durağı gösterir.
+  final void Function(List<HeritagePlace> stops, int index)? onShowStop;
 
   /// "Rota oluştur" butonu: rota oluşturma formunu açar.
   final VoidCallback? onCreateRoute;
@@ -25,6 +29,7 @@ class HistoricRoutesScreen extends StatefulWidget {
   const HistoricRoutesScreen({
     super.key,
     this.onRouteStarted,
+    this.onShowStop,
     this.onCreateRoute,
   });
 
@@ -84,74 +89,11 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   }
 
   void _showStops(HeritageRoute route) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.bgCanvas,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (_) => SafeArea(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.7,
-          ),
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            children: [
-              Text(route.nameFor(context.isEn), style: AppTheme.titleLarge),
-              const SizedBox(height: 14),
-              for (var i = 0; i < route.stops.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryTeal,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          '${i + 1}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              route.stops[i].nameFor(context.isEn),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              route.stops[i].category.labelFor(context.isEn),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+    showRouteStopsSheet(
+      context,
+      route: route,
+      onStopTap: (i) => widget.onShowStop?.call(route.stops, i),
+      onStart: () => _start(route),
     );
   }
 

@@ -18,6 +18,10 @@ class HeritageRoute {
   /// false ise koordinatlardan yapılan tahmindir (durak ziyaret süresi dahil).
   final bool isWalkingExact;
 
+  /// Sokakları izleyen hat ve duraklar arası bölümler (yürüyüş verisi geldiyse).
+  final List<LatLng> path;
+  final List<WalkLeg> legs;
+
   const HeritageRoute({
     required this.name,
     this.nameEn = '',
@@ -25,6 +29,8 @@ class HeritageRoute {
     required this.distanceKm,
     required this.durationMinutes,
     this.isWalkingExact = false,
+    this.path = const [],
+    this.legs = const [],
   });
 
   HeritageRoute withWalk(WalkingRoute walk) => HeritageRoute(
@@ -34,6 +40,8 @@ class HeritageRoute {
     distanceKm: walk.meters / 1000,
     durationMinutes: walk.minutes,
     isWalkingExact: true,
+    path: walk.points,
+    legs: walk.legs,
   );
 
   String nameFor(bool en) => en && nameEn.isNotEmpty ? nameEn : name;

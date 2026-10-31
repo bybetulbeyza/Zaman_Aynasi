@@ -120,15 +120,16 @@ class MapScreenState extends State<MapScreen> {
   }
 
   /// RoutesScreen üzerinden gelen özel rotayı haritaya yükleme
-  void loadCustomRoute(List<HeritagePlace> places) {
+  void loadCustomRoute(List<HeritagePlace> places, {int focusIndex = 0}) {
     if (places.isEmpty) return;
+    final focus = focusIndex.clamp(0, places.length - 1);
     setState(() {
       _routeChip = 'active';
       _walk = null;
       _filteredPlaces = places;
-      _currentStopIndex = 0;
+      _currentStopIndex = focus;
     });
-    _moveMap(places.first.location, 16.5);
+    _moveMap(places[focus].location, 16.5);
     _loadWalkingRoute();
   }
 

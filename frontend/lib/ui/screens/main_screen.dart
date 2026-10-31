@@ -76,10 +76,10 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   /// Haritaya geçip verilen rotayı çizer.
-  void _showRouteOnMap(List<HeritagePlace> places) {
+  void _showRouteOnMap(List<HeritagePlace> places, {int focusIndex = 0}) {
     setState(() => _currentIndex = 1);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _mapKey.currentState?.loadCustomRoute(places);
+      _mapKey.currentState?.loadCustomRoute(places, focusIndex: focusIndex);
     });
   }
 
@@ -119,6 +119,7 @@ class _MainScreenState extends State<MainScreen> {
       const QRScannerScreen(),
       HistoricRoutesScreen(
         onRouteStarted: _showRouteOnMap,
+        onShowStop: (stops, i) => _showRouteOnMap(stops, focusIndex: i),
         onCreateRoute: _openRouteBuilder,
       ),
       const ProfileScreen(),
