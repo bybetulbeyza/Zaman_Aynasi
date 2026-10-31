@@ -20,6 +20,7 @@ import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
 import '../widgets/detail/photo_collage.dart';
 import '../widgets/detail/activities_section.dart';
+import '../widgets/detail/swipe_hint_arrow.dart';
 import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
@@ -35,7 +36,9 @@ class SliderScreen extends StatefulWidget {
 }
 
 class _SliderScreenState extends State<SliderScreen> {
-  static const double _sheetMax = 0.9;
+  // Kart tamamen açılsa bile fotoğrafın üst kısmı görünür kalır
+  static const double _sheetMax = 0.78;
+  bool _sheetRaised = false;
   static const double _underlap =
       28; // fotoğraf, sayfanın yuvarlak köşelerinin altına uzanır
 
@@ -367,29 +370,36 @@ class _SliderScreenState extends State<SliderScreen> {
           ),
 
           // 2. Alttan açılan bilgi sayfası
-          DraggableScrollableSheet(
-            controller: _sheetController,
-            initialChildSize: _sheetMin,
-            minChildSize: _sheetMin,
-            maxChildSize: _sheetMax,
-            builder: (context, scrollController) => Container(
-              decoration: BoxDecoration(
-                color: AppColors.bgCanvas,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.10),
-                    blurRadius: 16,
-                    offset: const Offset(0, -4),
+          NotificationListener<DraggableScrollableNotification>(
+            onNotification: (n) {
+              final raised = n.extent > _sheetMin + 0.04;
+              if (raised != _sheetRaised) setState(() => _sheetRaised = raised);
+              return false;
+            },
+            child: DraggableScrollableSheet(
+              controller: _sheetController,
+              initialChildSize: _sheetMin,
+              minChildSize: _sheetMin,
+              maxChildSize: _sheetMax,
+              builder: (context, scrollController) => Container(
+                decoration: BoxDecoration(
+                  color: AppColors.bgCanvas,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
                   ),
-                ],
-              ),
-              child: ListView(
-                controller: scrollController,
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
-                children: _buildSheetContent(en),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.10),
+                      blurRadius: 16,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
+                ),
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+                  children: _buildSheetContent(en),
+                ),
               ),
             ),
           ),
@@ -452,28 +462,12 @@ class _SliderScreenState extends State<SliderScreen> {
         ),
       const SizedBox(height: 18),
 
-      // Yukarı kaydır ipucu
-      GestureDetector(
-        onTap: _expandSheet,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: AppColors.chipBorder),
-          ),
-          child: Text(
-            '↑ ${context.t('swipe_up')}',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primaryTeal,
-            ),
-          ),
-        ),
+      // Kartın yukarı çekilebildiğini gösteren zıplayan ok (kart açılınca solar)
+      AnimatedOpacity(
+        duration: const Duration(milliseconds: 250),
+        opacity: _sheetRaised ? 0 : 1,
+        child: SwipeHintArrow(onTap: _expandSheet),
       ),
-      const SizedBox(height: 22),
 
       // Külliye ise alt yapıları, alt eser ise bağlı olduğu yapı
       if (_parent != null) ...[
