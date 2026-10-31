@@ -158,12 +158,24 @@ class _HomeScreenState extends State<HomeScreen> {
     final top = MediaQuery.of(context).padding.top;
     return Container(
       padding: EdgeInsets.fromLTRB(20, top + 10, 20, 24),
-      // Desensiz, sade: üstten alta hafifçe koyulaşan petrol geçişi
+      // Çapraz geçiş: sol üstte canlı teal, ortada petrol, sağ altta derin lacivert-petrol
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF1A4F5F), AppColors.heroPetrol, Color(0xFF0F3340)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF138A86), Color(0xFF14505F), Color(0xFF0A2733)],
+          stops: [0.0, 0.5, 1.0],
+        ),
+      ),
+      foregroundDecoration: BoxDecoration(
+        // Logonun arkasında yumuşak ışık hale
+        gradient: RadialGradient(
+          center: const Alignment(0.82, -0.2),
+          radius: 0.75,
+          colors: [
+            Colors.white.withValues(alpha: 0.16),
+            Colors.white.withValues(alpha: 0.0),
+          ],
         ),
       ),
       child: Column(

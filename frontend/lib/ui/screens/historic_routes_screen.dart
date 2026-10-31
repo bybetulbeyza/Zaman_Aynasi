@@ -108,11 +108,12 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
         backgroundColor: Colors.transparent,
         body: SafeArea(
           bottom: false,
-          child: Column(
+          child: Stack(
             children: [
-              Expanded(
+              Positioned.fill(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                  // Alt boşluk: yüzen buton son kartın üstüne binmesin
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
                   children: [
                     Text(context.t('hr_title'), style: AppTheme.displayLarge),
                     const SizedBox(height: 6),
@@ -175,7 +176,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                   ],
                 ),
               ),
-              _buildCreateBar(),
+              Positioned(right: 20, bottom: 18, child: _buildCreateFab()),
             ],
           ),
         ),
@@ -183,29 +184,28 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
     );
   }
 
-  /// Navigasyonun hemen üstünde sabit duran büyük "Rota oluştur" butonu.
-  Widget _buildCreateBar() {
+  /// Sağ altta yüzen kompakt "Rota oluştur" butonu.
+  Widget _buildCreateFab() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
       decoration: BoxDecoration(
-        color: AppColors.bgCanvas,
-        border: Border(
-          top: BorderSide(color: AppColors.chipBorder.withValues(alpha: 0.9)),
-        ),
-      ),
-      child: SizedBox(
-        height: 58,
-        child: ElevatedButton(
-          onPressed: widget.onCreateRoute,
-          child: Text(context.t('rc_create')),
-          style: ElevatedButton.styleFrom(
-            shape: const StadiumBorder(),
-            textStyle: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryTeal.withValues(alpha: 0.4),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
+        ],
+      ),
+      child: ElevatedButton.icon(
+        onPressed: widget.onCreateRoute,
+        icon: const Icon(Icons.add_rounded, size: 22),
+        label: Text(context.t('rc_create')),
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+          shape: const StadiumBorder(),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
     );
