@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/app_toast.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
@@ -16,11 +17,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  void _soon(BuildContext context) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(context.t('coming_soon'))));
-  }
+  void _soon(BuildContext context) => AppToast.show(
+    context,
+    context.t('coming_soon'),
+    icon: Icons.hourglass_top_rounded,
+  );
 
   void _showAccessibility(BuildContext context) {
     showModalBottomSheet<void>(

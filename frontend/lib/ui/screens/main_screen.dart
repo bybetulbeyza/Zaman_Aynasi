@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/app_toast.dart';
 import '../../core/state/passport.dart';
 import '../widgets/passport/stamp_widget.dart';
 import 'passport_screen.dart';
@@ -76,32 +77,17 @@ class _MainScreenState extends State<MainScreen> {
     await _geofence.start(places, (place) {
       if (!mounted) return;
       Passport.instance.earnStamp(place);
-      final messenger = ScaffoldMessenger.of(context);
-      messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 8),
-          content: Row(
-            children: [
-              const Icon(Icons.place_rounded, color: Colors.white, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  context
-                      .t('geo_nearby')
-                      .replaceAll('{name}', place.nameFor(context.isEn)),
-                ),
-              ),
-            ],
-          ),
-          action: SnackBarAction(
-            label: context.t('geo_open'),
-            textColor: Colors.white,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
-            ),
-          ),
+      AppToast.show(
+        context,
+        context
+            .t('geo_nearby')
+            .replaceAll('{name}', place.nameFor(context.isEn)),
+        icon: Icons.place_rounded,
+        actionLabel: context.t('geo_open'),
+        duration: const Duration(seconds: 8),
+        onAction: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
         ),
       );
     });

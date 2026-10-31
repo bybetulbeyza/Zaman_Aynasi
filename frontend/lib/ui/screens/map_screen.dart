@@ -3,6 +3,7 @@ import 'dart:async';
 import '../widgets/common/app_icon.dart';
 import '../widgets/common/logo_loader.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/app_toast.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
@@ -153,20 +154,11 @@ class MapScreenState extends State<MapScreen> {
     }
     _loadWalkingRoute();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.near_me_rounded, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            Expanded(child: Text(context.t('nearby_route_ready'))),
-          ],
-        ),
-        backgroundColor: AppColors.primaryTeal,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
+    AppToast.show(
+      context,
+      context.t('nearby_route_ready'),
+      icon: Icons.near_me_rounded,
+      duration: const Duration(seconds: 3),
     );
   }
 
@@ -252,9 +244,11 @@ class MapScreenState extends State<MapScreen> {
 
   void _recenter() {
     if (!_hasRealLocation) {
-      ScaffoldMessenger.of(
+      AppToast.show(
         context,
-      ).showSnackBar(SnackBar(content: Text(context.t('location_off_note'))));
+        context.t('location_off_note'),
+        icon: Icons.location_off_rounded,
+      );
       return;
     }
     _moveMap(_userLocation, 16.5);
@@ -274,23 +268,19 @@ class MapScreenState extends State<MapScreen> {
     _applyFilters();
     if (!wasActive) return;
     ActiveRoute.instance.clear();
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(context.t('route_closed')),
-        action: SnackBarAction(
-          label: context.t('undo'),
-          onPressed: () {
-            ActiveRoute.instance.setRoute(
-              stops,
-              titleTr: titleTr,
-              titleEn: titleEn,
-            );
-            loadCustomRoute(stops);
-          },
-        ),
-      ),
+    AppToast.show(
+      context,
+      context.t('route_closed'),
+      icon: Icons.remove_circle_outline_rounded,
+      actionLabel: context.t('undo'),
+      onAction: () {
+        ActiveRoute.instance.setRoute(
+          stops,
+          titleTr: titleTr,
+          titleEn: titleEn,
+        );
+        loadCustomRoute(stops);
+      },
     );
   }
 

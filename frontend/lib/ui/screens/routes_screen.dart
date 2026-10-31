@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/app_toast.dart';
 import '../widgets/common/logo_loader.dart';
 import 'package:latlong2/latlong.dart';
 import '../../core/constants/app_colors.dart';
@@ -248,9 +249,11 @@ class _RoutesScreenState extends State<RoutesScreen> {
       Navigator.pop(context); // Dialog kapat
 
       if (finalRoute.isEmpty) {
-        ScaffoldMessenger.of(
+        AppToast.show(
           context,
-        ).showSnackBar(SnackBar(content: Text(context.t('rc_none_found'))));
+          context.t('rc_none_found'),
+          icon: Icons.search_off_rounded,
+        );
         return;
       }
 
@@ -263,29 +266,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
       if (widget.onRouteCreated != null) {
         widget.onRouteCreated!(finalRoute);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(
-                  Icons.check_circle_outline_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  context
-                      .t('route_created')
-                      .replaceAll('{n}', '${finalRoute.length}'),
-                ),
-              ],
-            ),
-            backgroundColor: AppColors.primaryTeal,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
+        AppToast.show(
+          context,
+          context.t('route_created').replaceAll('{n}', '${finalRoute.length}'),
         );
       }
     }

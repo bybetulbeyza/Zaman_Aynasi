@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/app_toast.dart';
 import '../../core/state/passport.dart';
 import '../widgets/common/pattern_background.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -51,9 +52,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       if (matchedPlace == null) {
         if (mounted) {
           setState(() => _isProcessing = false);
-          ScaffoldMessenger.of(
+          AppToast.show(
             context,
-          ).showSnackBar(SnackBar(content: Text(context.t('qr_unknown'))));
+            context.t('qr_unknown'),
+            icon: Icons.qr_code_scanner_rounded,
+          );
         }
         return;
       }

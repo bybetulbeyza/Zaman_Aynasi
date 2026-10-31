@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/app_toast.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_links.dart';
 import '../../core/constants/app_theme.dart';
@@ -200,63 +201,18 @@ class _SliderScreenState extends State<SliderScreen> {
     }
   }
 
-  /// Altta yüzen, yuvarlak köşeli bildirim; [action] verilirse rotalar sekmesine götürür.
+  /// Alt eylem çubuğunun üstünde yüzen bildirim; [action] verilirse rotalar sekmesine götürür.
   void _toast(String text, IconData icon, {String? action}) {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 92),
-        padding: const EdgeInsets.fromLTRB(14, 6, 6, 6),
-        backgroundColor: AppColors.heroPetrol,
-        elevation: 6,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        duration: const Duration(seconds: 4),
-        content: Row(
-          children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryTeal,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 17, color: Colors.white),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            if (action != null)
-              TextButton(
-                onPressed: () {
-                  messenger.hideCurrentSnackBar();
-                  Navigator.of(context).popUntil((r) => r.isFirst);
-                  mainTabRequest.value = 3;
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.white.withValues(alpha: 0.16),
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  textStyle: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                child: Text(action),
-              ),
-          ],
-        ),
-      ),
+    AppToast.show(
+      context,
+      text,
+      icon: icon,
+      actionLabel: action,
+      bottomMargin: 92,
+      onAction: () {
+        Navigator.of(context).popUntil((r) => r.isFirst);
+        mainTabRequest.value = 3;
+      },
     );
   }
 
