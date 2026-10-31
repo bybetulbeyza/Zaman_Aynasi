@@ -819,88 +819,76 @@ class _SliderScreenState extends State<SliderScreen>
 
   Widget _buildSourceCard(bool en) {
     final inventory = _inventoryLabel(en);
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label:
+          '${context.t('source_book')}. ${inventory.isNotEmpty ? inventory : context.t('source_label')}',
+      hint: context.t('source_open'),
+      excludeSemantics: true,
       onTap: () => LauncherUtil.openUrl(AppLinks.inventoryBooks),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppColors.ciniBordeaux.withValues(alpha: 0.4),
-            width: 1.1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.t('source_book'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    inventory.isNotEmpty
-                        ? inventory
-                        : context.t('source_label'),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        context.t('source_open'),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryTeal,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.open_in_new_rounded,
-                        size: 14,
-                        color: AppColors.primaryTeal,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+      child: GestureDetector(
+        onTap: () => LauncherUtil.openUrl(AppLinks.inventoryBooks),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppColors.ciniBordeaux.withValues(alpha: 0.4),
+              width: 1.1,
             ),
-            if (inventory.isNotEmpty) ...[
-              const SizedBox(width: 10),
+          ),
+          child: Row(
+            children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
                   color: AppColors.primaryTealLight,
-                  borderRadius: BorderRadius.circular(16),
+                  shape: BoxShape.circle,
                 ),
-                child: Text(
-                  context.t('verified'),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryTeal,
-                  ),
+                child: const Icon(
+                  Icons.menu_book_rounded,
+                  size: 22,
+                  color: AppColors.primaryTeal,
                 ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.t('source_book'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      inventory.isNotEmpty
+                          ? inventory
+                          : context.t('source_label'),
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.open_in_new_rounded,
+                size: 20,
+                color: AppColors.primaryTeal,
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
