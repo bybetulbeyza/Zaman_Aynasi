@@ -36,7 +36,7 @@ const Map<String, String> appStringsTr = {
   'reels_title': 'Hikâyeler',
   'reels_empty': 'Hikâye videoları yakında burada olacak.',
   'qa_cities': 'Şehirler',
-  'home_featured': 'Öne çıkan vakıf eserleri',
+  'home_featured': 'Öne çıkan eserler',
   'home_nearby': 'Yakınımdaki eserler',
   'location_off_note':
       'Konum kapalı; eserler şehir merkezine göre gösteriliyor.',
