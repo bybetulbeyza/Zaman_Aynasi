@@ -88,6 +88,8 @@ class _SliderScreenState extends State<SliderScreen> {
       DraggableScrollableController();
   Hotspot? _selectedHotspot;
   bool _showHint = false;
+  bool _showAiHint = true;
+  Timer? _aiHintTimer;
   Timer? _hintTimer;
 
   HeritagePlace get _place => widget.place;
@@ -137,6 +139,9 @@ class _SliderScreenState extends State<SliderScreen> {
   void initState() {
     super.initState();
     _loadRelated();
+    _aiHintTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) setState(() => _showAiHint = false);
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _fitPhotoArea());
     // Hotspot'ların varlığını ilk bakışta anlatan kısa ipucu
     if (_place.hotspots.isNotEmpty) {
@@ -150,6 +155,7 @@ class _SliderScreenState extends State<SliderScreen> {
   @override
   void dispose() {
     _hintTimer?.cancel();
+    _aiHintTimer?.cancel();
     _sheetController.dispose();
     super.dispose();
   }
@@ -199,6 +205,77 @@ class _SliderScreenState extends State<SliderScreen> {
     return raw.replaceAll('Cilt', 'Vol.').replaceAll(RegExp(r's\.\s*'), 'p. ');
   }
 
+  /// Tarihî görselin yapay zekâ canlandırması olduğunu açıklayan kart.
+  void _showAiSheet() {
+    final en = context.isEn;
+    final inventory = _inventoryLabel(en);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 22, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                ctx.t('ai_sheet_title'),
+                style: const TextStyle(
+                  fontFamily: AppTheme.headingFont,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                ctx.t('ai_sheet_body'),
+                style: const TextStyle(
+                  fontSize: 15,
+                  height: 1.5,
+                  color: AppColors.textDark,
+                ),
+              ),
+              if (inventory.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryTealLight,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(
+                    '${ctx.t('ai_sheet_source')}: $inventory',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryTealDark,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(ctx.t('ai_sheet_ok')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _toggleRoute() {
     final route = ActiveRoute.instance;
     final messenger = ScaffoldMessenger.of(context);
@@ -244,6 +321,7 @@ class _SliderScreenState extends State<SliderScreen> {
                   beforeLabel: context.t('today_label'),
                   hotspots: _place.hotspots,
                   bottomInset: _underlap,
+                  onAfterBadgeTap: _showAiSheet,
                   onHotspotSelected: (h) => setState(() {
                     _selectedHotspot = h;
                     _showHint = false;
@@ -285,6 +363,37 @@ class _SliderScreenState extends State<SliderScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 112,
+                  child: IgnorePointer(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 400),
+                      opacity: _showAiHint && _selectedHotspot == null ? 1 : 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.55),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(
+                            context.t('ai_hint'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -760,6 +869,15 @@ class _SliderScreenState extends State<SliderScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
+                  Text(
+                    context.t('source_ai_note'),
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      height: 1.4,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -782,22 +900,27 @@ class _SliderScreenState extends State<SliderScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: AppColors.primaryTealLight,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                context.t('verified'),
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryTeal,
+            if (inventory.isNotEmpty) ...[
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryTealLight,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  context.t('verified'),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryTeal,
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),

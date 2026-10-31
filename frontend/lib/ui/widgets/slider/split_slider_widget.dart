@@ -21,6 +21,9 @@ class SplitSliderWidget extends StatefulWidget {
   /// Bu kadar piksel alt kısım bilgi sayfasının altında kalır; butonlar bunun üstüne yerleşir.
   final double bottomInset;
 
+  /// Sol (tarihî) rozete dokununca.
+  final VoidCallback? onAfterBadgeTap;
+
   const SplitSliderWidget({
     super.key,
     required this.beforeImageUrl,
@@ -30,6 +33,7 @@ class SplitSliderWidget extends StatefulWidget {
     this.hotspots = const [],
     this.onHotspotSelected,
     this.bottomInset = 0,
+    this.onAfterBadgeTap,
   });
 
   @override
@@ -252,9 +256,13 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 150),
                 opacity: (_sliderValue > 0.12) ? 1.0 : 0.0,
-                child: _buildBadge(
-                  widget.afterLabel,
-                  tint: AppColors.primaryTealDark,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.onAfterBadgeTap,
+                  child: _buildBadge(
+                    widget.afterLabel,
+                    tint: AppColors.primaryTealDark,
+                  ),
                 ),
               ),
             ),
