@@ -319,19 +319,31 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 80,
         child: Column(
           children: [
+            // Tüm kısayollar aynı çerçeve ve iç boşlukla; vurgulu olan bordo tonda
             Container(
-              width: 56,
-              height: 56,
+              width: 64,
+              height: 64,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AppColors.primaryTealLight,
+                color: highlight ? AppColors.ciniBordeauxLight : Colors.white,
                 shape: BoxShape.circle,
-                border: highlight
-                    ? Border.all(color: AppColors.ciniBordeaux, width: 1.4)
-                    : null,
+                border: Border.all(
+                  color: highlight
+                      ? AppColors.ciniBordeaux
+                      : AppColors.primaryTeal.withValues(alpha: 0.4),
+                  width: 1.3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: AppIcon(
                 icon,
-                size: 32,
+                size: 30,
                 color: highlight
                     ? AppColors.ciniBordeaux
                     : AppColors.primaryTeal,
