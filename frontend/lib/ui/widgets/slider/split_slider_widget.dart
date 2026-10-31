@@ -448,10 +448,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               ),
             ),
 
-            // 3. Sol üst: Dönem rozeti (cam)
+            // 3. Sol alt: Dönem rozeti (cam)
             Positioned(
               left: 16,
-              top: 68,
+              bottom: widget.bottomInset + 14,
               child: IgnorePointer(
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 150),
@@ -464,10 +464,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               ),
             ),
 
-            // 4. Sağ üst: Bugün rozeti (cam)
+            // 4. Sağ alt: Bugün rozeti (cam)
             Positioned(
               right: 16,
-              top: 68,
+              bottom: widget.bottomInset + 14,
               child: IgnorePointer(
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 150),
@@ -483,7 +483,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             // 5. Yakınlaştırınca: oran ve sıfırlama düğmesi
             Positioned(
               right: 16,
-              top: 110,
+              top: MediaQuery.of(context).padding.top + 12,
               child: IgnorePointer(
                 ignoring: _zoom <= 1.05,
                 child: AnimatedOpacity(
