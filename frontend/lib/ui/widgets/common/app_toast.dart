@@ -9,14 +9,15 @@ class AppToast {
   static OverlayEntry? _entry;
   static _ToastController? _controller;
 
-  /// [bottomMargin]: güvenli alt boşluğun üstünden uzaklık. Varsayılan, alt gezinme çubuğunun üstüdür.
+  /// [bottomMargin]: güvenli alt boşluğun üstünden uzaklık. Varsayılan, alt gezinme çubuğunun ve
+  /// ortadaki QR düğmesinin çıkıntısının üstüdür.
   static void show(
     BuildContext context,
     String text, {
     IconData icon = Icons.check_rounded,
     String? actionLabel,
     VoidCallback? onAction,
-    double bottomMargin = 78,
+    double bottomMargin = 108,
     Duration duration = const Duration(seconds: 4),
   }) {
     // Öncekini beklemeden kaldır
@@ -131,75 +132,89 @@ class _ToastViewState extends State<_ToastView>
       left: 16,
       right: 16,
       bottom: widget.bottom,
-      child: SlideTransition(
-        position: slide,
-        child: FadeTransition(
-          opacity: CurvedAnimation(
-            parent: _anim,
-            curve: const Interval(0, 0.6),
-            reverseCurve: const Interval(0.4, 1),
-          ),
-          child: GestureDetector(
-            onVerticalDragEnd: (d) {
-              if ((d.primaryVelocity ?? 0) > 150) _close();
-            },
-            child: Material(
-              color: AppColors.heroPetrol,
-              elevation: 6,
-              borderRadius: BorderRadius.circular(20),
-              child: Semantics(
-                liveRegion: true,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    14,
-                    8,
-                    widget.actionLabel == null ? 14 : 8,
-                    8,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryTeal,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(widget.icon, size: 17, color: Colors.white),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          widget.text,
-                          style: const TextStyle(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: SlideTransition(
+          position: slide,
+          child: FadeTransition(
+            opacity: CurvedAnimation(
+              parent: _anim,
+              curve: const Interval(0, 0.6),
+              reverseCurve: const Interval(0.4, 1),
+            ),
+            child: GestureDetector(
+              onVerticalDragEnd: (d) {
+                if ((d.primaryVelocity ?? 0) > 150) _close();
+              },
+              child: Material(
+                color: AppColors.heroPetrol,
+                elevation: 6,
+                borderRadius: BorderRadius.circular(18),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      10,
+                      6,
+                      widget.actionLabel == null ? 14 : 6,
+                      6,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: const BoxDecoration(
+                            color: AppColors.primaryTeal,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            widget.icon,
+                            size: 15,
                             color: Colors.white,
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.none,
                           ),
                         ),
-                      ),
-                      if (widget.actionLabel != null)
-                        TextButton(
-                          onPressed: () {
-                            _close();
-                            widget.onAction?.call();
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.16,
-                            ),
-                            shape: const StadiumBorder(),
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            textStyle: const TextStyle(
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            widget.text,
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontSize: 13.5,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.none,
                             ),
                           ),
-                          child: Text(widget.actionLabel!),
                         ),
-                    ],
+                        if (widget.actionLabel != null) ...[
+                          const SizedBox(width: 10),
+                          TextButton(
+                            onPressed: () {
+                              _close();
+                              widget.onAction?.call();
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.16,
+                              ),
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              minimumSize: const Size(0, 32),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              textStyle: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            child: Text(widget.actionLabel!),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
               ),
