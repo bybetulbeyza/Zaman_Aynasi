@@ -18,7 +18,6 @@ import '../widgets/common/section_title.dart';
 import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
 import '../widgets/detail/photo_collage.dart';
-import 'fullscreen_slider_screen.dart';
 import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
@@ -245,12 +244,6 @@ class _SliderScreenState extends State<SliderScreen> {
                   beforeLabel: context.t('today_label'),
                   hotspots: _place.hotspots,
                   bottomInset: _underlap,
-                  onFullscreen: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FullscreenSliderScreen(place: _place),
-                    ),
-                  ),
                   onHotspotSelected: (h) => setState(() {
                     _selectedHotspot = h;
                     _showHint = false;

@@ -18,9 +18,6 @@ class SplitSliderWidget extends StatefulWidget {
   final List<Hotspot> hotspots;
   final ValueChanged<Hotspot>? onHotspotSelected;
 
-  /// Doluysa sağ altta "tam ekran" butonu gösterilir.
-  final VoidCallback? onFullscreen;
-
   /// Bu kadar piksel alt kısım bilgi sayfasının altında kalır; butonlar bunun üstüne yerleşir.
   final double bottomInset;
 
@@ -32,7 +29,6 @@ class SplitSliderWidget extends StatefulWidget {
     this.afterLabel = 'Dönem',
     this.hotspots = const [],
     this.onHotspotSelected,
-    this.onFullscreen,
     this.bottomInset = 0,
   });
 
@@ -394,13 +390,6 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               ),
 
             // 7. Modu Açıp Kapatma Butonu (Sol Alt Köşe)
-            if (widget.onFullscreen != null)
-              Positioned(
-                right: 12,
-                bottom: widget.bottomInset + 12,
-                child: _buildFullscreenButton(),
-              ),
-
             if (kDebugMode)
               Positioned(
                 left: 12,
@@ -560,31 +549,6 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFullscreenButton() {
-    return GestureDetector(
-      onTap: widget.onFullscreen,
-      child: ClipOval(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.28),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
-            ),
-            child: const Icon(
-              Icons.fullscreen_rounded,
-              color: Colors.white,
-              size: 26,
-            ),
-          ),
-        ),
       ),
     );
   }
