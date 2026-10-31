@@ -112,8 +112,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
             children: [
               Positioned.fill(
                 child: ListView(
-                  // Alt boşluk: yüzen buton son kartın üstüne binmesin
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   children: [
                     Text(context.t('hr_title'), style: AppTheme.displayLarge),
                     const SizedBox(height: 6),
@@ -144,6 +143,8 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                             .toList(),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    _buildCreateRow(),
                     const SizedBox(height: 20),
                     ActiveRouteCard(
                       onShowOnMap: (stops) =>
@@ -176,7 +177,6 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                   ],
                 ),
               ),
-              Positioned(right: 20, bottom: 18, child: _buildCreateFab()),
             ],
           ),
         ),
@@ -184,28 +184,50 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
     );
   }
 
-  /// Sağ altta yüzen kompakt "Rota oluştur" butonu.
-  Widget _buildCreateFab() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryTeal.withValues(alpha: 0.4),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+  /// Çiplerin altında, listeyi örtmeyen tam genişlikte "Rota oluştur" satırı.
+  Widget _buildCreateRow() {
+    return GestureDetector(
+      onTap: widget.onCreateRoute,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.primaryTealLight,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.primaryTeal.withValues(alpha: 0.35),
           ),
-        ],
-      ),
-      child: ElevatedButton.icon(
-        onPressed: widget.onCreateRoute,
-        icon: const Icon(Icons.add_rounded, size: 22),
-        label: Text(context.t('rc_create')),
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-          shape: const StadiumBorder(),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryTeal,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                context.t('rc_create'),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryTealDark,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.primaryTeal,
+            ),
+          ],
         ),
       ),
     );
