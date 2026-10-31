@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_lang.dart';
 
@@ -9,6 +10,23 @@ class AuthService {
 
   /// Google dönüşünde uygulamayı geri açan adres (AndroidManifest / Info.plist ile aynı).
   static const redirectUrl = 'io.supabase.zamanaynasi://login-callback/';
+
+  static const _seenKey = 'auth_screen_seen';
+
+  /// Giriş ekranı daha önce gösterildi mi (misafir seçilmiş olabilir)?
+  static Future<bool> hasSeenAuth() async {
+    try {
+      return (await SharedPreferences.getInstance()).getBool(_seenKey) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<void> markAuthSeen() async {
+    try {
+      await (await SharedPreferences.getInstance()).setBool(_seenKey, true);
+    } catch (_) {}
+  }
 
   static User? get user => _c.auth.currentUser;
   static bool get isSignedIn => user != null;

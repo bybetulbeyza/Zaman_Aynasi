@@ -56,6 +56,7 @@ class _AuthScreenState extends State<AuthScreen> {
   void _done() {
     if (!mounted || _finished) return;
     _finished = true;
+    AuthService.markAuthSeen();
     if (widget.popOnDone) {
       Navigator.of(context).pop();
     } else {
@@ -64,6 +65,7 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _guest() {
+    AuthService.markAuthSeen();
     if (widget.popOnDone) {
       Navigator.of(context).pop();
       return;

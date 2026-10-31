@@ -29,13 +29,15 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    Future.delayed(SplashScreen.duration, () {
+    Future.delayed(SplashScreen.duration, () async {
+      // Oturum varsa ya da giriş ekranı daha önce görüldüyse (misafir) doğrudan ana ekran
+      final skip = AuthService.isSignedIn || await AuthService.hasSeenAuth();
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         PageRouteBuilder<void>(
           transitionDuration: const Duration(milliseconds: 500),
           pageBuilder: (_, __, ___) =>
-              AuthService.isSignedIn ? const MainScreen() : const AuthScreen(),
+              skip ? const MainScreen() : const AuthScreen(),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
