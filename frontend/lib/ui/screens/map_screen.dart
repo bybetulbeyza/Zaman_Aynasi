@@ -489,18 +489,26 @@ class MapScreenState extends State<MapScreen> {
           // Yakınlaştır / uzaklaştır
           Positioned(
             right: 16,
-            top: MediaQuery.of(context).padding.top + 124,
-            child: Material(
-              color: Colors.white,
-              elevation: 3,
-              borderRadius: BorderRadius.circular(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _zoomButton(Icons.add_rounded, () => _zoomBy(1)),
-                  Container(width: 28, height: 1, color: AppColors.chipBorder),
-                  _zoomButton(Icons.remove_rounded, () => _zoomBy(-1)),
-                ],
+            top: 0,
+            bottom: 0,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Material(
+                color: Colors.white,
+                elevation: 3,
+                borderRadius: BorderRadius.circular(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _zoomButton(Icons.add_rounded, () => _zoomBy(1)),
+                    Container(
+                      width: 28,
+                      height: 1,
+                      color: AppColors.chipBorder,
+                    ),
+                    _zoomButton(Icons.remove_rounded, () => _zoomBy(-1)),
+                  ],
+                ),
               ),
             ),
           ),
