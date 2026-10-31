@@ -181,7 +181,7 @@ const Map<String, String> appStringsTr = {
   'about_open_inventory': 'Envanter yayınlarını aç',
   'ai_sheet_title': 'Bu görüntü nasıl hazırlandı?',
   'ai_sheet_body':
-      'Soldaki "Tarihî canlandırma", Vakıf Katılım envanter kitaplarındaki tarif ve kayıtlara dayanarak yapay zekâ ile oluşturulmuş bir canlandırmadır. Gerçek bir fotoğraf değildir. Sağdaki "Günümüz" görseli ise eserin bugünkü gerçek fotoğrafıdır.',
+      'Soldaki "Tarihî canlandırma", Vakıf Katılım envanter kitaplarındaki tarif ve kayıtlara dayanarak yapay zekâ ile oluşturulmuş bir canlandırmadır. Sağdaki "Günümüz" görseli ise eserin bugünkü gerçek fotoğrafıdır.',
   'ai_sheet_source': 'Dayanak kayıt',
   'ai_sheet_ok': 'Anladım',
   'source_ai_note':
@@ -374,7 +374,7 @@ const Map<String, String> appStringsEn = {
   'about_open_inventory': 'Open inventory publications',
   'ai_sheet_title': 'How was this image made?',
   'ai_sheet_body':
-      'The "Historic reconstruction" on the left is an AI-generated reconstruction based on the descriptions and records in the Vakıf Katılım inventory books. It is not a real photograph. The "Present" image on the right is a real, current photo of the landmark.',
+      'The "Historic reconstruction" on the left is an AI-generated reconstruction based on the descriptions and records in the Vakıf Katılım inventory books. The "Present" image on the right is a real, current photo of the landmark.',
   'ai_sheet_source': 'Source record',
   'ai_sheet_ok': 'Got it',
   'source_ai_note':
