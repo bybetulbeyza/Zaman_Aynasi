@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/passport.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
+import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/passport/stamp_widget.dart';
 import 'slider_screen.dart';
@@ -18,7 +20,8 @@ class PassportScreen extends StatefulWidget {
 }
 
 class _PassportScreenState extends State<PassportScreen> {
-  List<HeritagePlace> _places = [];
+  List<HeritagePlace> _all = [];
+  String _city = AppCities.active;
   bool _loading = true;
 
   @override
@@ -27,7 +30,7 @@ class _PassportScreenState extends State<PassportScreen> {
     HeritageRepository().getPlacesCached().then((p) {
       if (mounted) {
         setState(() {
-          _places = p;
+          _all = p;
           _loading = false;
         });
       }
@@ -45,10 +48,11 @@ class _PassportScreenState extends State<PassportScreen> {
           child: ListenableBuilder(
             listenable: Passport.instance,
             builder: (context, _) {
-              final earned = _places
+              final cityPlaces = _all.where((p) => p.city == _city).toList();
+              final earned = cityPlaces
                   .where((p) => Passport.instance.hasStamp(p.id))
                   .length;
-              final total = _places.length;
+              final total = cityPlaces.length;
               return ListView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                 children: [
@@ -78,7 +82,24 @@ class _PassportScreenState extends State<PassportScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 14),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final c in AppCities.all)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: FilterChipPill(
+                              label: c,
+                              selected: _city == c,
+                              onTap: () => setState(() => _city = c),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
@@ -132,6 +153,19 @@ class _PassportScreenState extends State<PassportScreen> {
                         ),
                       ),
                     )
+                  else if (cityPlaces.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 40),
+                      child: Center(
+                        child: Text(
+                          context
+                              .t('passport_soon')
+                              .replaceAll('{city}', _city),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: AppColors.textMuted),
+                        ),
+                      ),
+                    )
                   else
                     GridView.count(
                       crossAxisCount: 3,
@@ -141,7 +175,7 @@ class _PassportScreenState extends State<PassportScreen> {
                       crossAxisSpacing: 8,
                       childAspectRatio: 0.78,
                       children: [
-                        for (final p in _places) _slot(context, p, en),
+                        for (final p in cityPlaces) _slot(context, p, en),
                       ],
                     ),
                 ],

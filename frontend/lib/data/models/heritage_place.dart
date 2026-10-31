@@ -114,6 +114,9 @@ class HeritagePlace {
   final String id;
   final String? parentId; // Külliyenin alt parçası ise üst yapının ID'si
   final String name;
+
+  /// Supabase: city — eserin şehri (boşsa aktif şehir sayılır).
+  final String city;
   final String routeName;
   final PlaceCategory category;
   final LatLng location;
@@ -146,6 +149,7 @@ class HeritagePlace {
     required this.id,
     this.parentId,
     required this.name,
+    this.city = 'Bursa',
     required this.routeName,
     required this.category,
     required this.location,
@@ -199,6 +203,7 @@ class HeritagePlace {
       id: id,
       parentId: parentId,
       name: name,
+      city: city,
       routeName: routeName,
       category: category,
       location: location,
@@ -238,6 +243,9 @@ class HeritagePlace {
       id: json['id'].toString(),
       parentId: json['parent_id']?.toString(),
       name: json['name'] as String? ?? '',
+      city: (json['city'] as String? ?? '').trim().isEmpty
+          ? 'Bursa'
+          : (json['city'] as String).trim(),
       routeName: json['route_name'] as String? ?? '',
       category: _parseCategory(json['category'] as String?),
       location: LatLng(

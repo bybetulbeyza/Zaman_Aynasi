@@ -75,8 +75,9 @@ const Map<String, String> appStringsTr = {
   'stamp_collected': 'mühür kazanıldı',
   'stamp_empty': 'mühür henüz yok',
   'ok_btn': 'Tamam',
-  'passport_title': 'Bursa Pasaportu',
-  'passport_row': 'Bursa Pasaportum',
+  'passport_title': 'Pasaportum',
+  'passport_row': 'Pasaportum',
+  'passport_soon': '{city} mühürleri yakında.',
   'passport_count': '{n}/{total} mühür',
   'passport_hint':
       'Bir eseri ziyaret et, QR kodunu okut ya da görevlerini tamamla; mührünü kazan.',
@@ -279,8 +280,9 @@ const Map<String, String> appStringsEn = {
   'stamp_collected': 'stamp collected',
   'stamp_empty': 'no stamp yet',
   'ok_btn': 'OK',
-  'passport_title': 'Bursa Passport',
-  'passport_row': 'My Bursa Passport',
+  'passport_title': 'My Passport',
+  'passport_row': 'Passport',
+  'passport_soon': '{city} stamps are coming soon.',
   'passport_count': '{n}/{total} stamps',
   'passport_hint':
       'Visit a landmark, scan its QR code or finish its tasks to earn its stamp.',
