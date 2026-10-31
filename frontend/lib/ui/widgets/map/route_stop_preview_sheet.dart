@@ -1,3 +1,4 @@
+import 'package:flutter/semantics.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -16,6 +17,10 @@ class RouteStopPreviewSheet extends StatelessWidget {
   final VoidCallback? onPrevStopTap;
   final VoidCallback? onCloseRoute;
 
+  /// Rota modunda durak sayısı ve sıradaki durak (nokta göstergesi için).
+  final int stopCount;
+  final int stopIndex;
+
   const RouteStopPreviewSheet({
     super.key,
     this.routeTitle,
@@ -27,6 +32,8 @@ class RouteStopPreviewSheet extends StatelessWidget {
     this.onNextStopTap,
     this.onPrevStopTap,
     this.onCloseRoute,
+    this.stopCount = 0,
+    this.stopIndex = 0,
   });
 
   Widget _placeholder() => Container(
@@ -39,40 +46,6 @@ class RouteStopPreviewSheet extends StatelessWidget {
     alignment: Alignment.center,
     child: const Icon(Icons.image_outlined, color: AppColors.textMuted),
   );
-
-  Widget _stepButton(
-    BuildContext context,
-    IconData icon,
-    String label,
-    VoidCallback? onTap,
-  ) {
-    return Semantics(
-      button: true,
-      enabled: onTap != null,
-      label: label,
-      excludeSemantics: true,
-      child: Material(
-        color: onTap == null
-            ? AppColors.borderSubtle
-            : AppColors.primaryTealLight,
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(7),
-            child: Icon(
-              icon,
-              size: 22,
-              color: onTap == null
-                  ? AppColors.textMuted
-                  : AppColors.primaryTealDark,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,20 +100,6 @@ class RouteStopPreviewSheet extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  _stepButton(
-                    context,
-                    Icons.chevron_left_rounded,
-                    context.t('prev_stop'),
-                    onPrevStopTap,
-                  ),
-                  const SizedBox(width: 8),
-                  _stepButton(
-                    context,
-                    Icons.chevron_right_rounded,
-                    context.t('next_stop'),
-                    onNextStopTap,
-                  ),
                   if (onCloseRoute != null) ...[
                     const SizedBox(width: 4),
                     Semantics(
@@ -167,8 +126,22 @@ class RouteStopPreviewSheet extends StatelessWidget {
             hint: placeDistanceTime,
             excludeSemantics: true,
             onTap: onDetailTap,
+            customSemanticsActions: {
+              if (onNextStopTap != null)
+                CustomSemanticsAction(label: context.t('next_stop')):
+                    onNextStopTap!,
+              if (onPrevStopTap != null)
+                CustomSemanticsAction(label: context.t('prev_stop')):
+                    onPrevStopTap!,
+            },
             child: GestureDetector(
               onTap: onDetailTap,
+              // Rota modunda kartı sağa/sola kaydırarak durak değiştirilir
+              onHorizontalDragEnd: (d) {
+                final v = d.primaryVelocity ?? 0;
+                if (v < -250) onNextStopTap?.call();
+                if (v > 250) onPrevStopTap?.call();
+              },
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -234,6 +207,28 @@ class RouteStopPreviewSheet extends StatelessWidget {
               ),
             ),
           ),
+          if (stopCount > 1 && stopCount <= 12)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < stopCount; i++)
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: i == stopIndex ? 18 : 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: i == stopIndex
+                            ? AppColors.primaryTeal
+                            : AppColors.chipBorder,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                ],
+              ),
+            ),
         ],
       ),
     );

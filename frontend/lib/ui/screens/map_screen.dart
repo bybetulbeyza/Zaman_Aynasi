@@ -250,25 +250,6 @@ class MapScreenState extends State<MapScreen> {
     setState(() => _walk = route);
   }
 
-  Widget _zoomButton(IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: SizedBox(
-        width: 42,
-        height: 42,
-        child: Icon(icon, color: AppColors.textDark, size: 24),
-      ),
-    );
-  }
-
-  void _zoomBy(double delta) {
-    try {
-      final cam = _mapController.camera;
-      _mapController.move(cam.center, (cam.zoom + delta).clamp(10.0, 19.0));
-    } catch (_) {}
-  }
-
   void _recenter() {
     if (!_hasRealLocation) {
       ScaffoldMessenger.of(
@@ -561,72 +542,61 @@ class MapScreenState extends State<MapScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Yakınlaştır / uzaklaştır: başparmağın erişiminde, kontrol grubunun üstünde
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                  child: Material(
-                    color: Colors.white,
-                    elevation: 3,
-                    borderRadius: BorderRadius.circular(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _zoomButton(Icons.add_rounded, () => _zoomBy(1)),
-                        Container(
-                          width: 26,
-                          height: 1,
-                          color: AppColors.chipBorder,
-                        ),
-                        _zoomButton(Icons.remove_rounded, () => _zoomBy(-1)),
-                      ],
-                    ),
-                  ),
-                ),
+                // Sağda dikey yuvarlak ikili: yol tarifi (eser seçiliyse) ve konumum
                 Padding(
                   padding: EdgeInsets.fromLTRB(16, 0, 16, showCard ? 10 : 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Material(
-                        color: Colors.white,
-                        shape: const CircleBorder(),
-                        elevation: 3,
-                        child: InkWell(
-                          customBorder: const CircleBorder(),
-                          onTap: _recenter,
-                          child: const Padding(
-                            padding: EdgeInsets.all(15),
-                            child: AppIcon(
-                              'locate',
-                              color: AppColors.primaryTeal,
-                              size: 26,
+                      if (showCard) ...[
+                        Semantics(
+                          button: true,
+                          label: context.t('directions'),
+                          excludeSemantics: true,
+                          child: Material(
+                            color: AppColors.primaryTeal,
+                            shape: const CircleBorder(),
+                            elevation: 4,
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTap: () => LauncherUtil.openDirections(
+                                currentPlace.location,
+                              ),
+                              child: const Padding(
+                                padding: EdgeInsets.all(15),
+                                child: AppIcon(
+                                  'directions',
+                                  size: 26,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      Semantics(
+                        button: true,
+                        label: context.t('locate_me'),
+                        excludeSemantics: true,
+                        child: Material(
+                          color: Colors.white,
+                          shape: const CircleBorder(),
+                          elevation: 3,
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: _recenter,
+                            child: const Padding(
+                              padding: EdgeInsets.all(15),
+                              child: AppIcon(
+                                'locate',
+                                color: AppColors.primaryTeal,
+                                size: 26,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                      if (showCard)
-                        ElevatedButton.icon(
-                          onPressed: () => LauncherUtil.openDirections(
-                            currentPlace.location,
-                          ),
-                          icon: const AppIcon(
-                            'directions',
-                            size: 24,
-                            color: Colors.white,
-                          ),
-                          label: Text(context.t('directions')),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 22,
-                              vertical: 14,
-                            ),
-                            shape: const StadiumBorder(),
-                            textStyle: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -666,6 +636,10 @@ class MapScreenState extends State<MapScreen> {
                             ),
                           ),
                           onCloseRoute: _routeChip != null ? _closeRoute : null,
+                          stopCount: _routeChip != null
+                              ? _filteredPlaces.length
+                              : 0,
+                          stopIndex: _currentStopIndex,
                           onPrevStopTap:
                               (_routeChip != null && _filteredPlaces.length > 1)
                               ? () => _stepStop(-1)
