@@ -253,6 +253,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
           context,
           context.t('rc_none_found'),
           icon: Icons.search_off_rounded,
+          bottomMargin: 24,
         );
         return;
       }
