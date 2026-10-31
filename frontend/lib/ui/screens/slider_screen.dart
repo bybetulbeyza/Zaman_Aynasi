@@ -181,77 +181,6 @@ class _SliderScreenState extends State<SliderScreen> {
     return raw.replaceAll('Cilt', 'Vol.').replaceAll(RegExp(r's\.\s*'), 'p. ');
   }
 
-  /// Tarihî görselin yapay zekâ canlandırması olduğunu açıklayan kart.
-  void _showAiSheet() {
-    final en = context.isEn;
-    final inventory = _inventoryLabel(en);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 22, 24, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                ctx.t('ai_sheet_title'),
-                style: const TextStyle(
-                  fontFamily: AppTheme.headingFont,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                ctx.t('ai_sheet_body'),
-                style: const TextStyle(
-                  fontSize: 15,
-                  height: 1.5,
-                  color: AppColors.textDark,
-                ),
-              ),
-              if (inventory.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryTealLight,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Text(
-                    '${ctx.t('ai_sheet_source')}: $inventory',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryTealDark,
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(ctx.t('ai_sheet_ok')),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _toggleRoute() {
     final route = ActiveRoute.instance;
     if (route.contains(_place)) {
@@ -593,9 +522,9 @@ class _SliderScreenState extends State<SliderScreen> {
       // Kaynakça
       SectionTitle(context.t('sources')),
       const SizedBox(height: 12),
-      _buildAiNote(),
-      const SizedBox(height: 10),
       _buildSourceCard(en),
+      const SizedBox(height: 12),
+      _buildAiNote(),
     ];
   }
 
@@ -830,35 +759,14 @@ class _SliderScreenState extends State<SliderScreen> {
     );
   }
 
-  /// Tarihî görselin yapay zekâ canlandırması olduğunu söyleyen, dokununca açıklama açan tek satır.
+  /// Kaynakça altında, tarihî görselin yapay zekâ canlandırması olduğunu belirten düz not.
   Widget _buildAiNote() {
-    return GestureDetector(
-      onTap: _showAiSheet,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-        decoration: BoxDecoration(
-          color: AppColors.primaryTealLight,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                context.t('source_ai_note'),
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  height: 1.35,
-                  color: AppColors.primaryTealDark,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.primaryTeal,
-            ),
-          ],
-        ),
+    return Text(
+      context.t('source_ai_note'),
+      style: const TextStyle(
+        fontSize: 13,
+        height: 1.4,
+        color: AppColors.textMuted,
       ),
     );
   }
