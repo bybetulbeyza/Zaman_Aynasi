@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import 'package:video_player/video_player.dart';
 import '../../core/constants/app_colors.dart';
@@ -87,70 +88,72 @@ class _ReelsScreenState extends State<ReelsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          if (_loading)
-            const Center(child: const LogoLoader())
-          else if (_reels.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Text(
-                  context.t('reels_empty'),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    height: 1.5,
+    return DarkCancel(
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            if (_loading)
+              const Center(child: const LogoLoader())
+            else if (_reels.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(
+                    context.t('reels_empty'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      height: 1.5,
+                    ),
                   ),
                 ),
+              )
+            else
+              PageView.builder(
+                controller: _page,
+                scrollDirection: Axis.vertical,
+                itemCount: _reels.length,
+                itemBuilder: (_, i) => _ReelPage(
+                  key: ValueKey('${_reels[i].hotspot.id}'),
+                  reel: _reels[i],
+                  pageController: _page,
+                  index: i,
+                ),
               ),
-            )
-          else
-            PageView.builder(
-              controller: _page,
-              scrollDirection: Axis.vertical,
-              itemCount: _reels.length,
-              itemBuilder: (_, i) => _ReelPage(
-                key: ValueKey('${_reels[i].hotspot.id}'),
-                reel: _reels[i],
-                pageController: _page,
-                index: i,
-              ),
-            ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Semantics(
-                      button: true,
-                      label: context.t('a11y_back'),
-                      excludeSemantics: true,
-                      child: Icon(
-                        Icons.arrow_back_ios_new,
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Semantics(
+                        button: true,
+                        label: context.t('a11y_back'),
+                        excludeSemantics: true,
+                        child: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    Text(
+                      context.t('reels_title'),
+                      style: const TextStyle(
+                        fontFamily: AppTheme.headingFont,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Text(
-                    context.t('reels_title'),
-                    style: const TextStyle(
-                      fontFamily: AppTheme.headingFont,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

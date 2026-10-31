@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../common/dark_cancel.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../common/app_network_image.dart';
 
@@ -203,67 +204,69 @@ class _PhotoViewerState extends State<PhotoViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _controller,
-            itemCount: widget.photos.length,
-            onPageChanged: (i) => setState(() => _index = i),
-            itemBuilder: (_, i) => InteractiveViewer(
-              minScale: 1,
-              maxScale: 4,
-              child: Center(
-                child: AppNetworkImage(
-                  imageUrl: widget.photos[i],
-                  fit: BoxFit.contain,
+    return DarkCancel(
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            PageView.builder(
+              controller: _controller,
+              itemCount: widget.photos.length,
+              onPageChanged: (i) => setState(() => _index = i),
+              itemBuilder: (_, i) => InteractiveViewer(
+                minScale: 1,
+                maxScale: 4,
+                child: Center(
+                  child: AppNetworkImage(
+                    imageUrl: widget.photos[i],
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Semantics(
-                      button: true,
-                      label: context.t('a11y_close'),
-                      excludeSemantics: true,
-                      child: Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
-                        size: 28,
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Semantics(
+                        button: true,
+                        label: context.t('a11y_close'),
+                        excludeSemantics: true,
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        '${_index + 1} / ${widget.photos.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Text(
-                      '${_index + 1} / ${widget.photos.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                ],
+                    const SizedBox(width: 10),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

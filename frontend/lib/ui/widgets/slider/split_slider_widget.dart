@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../common/dark_cancel.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
@@ -351,185 +352,187 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        final totalHeight = constraints.maxHeight.isFinite
-            ? constraints.maxHeight
-            : 340.0;
-        final dividerX = _sliderValue * totalWidth;
-        final sceneM = _matrix(_zoom, _pan);
+    return DarkCancel(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final totalWidth = constraints.maxWidth;
+          final totalHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : 340.0;
+          final dividerX = _sliderValue * totalWidth;
+          final sceneM = _matrix(_zoom, _pan);
 
-        return Stack(
-          children: [
-            // 1. Karşılaştırma katmanı: çizgi + iki parmakla yakınlaştırma + çift dokunma + mercek
-            Semantics(
-              slider: true,
-              label: context.t('a11y_slider'),
-              value: '${(_sliderValue * 100).round()}%',
-              increasedValue:
-                  '${((_sliderValue + 0.1).clamp(0.0, 1.0) * 100).round()}%',
-              decreasedValue:
-                  '${((_sliderValue - 0.1).clamp(0.0, 1.0) * 100).round()}%',
-              onIncrease: () => setState(() {
-                _userTouched = true;
-                _intro.stop();
-                _sliderValue = (_sliderValue + 0.1).clamp(0.0, 1.0);
-              }),
-              onDecrease: () => setState(() {
-                _userTouched = true;
-                _intro.stop();
-                _sliderValue = (_sliderValue - 0.1).clamp(0.0, 1.0);
-              }),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onScaleStart: (d) => _onScaleStart(d, totalWidth),
-                onScaleUpdate: (d) =>
-                    _onScaleUpdate(d, totalWidth, totalHeight),
-                onScaleEnd: _onScaleEnd,
-                onDoubleTapDown: (d) => _doubleTapPos = d.localPosition,
-                onDoubleTap: () => _onDoubleTap(totalWidth, totalHeight),
-                onLongPressStart: (d) {
-                  HapticFeedback.mediumImpact();
-                  setState(() => _lensPoint = d.localPosition);
-                },
-                onLongPressMoveUpdate: (d) =>
-                    setState(() => _lensPoint = d.localPosition),
-                onLongPressEnd: (_) => setState(() => _lensPoint = null),
-                onLongPressCancel: () => setState(() => _lensPoint = null),
-                child: SizedBox(
-                  width: totalWidth,
-                  height: totalHeight,
-                  child: _scene(totalWidth, totalHeight, dividerX, sceneM),
+          return Stack(
+            children: [
+              // 1. Karşılaştırma katmanı: çizgi + iki parmakla yakınlaştırma + çift dokunma + mercek
+              Semantics(
+                slider: true,
+                label: context.t('a11y_slider'),
+                value: '${(_sliderValue * 100).round()}%',
+                increasedValue:
+                    '${((_sliderValue + 0.1).clamp(0.0, 1.0) * 100).round()}%',
+                decreasedValue:
+                    '${((_sliderValue - 0.1).clamp(0.0, 1.0) * 100).round()}%',
+                onIncrease: () => setState(() {
+                  _userTouched = true;
+                  _intro.stop();
+                  _sliderValue = (_sliderValue + 0.1).clamp(0.0, 1.0);
+                }),
+                onDecrease: () => setState(() {
+                  _userTouched = true;
+                  _intro.stop();
+                  _sliderValue = (_sliderValue - 0.1).clamp(0.0, 1.0);
+                }),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onScaleStart: (d) => _onScaleStart(d, totalWidth),
+                  onScaleUpdate: (d) =>
+                      _onScaleUpdate(d, totalWidth, totalHeight),
+                  onScaleEnd: _onScaleEnd,
+                  onDoubleTapDown: (d) => _doubleTapPos = d.localPosition,
+                  onDoubleTap: () => _onDoubleTap(totalWidth, totalHeight),
+                  onLongPressStart: (d) {
+                    HapticFeedback.mediumImpact();
+                    setState(() => _lensPoint = d.localPosition);
+                  },
+                  onLongPressMoveUpdate: (d) =>
+                      setState(() => _lensPoint = d.localPosition),
+                  onLongPressEnd: (_) => setState(() => _lensPoint = null),
+                  onLongPressCancel: () => setState(() => _lensPoint = null),
+                  child: SizedBox(
+                    width: totalWidth,
+                    height: totalHeight,
+                    child: _scene(totalWidth, totalHeight, dividerX, sceneM),
+                  ),
                 ),
               ),
-            ),
 
-            // 2. Cam efektli bölücü çizgi ve tutamaç
-            Positioned(
-              left: dividerX - 1.25,
-              top: 0,
-              bottom: 0,
-              child: IgnorePointer(
-                child: Container(
-                  width: 2.5,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.0, 0.2, 0.8, 1.0],
-                      colors: [
-                        Colors.white.withValues(alpha: 0.0),
-                        Colors.white.withValues(alpha: 0.95),
-                        Colors.white.withValues(alpha: 0.95),
-                        Colors.white.withValues(alpha: 0.0),
+              // 2. Cam efektli bölücü çizgi ve tutamaç
+              Positioned(
+                left: dividerX - 1.25,
+                top: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: Container(
+                    width: 2.5,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.0, 0.2, 0.8, 1.0],
+                        colors: [
+                          Colors.white.withValues(alpha: 0.0),
+                          Colors.white.withValues(alpha: 0.95),
+                          Colors.white.withValues(alpha: 0.95),
+                          Colors.white.withValues(alpha: 0.0),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withValues(alpha: 0.45),
+                          blurRadius: 10,
+                        ),
                       ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: 0.45),
-                        blurRadius: 10,
-                      ),
-                    ],
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              left: dividerX - 28.0,
-              top: (totalHeight * 0.5) - 28.0,
-              child: IgnorePointer(
-                child: AnimatedScale(
-                  scale: _active ? 1.14 : 1.0,
-                  duration: const Duration(milliseconds: 160),
-                  curve: Curves.easeOut,
-                  child: _buildGlassKnob(),
-                ),
-              ),
-            ),
-
-            // 3. Sol alt: Dönem rozeti (cam)
-            Positioned(
-              left: 16,
-              bottom: widget.bottomInset + 14,
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 150),
-                  opacity: (_sliderValue > 0.12) ? 1.0 : 0.0,
-                  child: _buildBadge(
-                    widget.afterLabel,
-                    tint: AppColors.primaryTealDark,
+              Positioned(
+                left: dividerX - 28.0,
+                top: (totalHeight * 0.5) - 28.0,
+                child: IgnorePointer(
+                  child: AnimatedScale(
+                    scale: _active ? 1.14 : 1.0,
+                    duration: const Duration(milliseconds: 160),
+                    curve: Curves.easeOut,
+                    child: _buildGlassKnob(),
                   ),
                 ),
               ),
-            ),
 
-            // 4. Sağ alt: Bugün rozeti (cam)
-            Positioned(
-              right: 16,
-              bottom: widget.bottomInset + 14,
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 150),
-                  opacity: (_sliderValue < 0.88) ? 1.0 : 0.0,
-                  child: _buildBadge(
-                    widget.beforeLabel,
-                    tint: AppColors.ciniCobalt,
+              // 3. Sol alt: Dönem rozeti (cam)
+              Positioned(
+                left: 16,
+                bottom: widget.bottomInset + 14,
+                child: IgnorePointer(
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: (_sliderValue > 0.12) ? 1.0 : 0.0,
+                    child: _buildBadge(
+                      widget.afterLabel,
+                      tint: AppColors.primaryTealDark,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // 5. Yakınlaştırınca: oran ve sıfırlama düğmesi
-            Positioned(
-              right: 16,
-              top: MediaQuery.of(context).padding.top + 12,
-              child: IgnorePointer(
-                ignoring: _zoom <= 1.05,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 180),
-                  opacity: _zoom > 1.05 ? 1 : 0,
-                  child: Semantics(
-                    button: true,
-                    label: context.t('zoom_reset'),
-                    excludeSemantics: true,
-                    child: GestureDetector(
-                      onTap: _resetZoom,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.32),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.38),
-                                width: 0.9,
+              // 4. Sağ alt: Bugün rozeti (cam)
+              Positioned(
+                right: 16,
+                bottom: widget.bottomInset + 14,
+                child: IgnorePointer(
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: (_sliderValue < 0.88) ? 1.0 : 0.0,
+                    child: _buildBadge(
+                      widget.beforeLabel,
+                      tint: AppColors.ciniCobalt,
+                    ),
+                  ),
+                ),
+              ),
+
+              // 5. Yakınlaştırınca: oran ve sıfırlama düğmesi
+              Positioned(
+                right: 16,
+                top: MediaQuery.of(context).padding.top + 12,
+                child: IgnorePointer(
+                  ignoring: _zoom <= 1.05,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 180),
+                    opacity: _zoom > 1.05 ? 1 : 0,
+                    child: Semantics(
+                      button: true,
+                      label: context.t('zoom_reset'),
+                      excludeSemantics: true,
+                      child: GestureDetector(
+                        onTap: _resetZoom,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
                               ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.zoom_out_map_rounded,
-                                  size: 16,
-                                  color: Colors.white,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.32),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.38),
+                                  width: 0.9,
                                 ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '${_zoom.toStringAsFixed(1)}×',
-                                  style: const TextStyle(
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.zoom_out_map_rounded,
+                                    size: 16,
                                     color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${_zoom.toStringAsFixed(1)}×',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -538,62 +541,62 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   ),
                 ),
               ),
-            ),
 
-            // 6. Dinamik hotspot'lar (fotoğrafla birlikte hareket eder, boyutu sabit kalır)
-            if (_showHotspots)
-              ...widget.hotspots.map((hotspot) {
-                final isBeforeSide =
-                    hotspot.targetSide.trim().toLowerCase() == 'before';
-                // 'after' hotspot'ları sol (eski) fotoğrafa, 'before' olanlar sağ (güncel) fotoğrafa aittir
-                final aspect = isBeforeSide ? _newAspect : _oldAspect;
-                final content = aspect == null
-                    ? Offset(
-                        hotspot.xPercent * totalWidth,
-                        hotspot.yPercent * totalHeight,
-                      )
-                    : _imageToBox(
-                        hotspot.xPercent,
-                        hotspot.yPercent,
-                        aspect,
-                        totalWidth,
-                        totalHeight,
-                      );
-                final pos = content * _zoom + _pan;
+              // 6. Dinamik hotspot'lar (fotoğrafla birlikte hareket eder, boyutu sabit kalır)
+              if (_showHotspots)
+                ...widget.hotspots.map((hotspot) {
+                  final isBeforeSide =
+                      hotspot.targetSide.trim().toLowerCase() == 'before';
+                  // 'after' hotspot'ları sol (eski) fotoğrafa, 'before' olanlar sağ (güncel) fotoğrafa aittir
+                  final aspect = isBeforeSide ? _newAspect : _oldAspect;
+                  final content = aspect == null
+                      ? Offset(
+                          hotspot.xPercent * totalWidth,
+                          hotspot.yPercent * totalHeight,
+                        )
+                      : _imageToBox(
+                          hotspot.xPercent,
+                          hotspot.yPercent,
+                          aspect,
+                          totalWidth,
+                          totalHeight,
+                        );
+                  final pos = content * _zoom + _pan;
 
-                // Kırpılan (görünmeyen) bölgeye düşen nokta gösterilmez
-                final inView =
-                    pos.dx > 12 &&
-                    pos.dx < totalWidth - 12 &&
-                    pos.dy > 12 &&
-                    pos.dy < totalHeight - 12;
-                final isVisible =
-                    inView &&
-                    (isBeforeSide ? pos.dx > dividerX : pos.dx < dividerX);
-                if (!isVisible) return const SizedBox.shrink();
+                  // Kırpılan (görünmeyen) bölgeye düşen nokta gösterilmez
+                  final inView =
+                      pos.dx > 12 &&
+                      pos.dx < totalWidth - 12 &&
+                      pos.dy > 12 &&
+                      pos.dy < totalHeight - 12;
+                  final isVisible =
+                      inView &&
+                      (isBeforeSide ? pos.dx > dividerX : pos.dx < dividerX);
+                  if (!isVisible) return const SizedBox.shrink();
 
-                return Positioned(
-                  left: pos.dx - 16,
-                  top: pos.dy - 16,
-                  child: _buildAnimatedHotspot(
-                    label: context
-                        .t('a11y_hotspot')
-                        .replaceAll('{name}', hotspot.titleFor(context.isEn)),
-                    onTap: () {
-                      if (widget.onHotspotSelected != null) {
-                        widget.onHotspotSelected!(hotspot);
-                      }
-                    },
-                  ),
-                );
-              }),
+                  return Positioned(
+                    left: pos.dx - 16,
+                    top: pos.dy - 16,
+                    child: _buildAnimatedHotspot(
+                      label: context
+                          .t('a11y_hotspot')
+                          .replaceAll('{name}', hotspot.titleFor(context.isEn)),
+                      onTap: () {
+                        if (widget.onHotspotSelected != null) {
+                          widget.onHotspotSelected!(hotspot);
+                        }
+                      },
+                    ),
+                  );
+                }),
 
-            // 7. Zaman merceği (basılı tutunca)
-            if (_lensPoint != null)
-              _buildLens(totalWidth, totalHeight, dividerX, sceneM),
-          ],
-        );
-      },
+              // 7. Zaman merceği (basılı tutunca)
+              if (_lensPoint != null)
+                _buildLens(totalWidth, totalHeight, dividerX, sceneM),
+            ],
+          );
+        },
+      ),
     );
   }
 

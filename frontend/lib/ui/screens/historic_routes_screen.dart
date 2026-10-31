@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
@@ -239,38 +240,40 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
           ),
           child: ClipRRect(
             borderRadius: radius,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (cover.isNotEmpty)
-                  AppNetworkImage(imageUrl: cover)
-                else
-                  const ColoredBox(color: AppColors.heroPetrol),
-                const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: [0.4, 1.0],
-                      colors: [Colors.transparent, Color(0xCC0F2F3A)],
+            child: DarkCancel(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (cover.isNotEmpty)
+                    AppNetworkImage(imageUrl: cover)
+                  else
+                    const ColoredBox(color: AppColors.heroPetrol),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [0.4, 1.0],
+                        colors: [Colors.transparent, Color(0xCC0F2F3A)],
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 20,
-                  right: 20,
-                  bottom: 16,
-                  child: Text(
-                    route.nameFor(context.isEn),
-                    style: const TextStyle(
-                      fontFamily: AppTheme.headingFont,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    bottom: 16,
+                    child: Text(
+                      route.nameFor(context.isEn),
+                      style: const TextStyle(
+                        fontFamily: AppTheme.headingFont,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

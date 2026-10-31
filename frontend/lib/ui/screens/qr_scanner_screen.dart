@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_toast.dart';
 import '../../core/state/passport.dart';
 import '../widgets/common/pattern_background.dart';
@@ -86,40 +87,42 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isScannerOpen) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: Semantics(
-              button: true,
-              label: context.t('a11y_close'),
-              excludeSemantics: true,
-              child: Icon(Icons.close_rounded, color: Colors.white),
-            ),
-            onPressed: () => setState(() => _isScannerOpen = false),
-          ),
-          title: Text(
-            context.t('qr_align'),
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-          ),
-          centerTitle: true,
-        ),
-        body: Stack(
-          alignment: Alignment.center,
-          children: [
-            MobileScanner(onDetect: _onDetect),
-            // Tarama Çerçevesi
-            Container(
-              width: 240,
-              height: 240,
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.primaryTeal, width: 2.5),
-                borderRadius: BorderRadius.circular(20),
+      return DarkCancel(
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Semantics(
+                button: true,
+                label: context.t('a11y_close'),
+                excludeSemantics: true,
+                child: Icon(Icons.close_rounded, color: Colors.white),
               ),
+              onPressed: () => setState(() => _isScannerOpen = false),
             ),
-          ],
+            title: Text(
+              context.t('qr_align'),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            centerTitle: true,
+          ),
+          body: Stack(
+            alignment: Alignment.center,
+            children: [
+              MobileScanner(onDetect: _onDetect),
+              // Tarama Çerçevesi
+              Container(
+                width: 240,
+                height: 240,
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primaryTeal, width: 2.5),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }

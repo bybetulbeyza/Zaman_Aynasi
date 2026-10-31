@@ -45,12 +45,19 @@ class ZamanAynasiApp extends StatelessWidget {
               ),
               child: child!,
             );
-            return AppAccessibility.instance.highContrast
+            final dark = AppAccessibility.instance.isDark(context);
+            final themed = dark
                 ? ColorFiltered(
-                    colorFilter: AppAccessibility.contrastFilter,
+                    colorFilter: AppAccessibility.darkFilter,
                     child: scaled,
                   )
                 : scaled;
+            return AppAccessibility.instance.highContrast
+                ? ColorFiltered(
+                    colorFilter: AppAccessibility.contrastFilter,
+                    child: themed,
+                  )
+                : themed;
           },
         ),
         home: const SplashScreen(),

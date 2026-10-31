@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_categories.dart';
 import '../../core/constants/app_colors.dart';
@@ -249,14 +250,16 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
             ),
             child: ClipRRect(
               borderRadius: radius,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  AppNetworkImage(
-                    imageUrl: place.imageAfterUrl,
-                    semanticLabel: place.nameFor(context.isEn),
-                  ),
-                ],
+              child: DarkCancel(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    AppNetworkImage(
+                      imageUrl: place.imageAfterUrl,
+                      semanticLabel: place.nameFor(context.isEn),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

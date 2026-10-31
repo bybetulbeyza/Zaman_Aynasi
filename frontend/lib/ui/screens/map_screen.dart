@@ -3,6 +3,7 @@ import 'dart:async';
 import '../widgets/common/app_icon.dart';
 import '../widgets/common/logo_loader.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_toast.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -469,34 +470,38 @@ class MapScreenState extends State<MapScreen> {
 
               // Kullanıcının konumu (gerçek konum varsa)
               if (_hasRealLocation)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _userLocation,
-                      width: 56,
-                      height: 56,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primaryTeal.withValues(alpha: 0.22),
-                        ),
-                        alignment: Alignment.center,
+                DarkCancel(
+                  child: MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: _userLocation,
+                        width: 56,
+                        height: 56,
                         child: Container(
-                          width: 18,
-                          height: 18,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryTeal,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
+                            color: AppColors.primaryTeal.withValues(
+                              alpha: 0.22,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryTeal,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 3),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
               // Kategori pinleri (rota modunda sıra rozetli)
-              MarkerLayer(markers: _buildPinMarkers()),
+              DarkCancel(child: MarkerLayer(markers: _buildPinMarkers())),
             ],
           ),
 

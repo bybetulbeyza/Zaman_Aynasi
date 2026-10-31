@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_toast.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_links.dart';
@@ -634,57 +635,59 @@ class _SliderScreenState extends State<SliderScreen>
                   width: 132,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        AppNetworkImage(
-                          imageUrl: c.imageAfterUrl,
-                          semanticLabel: c.nameFor(en),
-                        ),
-                        const DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              stops: [0.4, 1.0],
-                              colors: [Colors.transparent, Color(0xCC0F2F3A)],
-                            ),
+                    child: DarkCancel(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          AppNetworkImage(
+                            imageUrl: c.imageAfterUrl,
+                            semanticLabel: c.nameFor(en),
                           ),
-                        ),
-                        Positioned(
-                          top: 8,
-                          left: 8,
-                          child: Container(
-                            padding: const EdgeInsets.all(5),
+                          const DecoratedBox(
                             decoration: BoxDecoration(
-                              color: style.color,
-                              shape: BoxShape.circle,
-                            ),
-                            child: AppIcon(
-                              style.icon,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 10,
-                          right: 10,
-                          bottom: 10,
-                          child: Text(
-                            c.nameFor(en),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: AppTheme.headingFont,
-                              fontSize: 15,
-                              height: 1.1,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                stops: [0.4, 1.0],
+                                colors: [Colors.transparent, Color(0xCC0F2F3A)],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                          Positioned(
+                            top: 8,
+                            left: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: style.color,
+                                shape: BoxShape.circle,
+                              ),
+                              child: AppIcon(
+                                style.icon,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: 10,
+                            right: 10,
+                            bottom: 10,
+                            child: Text(
+                              c.nameFor(en),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: AppTheme.headingFont,
+                                fontSize: 15,
+                                height: 1.1,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -738,66 +741,70 @@ class _SliderScreenState extends State<SliderScreen>
         ),
         child: ClipRRect(
           borderRadius: radius,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                _place.imageAfterUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const ColoredBox(color: AppColors.heroPetrol),
-              ),
-              Container(color: Colors.black.withValues(alpha: 0.28)),
-              Positioned(
-                top: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.ciniBordeaux,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    context.t('ai_generated'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
+          child: DarkCancel(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  _place.imageAfterUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      const ColoredBox(color: AppColors.heroPetrol),
+                ),
+                Container(color: Colors.black.withValues(alpha: 0.28)),
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.ciniBordeaux,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      context.t('ai_generated'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Center(
-                child: Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: available ? 1 : 0.7),
-                    shape: BoxShape.circle,
+                Center(
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(
+                        alpha: available ? 1 : 0.7,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      available
+                          ? Icons.play_arrow_rounded
+                          : Icons.hourglass_empty_rounded,
+                      color: AppColors.primaryTeal,
+                      size: 34,
+                    ),
                   ),
-                  child: Icon(
+                ),
+                Positioned(
+                  left: 14,
+                  bottom: 12,
+                  child: Text(
                     available
-                        ? Icons.play_arrow_rounded
-                        : Icons.hourglass_empty_rounded,
-                    color: AppColors.primaryTeal,
-                    size: 34,
+                        ? context.t('transform_video')
+                        : context.t('video_soon'),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ),
-              ),
-              Positioned(
-                left: 14,
-                bottom: 12,
-                child: Text(
-                  available
-                      ? context.t('transform_video')
-                      : context.t('video_soon'),
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

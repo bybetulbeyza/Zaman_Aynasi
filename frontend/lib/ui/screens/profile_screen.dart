@@ -26,6 +26,7 @@ class ProfileScreen extends StatelessWidget {
   void _showAccessibility(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -40,92 +41,163 @@ class ProfileScreen extends StatelessWidget {
             context.t('font_xlarge'),
           ];
           return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(context.t('font_row'), style: AppTheme.titleLarge),
-                  const SizedBox(height: 18),
-                  Text(
-                    context.t('font_size'),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(context.t('font_row'), style: AppTheme.titleLarge),
+                    const SizedBox(height: 18),
+                    Text(
+                      context.t('font_size'),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      for (
-                        var i = 0;
-                        i < AppAccessibility.textScales.length;
-                        i++
-                      )
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              right: i == AppAccessibility.textScales.length - 1
-                                  ? 0
-                                  : 10,
-                            ),
-                            child: GestureDetector(
-                              onTap: () => a11y.setTextScale(
-                                AppAccessibility.textScales[i],
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        for (
+                          var i = 0;
+                          i < AppAccessibility.textScales.length;
+                          i++
+                        )
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                right:
+                                    i == AppAccessibility.textScales.length - 1
+                                    ? 0
+                                    : 10,
                               ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
+                              child: GestureDetector(
+                                onTap: () => a11y.setTextScale(
+                                  AppAccessibility.textScales[i],
                                 ),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color:
-                                      a11y.textScale ==
-                                          AppAccessibility.textScales[i]
-                                      ? AppColors.primaryTeal
-                                      : Colors.white,
-                                  borderRadius: BorderRadius.circular(22),
-                                  border: Border.all(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
                                     color:
                                         a11y.textScale ==
                                             AppAccessibility.textScales[i]
                                         ? AppColors.primaryTeal
-                                        : AppColors.chipBorder,
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(22),
+                                    border: Border.all(
+                                      color:
+                                          a11y.textScale ==
+                                              AppAccessibility.textScales[i]
+                                          ? AppColors.primaryTeal
+                                          : AppColors.chipBorder,
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  labels[i],
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color:
-                                        a11y.textScale ==
-                                            AppAccessibility.textScales[i]
-                                        ? Colors.white
-                                        : AppColors.textDark,
+                                  child: Text(
+                                    labels[i],
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color:
+                                          a11y.textScale ==
+                                              AppAccessibility.textScales[i]
+                                          ? Colors.white
+                                          : AppColors.textDark,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeThumbColor: AppColors.primaryTeal,
+                      title: Text(
+                        context.t('high_contrast'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    activeThumbColor: AppColors.primaryTeal,
-                    title: Text(
-                      context.t('high_contrast'),
+                      ),
+                      value: a11y.highContrast,
+                      onChanged: a11y.setHighContrast,
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeThumbColor: AppColors.primaryTeal,
+                      title: Text(
+                        context.t('guide_prefer_text'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(context.t('guide_prefer_text_hint')),
+                      value: a11y.readGuide,
+                      onChanged: a11y.setReadGuide,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      context.t('appearance'),
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    value: a11y.highContrast,
-                    onChanged: a11y.setHighContrast,
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        for (final m in const [0, 1, 2])
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: m == 2 ? 0 : 10),
+                              child: GestureDetector(
+                                onTap: () => a11y.setThemeMode(m),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: a11y.themeMode == m
+                                        ? AppColors.primaryTeal
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(22),
+                                    border: Border.all(
+                                      color: a11y.themeMode == m
+                                          ? AppColors.primaryTeal
+                                          : AppColors.chipBorder,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    context.t(
+                                      m == 0
+                                          ? 'theme_system'
+                                          : m == 1
+                                          ? 'theme_light'
+                                          : 'theme_dark',
+                                    ),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: a11y.themeMode == m
+                                          ? Colors.white
+                                          : AppColors.textDark,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );

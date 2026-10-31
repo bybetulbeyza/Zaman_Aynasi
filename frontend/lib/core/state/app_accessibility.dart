@@ -15,10 +15,31 @@ class AppAccessibility extends ChangeNotifier {
   bool _readGuide = false;
   bool get readGuide => _readGuide;
 
+  /// Görünüm: 0 = sistemi izle, 1 = açık, 2 = koyu. Seçim hatırlanır.
+  int _themeMode = 0;
+  int get themeMode => _themeMode;
+
+  /// Koyu mod şu an etkin mi? (Sistemi izliyorsa cihazın tercihine bakar.)
+  bool isDark(BuildContext context) =>
+      _themeMode == 2 ||
+      (_themeMode == 0 &&
+          MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
+  Future<void> setThemeMode(int value) async {
+    if (value == _themeMode) return;
+    _themeMode = value;
+    notifyListeners();
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setInt('theme_mode', value);
+    } catch (_) {}
+  }
+
   Future<void> init() async {
     try {
       final p = await SharedPreferences.getInstance();
       _readGuide = p.getBool('read_guide') ?? false;
+      _themeMode = p.getInt('theme_mode') ?? 0;
     } catch (_) {}
   }
 
@@ -46,6 +67,16 @@ class AppAccessibility extends ChangeNotifier {
     _highContrast = value;
     notifyListeners();
   }
+
+  /// Koyu mod: arayüz renklerini "akıllı tersine çevirir" (açık ↔ koyu, ton korunur).
+  /// Matris kendi tersidir; fotoğraf, video ve harita pinleri aynı filtreyle tekrar çevrilince
+  /// (bkz. DarkCancel) özgün renklerine döner.
+  static const ColorFilter darkFilter = ColorFilter.matrix(<double>[
+    0.574, -1.430, -0.144, 0, 255, //
+    -0.426, -0.430, -0.144, 0, 255, //
+    -0.426, -1.430, 0.856, 0, 255, //
+    0, 0, 0, 1, 0,
+  ]);
 
   /// Kontrastı artıran renk matrisi (yalnızca yüksek kontrast açıkken kullanılır).
   static const ColorFilter contrastFilter = ColorFilter.matrix(<double>[

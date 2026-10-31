@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../common/dark_cancel.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -49,69 +50,71 @@ class _VideoDialogState extends State<_VideoDialog> {
   @override
   Widget build(BuildContext context) {
     final ready = _controller.value.isInitialized;
-    return Dialog.fullscreen(
-      backgroundColor: Colors.black,
-      child: SafeArea(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            if (_hasError)
-              Text(
-                context.t('video_error'),
-                style: const TextStyle(color: Colors.white70),
-              )
-            else if (!ready)
-              const CircularProgressIndicator(color: AppColors.primaryTeal)
-            else
-              GestureDetector(
-                onTap: () => setState(() {
-                  _controller.value.isPlaying
-                      ? _controller.pause()
-                      : _controller.play();
-                }),
-                child: AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      VideoPlayer(_controller),
-                      VideoProgressIndicator(
-                        _controller,
-                        allowScrubbing: true,
-                        colors: const VideoProgressColors(
-                          playedColor: AppColors.primaryTeal,
-                        ),
-                      ),
-                      if (!_controller.value.isPlaying)
-                        const Center(
-                          child: Icon(
-                            Icons.play_circle_fill_rounded,
-                            size: 72,
-                            color: Colors.white70,
+    return DarkCancel(
+      child: Dialog.fullscreen(
+        backgroundColor: Colors.black,
+        child: SafeArea(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (_hasError)
+                Text(
+                  context.t('video_error'),
+                  style: const TextStyle(color: Colors.white70),
+                )
+              else if (!ready)
+                const CircularProgressIndicator(color: AppColors.primaryTeal)
+              else
+                GestureDetector(
+                  onTap: () => setState(() {
+                    _controller.value.isPlaying
+                        ? _controller.pause()
+                        : _controller.play();
+                  }),
+                  child: AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        VideoPlayer(_controller),
+                        VideoProgressIndicator(
+                          _controller,
+                          allowScrubbing: true,
+                          colors: const VideoProgressColors(
+                            playedColor: AppColors.primaryTeal,
                           ),
                         ),
-                    ],
+                        if (!_controller.value.isPlaying)
+                          const Center(
+                            child: Icon(
+                              Icons.play_circle_fill_rounded,
+                              size: 72,
+                              color: Colors.white70,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: IconButton(
-                icon: Semantics(
-                  button: true,
-                  label: context.t('a11y_close'),
-                  excludeSemantics: true,
-                  child: Icon(
-                    Icons.close_rounded,
-                    color: Colors.white,
-                    size: 28,
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  icon: Semantics(
+                    button: true,
+                    label: context.t('a11y_close'),
+                    excludeSemantics: true,
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
+                  onPressed: () => Navigator.pop(context),
                 ),
-                onPressed: () => Navigator.pop(context),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

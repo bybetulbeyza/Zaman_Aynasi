@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dark_cancel.dart';
 
 /// Zaman Aynası logosu (yuvarlak, kendi lacivert halkası olan çini lale amblemi).
 /// Logo değişirse yalnızca assets/images/app_logo.png değiştirilir.
@@ -14,12 +15,14 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final image = Image.asset(
-      asset,
-      width: size,
-      height: size,
-      filterQuality: FilterQuality.high,
-      semanticLabel: 'Zaman Aynası',
+    final image = DarkCancel(
+      child: Image.asset(
+        asset,
+        width: size,
+        height: size,
+        filterQuality: FilterQuality.high,
+        semanticLabel: 'Zaman Aynası',
+      ),
     );
     if (!shadow) return image;
     return Container(

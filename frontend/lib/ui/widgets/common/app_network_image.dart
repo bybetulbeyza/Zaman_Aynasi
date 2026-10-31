@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dark_cancel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 
@@ -60,6 +61,7 @@ class AppNetworkImage extends StatelessWidget {
       imageWidget = ClipRRect(borderRadius: borderRadius!, child: imageWidget);
     }
 
+    imageWidget = DarkCancel(child: imageWidget);
     if (semanticLabel == null) return imageWidget;
     return Semantics(image: true, label: semanticLabel, child: imageWidget);
   }

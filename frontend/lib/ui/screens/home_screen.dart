@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
@@ -10,7 +11,6 @@ import '../../data/repositories/heritage_repository.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/city_picker_sheet.dart';
-import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/common/app_logo.dart';
 import 'places_list_screen.dart';
@@ -155,105 +155,106 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHero() {
     final top = MediaQuery.of(context).padding.top;
-    return Container(
-      padding: EdgeInsets.fromLTRB(20, top + 10, 20, 24),
-      // Çapraz geçiş: sol üstte canlı teal, ortada petrol, sağ altta derin lacivert-petrol
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF138A86), Color(0xFF14505F), Color(0xFF0A2733)],
-          stops: [0.0, 0.5, 1.0],
-        ),
-      ),
-      foregroundDecoration: BoxDecoration(
-        // Logonun arkasında yumuşak ışık hale
-        gradient: RadialGradient(
-          center: const Alignment(0.82, -0.2),
-          radius: 0.75,
-          colors: [
-            Colors.white.withValues(alpha: 0.16),
-            Colors.white.withValues(alpha: 0.0),
-          ],
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Align(
-            alignment: Alignment.centerRight,
-            child: LangToggle(onDark: true),
+    return DarkCancel(
+      child: Container(
+        padding: EdgeInsets.fromLTRB(20, top + 10, 20, 24),
+        // Çapraz geçiş: sol üstte canlı teal, ortada petrol, sağ altta derin lacivert-petrol
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF138A86), Color(0xFF14505F), Color(0xFF0A2733)],
+            stops: [0.0, 0.5, 1.0],
           ),
-          const SizedBox(height: 14),
-          // Marka bloğu: süslü dikey çizgi, ad ve slogan solda; logo sağda
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _brandOrnament(),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Zaman Aynası',
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontFamily: AppTheme.brandFont,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          letterSpacing: -0.3,
+        ),
+        foregroundDecoration: BoxDecoration(
+          // Logonun arkasında yumuşak ışık hale
+          gradient: RadialGradient(
+            center: const Alignment(0.82, -0.2),
+            radius: 0.75,
+            colors: [
+              Colors.white.withValues(alpha: 0.16),
+              Colors.white.withValues(alpha: 0.0),
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Marka bloğu: süslü dikey çizgi, ad ve slogan solda; logo sağda
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _brandOrnament(),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Zaman Aynası',
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontFamily: AppTheme.brandFont,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            letterSpacing: -0.3,
+                          ),
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        context.t('hero_title').replaceAll('\n', ' '),
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          height: 1.55,
+                          letterSpacing: 1.3,
+                          color: Colors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const AppLogo(size: 84, shadow: true),
+              ],
+            ),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: _openPlaces,
+              child: Container(
+                height: 54,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
+                ),
+                child: Row(
+                  children: [
+                    const AppIcon(
+                      'search',
+                      color: AppColors.textDark,
+                      size: 24,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(width: 12),
                     Text(
-                      context.t('hero_title').replaceAll('\n', ' '),
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        height: 1.55,
-                        letterSpacing: 1.3,
-                        color: Colors.white.withValues(alpha: 0.85),
+                      context.t('search_hint'),
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 15,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              const AppLogo(size: 84, shadow: true),
-            ],
-          ),
-          const SizedBox(height: 24),
-          GestureDetector(
-            onTap: _openPlaces,
-            child: Container(
-              height: 54,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
-              ),
-              child: Row(
-                children: [
-                  const AppIcon('search', color: AppColors.textDark, size: 24),
-                  const SizedBox(width: 12),
-                  Text(
-                    context.t('search_hint'),
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -460,56 +461,58 @@ class _PlaceCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: radius,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              AppNetworkImage(
-                imageUrl: place.imageAfterUrl,
-                semanticLabel: place.nameFor(context.isEn),
-              ),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [0.45, 1.0],
-                    colors: [Colors.transparent, Color(0xCC0F2F3A)],
+          child: DarkCancel(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                AppNetworkImage(
+                  imageUrl: place.imageAfterUrl,
+                  semanticLabel: place.nameFor(context.isEn),
+                ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.45, 1.0],
+                      colors: [Colors.transparent, Color(0xCC0F2F3A)],
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      place.nameFor(context.isEn),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: AppTheme.headingFont,
-                        fontSize: 19,
-                        height: 1.1,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                Positioned(
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        place.nameFor(context.isEn),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: AppTheme.headingFont,
+                          fontSize: 19,
+                          height: 1.1,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${place.category.labelFor(context.isEn)} · ${distanceLabel.isNotEmpty ? distanceLabel : city}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(height: 4),
+                      Text(
+                        '${place.category.labelFor(context.isEn)} · ${distanceLabel.isNotEmpty ? distanceLabel : city}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
