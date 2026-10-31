@@ -87,7 +87,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.close_rounded, color: Colors.white),
+            icon: Semantics(
+              button: true,
+              label: context.t('a11y_close'),
+              excludeSemantics: true,
+              child: Icon(Icons.close_rounded, color: Colors.white),
+            ),
             onPressed: () => setState(() => _isScannerOpen = false),
           ),
           title: Text(

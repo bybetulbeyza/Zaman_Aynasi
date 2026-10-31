@@ -46,9 +46,11 @@ class ActiveRouteCard extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: route.clear,
-                    child: const Icon(
-                      Icons.close_rounded,
-                      color: Colors.white70,
+                    child: Semantics(
+                      button: true,
+                      label: context.t('a11y_close'),
+                      excludeSemantics: true,
+                      child: Icon(Icons.close_rounded, color: Colors.white70),
                     ),
                   ),
                 ],

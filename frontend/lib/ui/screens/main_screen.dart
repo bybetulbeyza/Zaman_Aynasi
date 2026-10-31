@@ -234,34 +234,41 @@ class _MainScreenState extends State<MainScreen> {
     final isSelected = _currentIndex == index;
     final color = isSelected ? AppColors.primaryTeal : AppColors.textMuted;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      excludeSemantics: true,
       onTap: () => setState(() => _currentIndex = index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          showRouteBadge
-              ? ListenableBuilder(
-                  listenable: ActiveRoute.instance,
-                  builder: (_, __) => Badge(
-                    isLabelVisible: !ActiveRoute.instance.isEmpty,
-                    label: Text('${ActiveRoute.instance.length}'),
-                    backgroundColor: AppColors.ciniBordeaux,
-                    child: AppIcon(icon, color: color, size: 28),
-                  ),
-                )
-              : AppIcon(icon, color: color, size: 28),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11.5,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-              color: color,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _currentIndex = index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            showRouteBadge
+                ? ListenableBuilder(
+                    listenable: ActiveRoute.instance,
+                    builder: (_, __) => Badge(
+                      isLabelVisible: !ActiveRoute.instance.isEmpty,
+                      label: Text('${ActiveRoute.instance.length}'),
+                      backgroundColor: AppColors.ciniBordeaux,
+                      child: AppIcon(icon, color: color, size: 28),
+                    ),
+                  )
+                : AppIcon(icon, color: color, size: 28),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: color,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -269,32 +276,39 @@ class _MainScreenState extends State<MainScreen> {
   // Dairesel QR Butonu (krem halkalı)
   Widget _buildQrButton() {
     final selected = _currentIndex == 2;
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: context.t('nav_qr'),
+      excludeSemantics: true,
       onTap: () => setState(() => _currentIndex = 2),
-      child: Container(
-        width: _qrSize + 12,
-        height: _qrSize + 12,
-        padding: const EdgeInsets.all(6),
-        decoration: const BoxDecoration(
-          color: AppColors.bgCanvas,
-          shape: BoxShape.circle,
-        ),
+      child: GestureDetector(
+        onTap: () => setState(() => _currentIndex = 2),
         child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.ciniBordeaux,
+          width: _qrSize + 12,
+          height: _qrSize + 12,
+          padding: const EdgeInsets.all(6),
+          decoration: const BoxDecoration(
+            color: AppColors.bgCanvas,
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.ciniBordeaux.withValues(
-                  alpha: selected ? 0.45 : 0.28,
-                ),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
-          child: const Center(
-            child: AppIcon('qr', color: Colors.white, size: 34),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.ciniBordeaux,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.ciniBordeaux.withValues(
+                    alpha: selected ? 0.45 : 0.28,
+                  ),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: AppIcon('qr', color: Colors.white, size: 34),
+            ),
           ),
         ),
       ),
@@ -303,17 +317,19 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildQrLabel() {
     final selected = _currentIndex == 2;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => _currentIndex = 2),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Text(
-          context.t('nav_qr'),
-          style: TextStyle(
-            fontSize: 11.5,
-            fontWeight: FontWeight.w700,
-            color: selected ? AppColors.primaryTeal : AppColors.textDark,
+    return ExcludeSemantics(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _currentIndex = 2),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Text(
+            context.t('nav_qr'),
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: selected ? AppColors.primaryTeal : AppColors.textDark,
+            ),
           ),
         ),
       ),

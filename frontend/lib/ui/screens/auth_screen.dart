@@ -153,7 +153,12 @@ class _AuthScreenState extends State<AuthScreen> {
                     children: [
                       if (widget.popOnDone)
                         IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+                          icon: Semantics(
+                            button: true,
+                            label: context.t('a11y_back'),
+                            excludeSemantics: true,
+                            child: Icon(Icons.arrow_back_ios_new, size: 20),
+                          ),
                           onPressed: () => Navigator.pop(context),
                         )
                       else

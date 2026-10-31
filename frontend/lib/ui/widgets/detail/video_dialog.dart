@@ -98,10 +98,15 @@ class _VideoDialogState extends State<_VideoDialog> {
               top: 8,
               right: 8,
               child: IconButton(
-                icon: const Icon(
-                  Icons.close_rounded,
-                  color: Colors.white,
-                  size: 28,
+                icon: Semantics(
+                  button: true,
+                  label: context.t('a11y_close'),
+                  excludeSemantics: true,
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
                 onPressed: () => Navigator.pop(context),
               ),

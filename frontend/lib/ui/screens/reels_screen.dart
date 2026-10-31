@@ -127,9 +127,14 @@ class _ReelsScreenState extends State<ReelsScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.white,
+                    icon: Semantics(
+                      button: true,
+                      label: context.t('a11y_back'),
+                      excludeSemantics: true,
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                      ),
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),

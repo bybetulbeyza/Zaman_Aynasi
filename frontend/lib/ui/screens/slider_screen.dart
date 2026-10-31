@@ -341,16 +341,21 @@ class _SliderScreenState extends State<SliderScreen> {
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () => Navigator.pop(context),
-                      child: const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 16, 20, 20),
-                        child: Icon(
-                          Icons.arrow_back_ios_new,
-                          size: 22,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(color: Colors.black54, blurRadius: 8),
-                            Shadow(color: Colors.black38, blurRadius: 2),
-                          ],
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                        child: Semantics(
+                          button: true,
+                          label: context.t('a11y_back'),
+                          excludeSemantics: true,
+                          child: Icon(
+                            Icons.arrow_back_ios_new,
+                            size: 22,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(color: Colors.black54, blurRadius: 8),
+                              Shadow(color: Colors.black38, blurRadius: 2),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -967,12 +972,17 @@ class _SliderScreenState extends State<SliderScreen> {
               ),
               GestureDetector(
                 onTap: () => setState(() => _selectedHotspot = null),
-                child: const Padding(
-                  padding: EdgeInsets.only(left: 8),
-                  child: Icon(
-                    Icons.close,
-                    size: 20,
-                    color: AppColors.textMuted,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Semantics(
+                    button: true,
+                    label: context.t('a11y_close'),
+                    excludeSemantics: true,
+                    child: Icon(
+                      Icons.close,
+                      size: 20,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
               ),

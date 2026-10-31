@@ -340,12 +340,17 @@ class _RoutesScreenState extends State<RoutesScreen> {
                         children: [
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
-                            child: const Padding(
-                              padding: EdgeInsets.only(right: 12),
-                              child: Icon(
-                                Icons.arrow_back_ios_new,
-                                size: 20,
-                                color: AppColors.textDark,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: Semantics(
+                                button: true,
+                                label: context.t('a11y_back'),
+                                excludeSemantics: true,
+                                child: Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 20,
+                                  color: AppColors.textDark,
+                                ),
                               ),
                             ),
                           ),

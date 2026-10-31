@@ -160,12 +160,19 @@ class MapScreenState extends State<MapScreen> {
             setState(() => _currentStopIndex = index);
             _moveMap(place.location, 16.8);
           },
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: CategoryPin(
-              category: place.category,
-              selected: isSelected,
-              order: _routeChip != null ? index + 1 : null,
+          child: Semantics(
+            button: true,
+            label: context
+                .t('a11y_pin')
+                .replaceAll('{name}', place.nameFor(context.isEn)),
+            excludeSemantics: true,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: CategoryPin(
+                category: place.category,
+                selected: isSelected,
+                order: _routeChip != null ? index + 1 : null,
+              ),
             ),
           ),
         ),

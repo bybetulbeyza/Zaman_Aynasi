@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:before_after/before_after.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/app_lang.dart';
 import '../../../data/models/heritage_place.dart';
 import '../common/app_network_image.dart';
 
@@ -149,39 +150,61 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
         return Stack(
           children: [
             // 1. Before-After Karşılaştırma Katmanı
-            SizedBox(
-              width: totalWidth,
-              height: totalHeight,
-              child: BeforeAfter(
-                value: _sliderValue,
-                before: AppNetworkImage(
-                  imageUrl: widget.afterImageUrl,
-                  width: totalWidth,
-                  height: totalHeight,
-                ),
-                after: AppNetworkImage(
-                  imageUrl: widget.beforeImageUrl,
-                  width: totalWidth,
-                  height: totalHeight,
-                ),
-                onValueChanged: (val) {
-                  {
-                    _userTouched = true;
-                    if (_intro.isAnimating) _intro.stop();
-                    // Dörtte bir çizgilerini geçerken hafif titreşim
-                    if ((val * 4).floor() != (_sliderValue * 4).floor()) {
-                      HapticFeedback.selectionClick();
+            Semantics(
+              slider: true,
+              label: context.t('a11y_slider'),
+              value: '${(_sliderValue * 100).round()}%',
+              increasedValue:
+                  '${((_sliderValue + 0.1).clamp(0.0, 1.0) * 100).round()}%',
+              decreasedValue:
+                  '${((_sliderValue - 0.1).clamp(0.0, 1.0) * 100).round()}%',
+              onIncrease: () => setState(() {
+                _userTouched = true;
+                _intro.stop();
+                _sliderValue = (_sliderValue + 0.1).clamp(0.0, 1.0);
+              }),
+              onDecrease: () => setState(() {
+                _userTouched = true;
+                _intro.stop();
+                _sliderValue = (_sliderValue - 0.1).clamp(0.0, 1.0);
+              }),
+              child: SizedBox(
+                width: totalWidth,
+                height: totalHeight,
+                child: BeforeAfter(
+                  value: _sliderValue,
+                  before: AppNetworkImage(
+                    imageUrl: widget.afterImageUrl,
+                    width: totalWidth,
+                    height: totalHeight,
+                  ),
+                  after: AppNetworkImage(
+                    imageUrl: widget.beforeImageUrl,
+                    width: totalWidth,
+                    height: totalHeight,
+                  ),
+                  onValueChanged: (val) {
+                    {
+                      _userTouched = true;
+                      if (_intro.isAnimating) _intro.stop();
+                      // Dörtte bir çizgilerini geçerken hafif titreşim
+                      if ((val * 4).floor() != (_sliderValue * 4).floor()) {
+                        HapticFeedback.selectionClick();
+                      }
+                      _activeTimer?.cancel();
+                      _activeTimer = Timer(
+                        const Duration(milliseconds: 260),
+                        () {
+                          if (mounted) setState(() => _active = false);
+                        },
+                      );
+                      setState(() {
+                        _sliderValue = val;
+                        _active = true;
+                      });
                     }
-                    _activeTimer?.cancel();
-                    _activeTimer = Timer(const Duration(milliseconds: 260), () {
-                      if (mounted) setState(() => _active = false);
-                    });
-                    setState(() {
-                      _sliderValue = val;
-                      _active = true;
-                    });
-                  }
-                },
+                  },
+                ),
               ),
             ),
 
@@ -291,6 +314,9 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   left: pos.dx - 16,
                   top: pos.dy - 16,
                   child: _buildAnimatedHotspot(
+                    label: context
+                        .t('a11y_hotspot')
+                        .replaceAll('{name}', hotspot.titleFor(context.isEn)),
                     onTap: () {
                       if (widget.onHotspotSelected != null) {
                         widget.onHotspotSelected!(hotspot);
@@ -305,56 +331,65 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     );
   }
 
-  Widget _buildAnimatedHotspot({required VoidCallback onTap}) {
-    return GestureDetector(
+  Widget _buildAnimatedHotspot({
+    required VoidCallback onTap,
+    required String label,
+  }) {
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
       onTap: onTap,
-      child: AnimatedBuilder(
-        animation: _pulseController,
-        builder: (context, child) {
-          final scale = 1.0 + (_pulseController.value * 0.25);
-          final opacity = 0.35 - (_pulseController.value * 0.20);
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedBuilder(
+          animation: _pulseController,
+          builder: (context, child) {
+            final scale = 1.0 + (_pulseController.value * 0.25);
+            final opacity = 0.35 - (_pulseController.value * 0.20);
 
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              Transform.scale(
-                scale: scale,
-                child: Container(
-                  width: 34,
-                  height: 34,
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                Transform.scale(
+                  scale: scale,
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(opacity.clamp(0.08, 0.4)),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 22,
+                  height: 22,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(opacity.clamp(0.08, 0.4)),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primaryTeal,
                     ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primaryTeal,
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

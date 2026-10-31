@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/app_lang.dart';
 import '../common/app_network_image.dart';
 
 /// Eski fotoğraflar için kolaj: solda büyük, sağda 2x2 küçük kare; 5'ten fazlaysa "+N".
@@ -227,10 +228,15 @@ class _PhotoViewerState extends State<PhotoViewer> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
-                      Icons.close_rounded,
-                      color: Colors.white,
-                      size: 28,
+                    icon: Semantics(
+                      button: true,
+                      label: context.t('a11y_close'),
+                      excludeSemantics: true,
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),

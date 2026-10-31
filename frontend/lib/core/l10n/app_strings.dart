@@ -68,6 +68,11 @@ const Map<String, String> appStringsTr = {
   'route_added': 'Rotana eklendi · {n} durak',
   'route_removed': 'Rotandan çıkarıldı.',
   'route_view': 'Rotamı gör',
+  'a11y_back': 'Geri',
+  'a11y_close': 'Kapat',
+  'a11y_slider': 'Tarihî ve günümüz karşılaştırma kaydırıcısı',
+  'a11y_hotspot': 'Bilgi noktası: {name}',
+  'a11y_pin': 'Harita noktası: {name}',
   'add_to_route': 'Rotama ekle',
   'in_route': 'Rotada',
 
@@ -254,6 +259,11 @@ const Map<String, String> appStringsEn = {
   'route_added': 'Added to your route · {n} stops',
   'route_removed': 'Removed from your route.',
   'route_view': 'View route',
+  'a11y_back': 'Back',
+  'a11y_close': 'Close',
+  'a11y_slider': 'Historic and present comparison slider',
+  'a11y_hotspot': 'Point of interest: {name}',
+  'a11y_pin': 'Map point: {name}',
   'add_to_route': 'Add to route',
   'in_route': 'In route',
 

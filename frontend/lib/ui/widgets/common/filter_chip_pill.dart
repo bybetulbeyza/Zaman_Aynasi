@@ -23,42 +23,49 @@ class FilterChipPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final base = accent ?? AppColors.primaryTeal;
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: EdgeInsets.symmetric(
-          horizontal: icon == null ? 20 : 16,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: selected ? base : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: selected
-                ? base
-                : (accent ?? AppColors.chipBorder).withValues(
-                    alpha: accent == null ? 1 : 0.45,
-                  ),
-            width: 1.2,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: EdgeInsets.symmetric(
+            horizontal: icon == null ? 20 : 16,
+            vertical: 10,
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              AppIcon(icon!, size: 20, color: selected ? Colors.white : base),
-              const SizedBox(width: 8),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: selected ? Colors.white : AppColors.textDark,
-              ),
+          decoration: BoxDecoration(
+            color: selected ? base : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: selected
+                  ? base
+                  : (accent ?? AppColors.chipBorder).withValues(
+                      alpha: accent == null ? 1 : 0.45,
+                    ),
+              width: 1.2,
             ),
-          ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                AppIcon(icon!, size: 20, color: selected ? Colors.white : base),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? Colors.white : AppColors.textDark,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
