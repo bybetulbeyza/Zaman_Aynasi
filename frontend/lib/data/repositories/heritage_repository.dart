@@ -26,7 +26,7 @@ class HeritageRepository {
     try {
       final data = await _client
           .from('heritage_places')
-          .select('*, Hotspots(*)')
+          .select('*, Hotspots!place_id(*)')
           .order('id', ascending: true);
 
       return (data as List)
