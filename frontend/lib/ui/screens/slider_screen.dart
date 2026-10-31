@@ -15,6 +15,7 @@ import '../../data/models/heritage_place.dart';
 import '../../core/constants/category_style.dart';
 import '../../data/repositories/heritage_repository.dart';
 import '../widgets/common/app_network_image.dart';
+import '../widgets/common/pattern_background.dart';
 import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/detail/audio_guide_player.dart';
@@ -351,10 +352,18 @@ class _SliderScreenState extends State<SliderScreen> {
                     ),
                   ],
                 ),
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
-                  children: _buildSheetContent(en),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
+                  ),
+                  child: PatternBackground(
+                    lineOpacity: 0.07,
+                    child: ListView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+                      children: _buildSheetContent(en),
+                    ),
+                  ),
                 ),
               ),
             ),
