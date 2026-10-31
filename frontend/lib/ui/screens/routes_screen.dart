@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
+import '../widgets/common/app_back_button.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/logo_loader.dart';
 import 'package:latlong2/latlong.dart';
@@ -317,22 +319,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                     children: [
                       Row(
                         children: [
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 12),
-                              child: Semantics(
-                                button: true,
-                                label: context.t('a11y_back'),
-                                excludeSemantics: true,
-                                child: Icon(
-                                  Icons.arrow_back_ios_new,
-                                  size: 20,
-                                  color: AppColors.textDark,
-                                ),
-                              ),
-                            ),
-                          ),
+                          const AppBackButton(),
+                          const SizedBox(width: 8),
                           Text(
                             context.t('rc_title'),
                             style: AppTheme.displayLarge,
@@ -405,8 +393,8 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                     Container(
                                       width: 10,
                                       height: 10,
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.ciniBordeaux,
+                                      decoration: BoxDecoration(
+                                        color: bordeauxOf(context),
                                         shape: BoxShape.circle,
                                       ),
                                     ),

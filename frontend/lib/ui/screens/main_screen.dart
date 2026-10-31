@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_toast.dart';
 import '../../core/state/passport.dart';
 import '../widgets/passport/stamp_widget.dart';
@@ -259,7 +260,7 @@ class _MainScreenState extends State<MainScreen> {
                     builder: (_, __) => Badge(
                       isLabelVisible: !ActiveRoute.instance.isEmpty,
                       label: Text('${ActiveRoute.instance.length}'),
-                      backgroundColor: AppColors.ciniBordeaux,
+                      backgroundColor: bordeauxOf(context),
                       child: AppIcon(icon, color: color, size: 28),
                     ),
                   )
@@ -300,13 +301,13 @@ class _MainScreenState extends State<MainScreen> {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.ciniBordeaux,
+              color: bordeauxOf(context),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.ciniBordeaux.withValues(
-                    alpha: selected ? 0.45 : 0.28,
-                  ),
+                  color: bordeauxOf(
+                    context,
+                  ).withValues(alpha: selected ? 0.45 : 0.28),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),

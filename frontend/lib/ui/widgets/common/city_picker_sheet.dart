@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dark_cancel.dart';
 import '../../../core/constants/app_cities.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_theme.dart';
@@ -63,12 +64,12 @@ Future<void> showCityPickerSheet(BuildContext context) {
                         color: AppColors.primaryTeal,
                       )
                     else
-                      const Text(
+                      Text(
                         'Yakında',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.ciniBordeaux,
+                          color: bordeauxOf(context),
                         ),
                       ),
                   ],

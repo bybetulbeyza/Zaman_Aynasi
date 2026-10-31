@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dark_cancel.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_theme.dart';
 
@@ -22,7 +23,7 @@ class SectionTitle extends StatelessWidget {
             children: [
               Text(title, style: AppTheme.titleMedium),
               const SizedBox(height: 4),
-              Container(width: 28, height: 2.5, color: AppColors.ciniBordeaux),
+              Container(width: 28, height: 2.5, color: bordeauxOf(context)),
             ],
           ),
         ),

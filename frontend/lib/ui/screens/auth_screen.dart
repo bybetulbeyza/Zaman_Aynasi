@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
+import '../widgets/common/app_back_button.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
@@ -152,15 +154,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       if (widget.popOnDone)
-                        IconButton(
-                          icon: Semantics(
-                            button: true,
-                            label: context.t('a11y_back'),
-                            excludeSemantics: true,
-                            child: Icon(Icons.arrow_back_ios_new, size: 20),
-                          ),
-                          onPressed: () => Navigator.pop(context),
-                        )
+                        const AppBackButton()
                       else
                         const SizedBox(width: 48),
                       const LangToggle(),
@@ -246,8 +240,8 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 12),
                     Text(
                       _error!,
-                      style: const TextStyle(
-                        color: AppColors.ciniBordeaux,
+                      style: TextStyle(
+                        color: bordeauxOf(context),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),

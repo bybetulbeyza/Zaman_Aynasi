@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/app_back_button.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import 'package:video_player/video_player.dart';
@@ -127,18 +128,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
                 padding: const EdgeInsets.all(8),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: Semantics(
-                        button: true,
-                        label: context.t('a11y_back'),
-                        excludeSemantics: true,
-                        child: Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                    const AppBackButton(onPhoto: true),
                     Text(
                       context.t('reels_title'),
                       style: const TextStyle(

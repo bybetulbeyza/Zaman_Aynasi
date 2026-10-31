@@ -1,5 +1,7 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
+import '../widgets/common/app_back_button.dart';
 import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
@@ -98,23 +100,8 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Row(
                   children: [
-                    if (canPop)
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Semantics(
-                            button: true,
-                            label: context.t('a11y_back'),
-                            excludeSemantics: true,
-                            child: Icon(
-                              Icons.arrow_back_ios_new,
-                              size: 20,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                        ),
-                      ),
+                    if (canPop) const AppBackButton(),
+                    const SizedBox(width: 8),
                     Text(context.t('inv_title'), style: AppTheme.displayLarge),
                   ],
                 ),
@@ -214,7 +201,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
+        border: Border.all(color: bordeauxOf(context), width: 1.3),
       ),
       child: TextField(
         controller: _searchController,

@@ -4,6 +4,8 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
+import '../widgets/common/app_back_button.dart';
 import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_toast.dart';
@@ -427,34 +429,15 @@ class _SliderScreenState extends State<SliderScreen>
     );
   }
 
-  /// Sol üstte geri oku. Fotoğraf üzerindeyken beyaz ve gölgeli, kart tam ekranken koyu.
+  /// Sol üstte geri düğmesi: fotoğraf üstündeyken buzlu cam, kart tam ekranken beyaz yuvarlak düğme.
   Widget _buildBackArrow() {
     final onSheet = _extent > 0.9;
     return SafeArea(
       child: Align(
         alignment: Alignment.topLeft,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => Navigator.pop(context),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-            child: Semantics(
-              button: true,
-              label: context.t('a11y_back'),
-              excludeSemantics: true,
-              child: Icon(
-                Icons.arrow_back_ios_new,
-                size: 22,
-                color: onSheet ? AppColors.textDark : Colors.white,
-                shadows: onSheet
-                    ? null
-                    : const [
-                        Shadow(color: Colors.black54, blurRadius: 8),
-                        Shadow(color: Colors.black38, blurRadius: 2),
-                      ],
-              ),
-            ),
-          ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
+          child: AppBackButton(onPhoto: !onSheet),
         ),
       ),
     );
@@ -737,7 +720,7 @@ class _SliderScreenState extends State<SliderScreen>
         decoration: BoxDecoration(
           borderRadius: radius,
           border: Border.all(
-            color: AppColors.ciniBordeaux.withValues(alpha: 0.45),
+            color: bordeauxOf(context, alpha: 0.45),
             width: 1.1,
           ),
         ),
@@ -763,7 +746,7 @@ class _SliderScreenState extends State<SliderScreen>
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.ciniBordeaux,
+                      color: bordeauxOf(context),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -843,7 +826,7 @@ class _SliderScreenState extends State<SliderScreen>
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: AppColors.ciniBordeaux.withValues(alpha: 0.4),
+              color: bordeauxOf(context, alpha: 0.4),
               width: 1.1,
             ),
           ),
@@ -1069,7 +1052,7 @@ class _SliderScreenState extends State<SliderScreen>
                 icon: const Icon(Icons.play_arrow_rounded, size: 20),
                 label: Text(context.t('ai_story')),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.ciniBordeaux,
+                  backgroundColor: bordeauxOf(context),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: const StadiumBorder(),
                   textStyle: const TextStyle(

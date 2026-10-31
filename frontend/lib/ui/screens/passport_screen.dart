@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/app_back_button.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
@@ -56,22 +57,8 @@ class _PassportScreenState extends State<PassportScreen> {
                 children: [
                   Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Semantics(
-                            button: true,
-                            label: context.t('a11y_back'),
-                            excludeSemantics: true,
-                            child: const Icon(
-                              Icons.arrow_back_ios_new,
-                              size: 20,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                        ),
-                      ),
+                      const AppBackButton(),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           context.t('passport_title'),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dark_cancel.dart';
 import '../../../core/constants/app_colors.dart';
 
 /// Eser kartlarının ortak şekli: iki çapraz köşe büyük ve akıcı, diğer iki çapraz köşe sivri
@@ -37,8 +38,7 @@ class SquircleFrame extends StatelessWidget {
         shape: ContinuousRectangleBorder(
           borderRadius: shape(0),
           side: BorderSide(
-            color:
-                borderColor ?? AppColors.ciniBordeaux.withValues(alpha: 0.45),
+            color: borderColor ?? bordeauxOf(context, alpha: 0.45),
             width: 1.1,
           ),
         ),

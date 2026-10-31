@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../common/dark_cancel.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_theme.dart';
@@ -80,7 +81,7 @@ class _RouteStopsContent extends StatelessWidget {
                   height: 5,
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: AppColors.ciniBordeaux,
+                    color: bordeauxOf(context),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),

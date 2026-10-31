@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../common/dark_cancel.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -86,7 +87,7 @@ class _AudioGuidePlayerState extends State<AudioGuidePlayer> {
                       : () => playing ? player.pause() : player.play(),
                   child: CircleAvatar(
                     radius: 24,
-                    backgroundColor: AppColors.ciniBordeaux,
+                    backgroundColor: bordeauxOf(context),
                     child: Icon(
                       playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
                       color: Colors.white,

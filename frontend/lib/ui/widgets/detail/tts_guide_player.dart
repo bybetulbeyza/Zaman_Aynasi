@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../common/dark_cancel.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -87,7 +88,7 @@ class _TtsGuidePlayerState extends State<TtsGuidePlayer> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: AppColors.ciniBordeaux,
+                backgroundColor: bordeauxOf(context),
                 child: Icon(
                   _speaking ? Icons.stop_rounded : Icons.play_arrow_rounded,
                   color: Colors.white,

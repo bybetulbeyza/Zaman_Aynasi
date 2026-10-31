@@ -5,6 +5,7 @@ import 'core/l10n/app_lang.dart';
 import 'core/state/app_accessibility.dart';
 import 'core/state/passport.dart';
 import 'ui/screens/splash_screen.dart';
+import 'ui/widgets/common/dark_cancel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,12 +47,15 @@ class ZamanAynasiApp extends StatelessWidget {
               child: child!,
             );
             final dark = AppAccessibility.instance.isDark(context);
-            final themed = dark
-                ? ColorFiltered(
-                    colorFilter: AppAccessibility.darkFilter,
-                    child: scaled,
-                  )
-                : scaled;
+            final themed = DarkScope(
+              inverted: dark,
+              child: dark
+                  ? ColorFiltered(
+                      colorFilter: AppAccessibility.darkFilter,
+                      child: scaled,
+                    )
+                  : scaled,
+            );
             return AppAccessibility.instance.highContrast
                 ? ColorFiltered(
                     colorFilter: AppAccessibility.contrastFilter,

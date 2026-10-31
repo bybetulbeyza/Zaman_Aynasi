@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
@@ -233,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: AppColors.ciniBordeaux, width: 1.3),
+                  border: Border.all(color: bordeauxOf(context), width: 1.3),
                 ),
                 child: Row(
                   children: [
@@ -348,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: highlight
-                      ? AppColors.ciniBordeaux
+                      ? bordeauxOf(context)
                       : AppColors.primaryTeal.withValues(alpha: 0.4),
                   width: 1.3,
                 ),
@@ -363,9 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: AppIcon(
                 icon,
                 size: 30,
-                color: highlight
-                    ? AppColors.ciniBordeaux
-                    : AppColors.primaryTeal,
+                color: highlight ? bordeauxOf(context) : AppColors.primaryTeal,
               ),
             ),
             const SizedBox(height: 8),
