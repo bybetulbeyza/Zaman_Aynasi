@@ -189,31 +189,44 @@ class ProfileScreen extends StatelessWidget {
     final signedIn = AuthService.isSignedIn;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+      padding: const EdgeInsets.fromLTRB(22, 14, 14, 14),
       decoration: BoxDecoration(
         color: AppColors.primaryTeal,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(22),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            signedIn ? AuthService.displayName : context.t('auth_signin_card'),
-            style: const TextStyle(
-              fontFamily: AppTheme.headingFont,
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  signedIn
+                      ? AuthService.displayName
+                      : context.t('auth_signin_card'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: AppTheme.headingFont,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                if (signedIn)
+                  Text(
+                    AuthService.user?.email ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      color: Colors.white70,
+                    ),
+                  ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            signedIn
-                ? (AuthService.user?.email ?? '')
-                : context.t('auth_signin_card_body'),
-            style: const TextStyle(fontSize: 15, color: Colors.white70),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(width: 10),
           OutlinedButton(
             onPressed: signedIn
                 ? () => AuthService.signOut()
@@ -225,9 +238,14 @@ class ProfileScreen extends StatelessWidget {
                   ),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
+              backgroundColor: Colors.transparent,
               side: const BorderSide(color: Colors.white70),
               shape: const StadiumBorder(),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              textStyle: const TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             child: Text(
               signedIn ? context.t('auth_signout') : context.t('auth_login'),
