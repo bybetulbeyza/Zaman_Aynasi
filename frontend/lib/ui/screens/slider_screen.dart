@@ -1000,7 +1000,6 @@ class _SliderScreenState extends State<SliderScreen> {
 
   Widget _buildHotspotPopup(Hotspot hotspot, bool en) {
     final videoUrl = hotspot.videoFor(en);
-    final target = _navTarget(hotspot);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1094,33 +1093,13 @@ class _SliderScreenState extends State<SliderScreen> {
               ],
             ],
           ),
-          if (target != null) ...[
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _openPlace(target),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.heroPetrol,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: const StadiumBorder(),
-                  textStyle: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                child: Text(
-                  '${target.nameFor(en)}  ·  ${context.t('go_to_part')} →',
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 
   void _showHotspotDetail(Hotspot hotspot, bool en) {
+    final target = _navTarget(hotspot);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -1149,6 +1128,31 @@ class _SliderScreenState extends State<SliderScreen> {
                     color: AppColors.textDark,
                   ),
                 ),
+                if (target != null) ...[
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(sheetContext);
+                        _openPlace(target);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.heroPetrol,
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: const StadiumBorder(),
+                        textStyle: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      child: Text(
+                        '${target.nameFor(en)}  ·  ${context.t('go_to_part')} →',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
