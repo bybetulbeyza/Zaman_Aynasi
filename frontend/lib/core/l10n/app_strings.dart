@@ -73,7 +73,6 @@ const Map<String, String> appStringsTr = {
 
   // Tarihi rotalar
   'hr_title': 'Tarihi Rotalar',
-  'hr_subtitle': 'Bölgeye ve temaya göre hazır rota paketleri',
   'hr_see_stops': 'Durakları gör',
   'hr_start': 'Rotayı başlat',
   'hr_soon': '{city} için hazır rotalar yakında eklenecek.',
@@ -260,7 +259,6 @@ const Map<String, String> appStringsEn = {
 
   // Historic routes
   'hr_title': 'Historic Routes',
-  'hr_subtitle': 'Ready-made route packages by region and theme',
   'hr_see_stops': 'See stops',
   'hr_start': 'Start route',
   'hr_soon': 'Ready-made routes for {city} are coming soon.',

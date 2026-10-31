@@ -115,14 +115,6 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   children: [
                     Text(context.t('hr_title'), style: AppTheme.displayLarge),
-                    const SizedBox(height: 6),
-                    Text(
-                      context.t('hr_subtitle'),
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
                     const SizedBox(height: 16),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
