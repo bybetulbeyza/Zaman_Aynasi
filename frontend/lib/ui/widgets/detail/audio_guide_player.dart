@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../core/constants/app_colors.dart';
@@ -27,12 +28,14 @@ class _AudioGuidePlayerState extends State<AudioGuidePlayer> {
   }
 
   Future<void> _init() async {
+    _player?.dispose();
     final player = AudioPlayer();
     _player = player;
     try {
       final d = await player.setUrl(widget.url);
       if (mounted) setState(() => _duration = d ?? Duration.zero);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Sesli rehber yüklenemedi (${widget.url}): $e');
       if (mounted) setState(() => _hasError = true);
     }
     player.processingStateStream.listen((state) {
@@ -73,7 +76,12 @@ class _AudioGuidePlayerState extends State<AudioGuidePlayer> {
               builder: (_, snap) {
                 final playing = snap.data?.playing ?? false;
                 return GestureDetector(
-                  onTap: !_available || player == null
+                  onTap: _hasError
+                      ? () {
+                          setState(() => _hasError = false);
+                          _init();
+                        }
+                      : (!_available || player == null)
                       ? null
                       : () => playing ? player.pause() : player.play(),
                   child: CircleAvatar(
