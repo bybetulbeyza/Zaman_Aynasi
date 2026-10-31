@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../widgets/common/app_icon.dart';
 import '../widgets/common/logo_loader.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +28,26 @@ class MapScreen extends StatefulWidget {
   State<MapScreen> createState() => MapScreenState();
 }
 
+/// Karoların yüklendiğini saymak için ağ karo sağlayıcısını sarar (ilk açılış yükleme ekranı için).
+class _CountingTileProvider extends NetworkTileProvider {
+  final VoidCallback onTile;
+  _CountingTileProvider({required this.onTile});
+
+  @override
+  ImageProvider getImage(TileCoordinates coordinates, TileLayer options) {
+    final image = super.getImage(coordinates, options);
+    image
+        .resolve(ImageConfiguration.empty)
+        .addListener(
+          ImageStreamListener(
+            (_, __) => onTile(),
+            onError: (_, __) => onTile(),
+          ),
+        );
+    return image;
+  }
+}
+
 class MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   final HeritageRepository _heritageRepository = HeritageRepository();
@@ -37,6 +59,13 @@ class MapScreenState extends State<MapScreen> {
   List<HeritagePlace> _filteredPlaces = [];
   bool _isLoading = true;
   int _currentStopIndex = 0;
+  bool _tilesReady =
+      false; // ilk karolar gelene kadar logo yükleme ekranı gösterilir
+  int _tilesLoaded = 0;
+  Timer? _tilesTimeout;
+  late final _CountingTileProvider _tileProvider = _CountingTileProvider(
+    onTile: _onTileLoaded,
+  );
   bool _cardOpen =
       false; // normal modda kart yalnızca bir pine dokunulunca açılır
 
@@ -46,9 +75,24 @@ class MapScreenState extends State<MapScreen> {
   WalkingRoute? _walk; // rota modunda sokakları izleyen hat
   PlaceCategory? _selectedCategory; // null = Tümü
 
+  void _onTileLoaded() {
+    if (_tilesReady || !mounted) return;
+    if (++_tilesLoaded >= 4) setState(() => _tilesReady = true);
+  }
+
+  @override
+  void dispose() {
+    _tilesTimeout?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    // İnternet yavaşsa bile yükleme ekranı sonsuza kadar kalmasın
+    _tilesTimeout = Timer(const Duration(seconds: 7), () {
+      if (mounted && !_tilesReady) setState(() => _tilesReady = true);
+    });
     _initDataAndLocation();
   }
 
@@ -351,6 +395,7 @@ class MapScreenState extends State<MapScreen> {
                   ? _allPlaces.first.location
                   : _bursaCenter,
               initialZoom: 16.5,
+              backgroundColor: AppColors.bgCanvas,
               onTap: (_, __) {
                 if (_routeChip == null && _cardOpen) {
                   setState(() => _cardOpen = false);
@@ -360,6 +405,7 @@ class MapScreenState extends State<MapScreen> {
             children: [
               TileLayer(
                 urlTemplate: MapConfig.tileUrl,
+                tileProvider: _tileProvider,
                 tileSize: MapConfig.tileSize,
                 zoomOffset: MapConfig.zoomOffset,
                 userAgentPackageName: 'com.zamanaynasi.app',
@@ -423,6 +469,21 @@ class MapScreenState extends State<MapScreen> {
               // Kategori pinleri (rota modunda sıra rozetli)
               MarkerLayer(markers: _buildPinMarkers()),
             ],
+          ),
+
+          // İlk harita karoları gelene kadar logo yükleme ekranı
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: _tilesReady,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 350),
+                opacity: _tilesReady ? 0 : 1,
+                child: const ColoredBox(
+                  color: AppColors.bgCanvas,
+                  child: LogoLoader(size: 64),
+                ),
+              ),
+            ),
           ),
 
           // Yakınlaştır / uzaklaştır
