@@ -764,9 +764,10 @@ class _SliderScreenState extends State<SliderScreen> {
     return Text(
       context.t('source_ai_note'),
       style: const TextStyle(
-        fontSize: 13,
+        fontSize: 14.5,
         height: 1.4,
-        color: AppColors.textMuted,
+        fontWeight: FontWeight.w700,
+        color: AppColors.primaryTeal,
       ),
     );
   }
