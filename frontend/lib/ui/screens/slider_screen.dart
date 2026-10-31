@@ -619,7 +619,7 @@ class _SliderScreenState extends State<SliderScreen>
                   width: 132,
                   child: SquircleFrame(
                     radius: 30,
-                    gap: 3,
+                    elevated: false,
                     child: DarkCancel(
                       child: Stack(
                         fit: StackFit.expand,
