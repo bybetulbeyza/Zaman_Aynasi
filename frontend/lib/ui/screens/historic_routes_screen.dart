@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/dark_cancel.dart';
@@ -15,7 +17,6 @@ import '../widgets/common/pattern_background.dart';
 import '../widgets/common/active_route_card.dart';
 import '../widgets/common/app_network_image.dart';
 import '../widgets/common/filter_chip_pill.dart';
-import '../widgets/common/pill_button.dart';
 import '../widgets/route/route_stops_sheet.dart';
 
 class HistoricRoutesScreen extends StatefulWidget {
@@ -45,6 +46,14 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   String _city = 'Tümü';
   List<HeritageRoute> _routes = [];
   bool _isLoading = true;
+  final PageController _pc = PageController(viewportFraction: 0.84);
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _pc.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -115,12 +124,19 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
             children: [
               Positioned.fill(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(0, 16, 0, 24),
                   children: [
-                    Text(context.t('hr_title'), style: AppTheme.displayLarge),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        context.t('hr_title'),
+                        style: AppTheme.displayLarge,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         children: _cities
                             .map(
@@ -139,16 +155,22 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildCreateRow(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _buildCreateRow(),
+                    ),
                     const SizedBox(height: 20),
-                    ActiveRouteCard(
-                      onShowOnMap: (stops) =>
-                          widget.onRouteStarted?.call(stops),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ActiveRouteCard(
+                        onShowOnMap: (stops) =>
+                            widget.onRouteStarted?.call(stops),
+                      ),
                     ),
                     if (_isLoading)
                       const Padding(
                         padding: EdgeInsets.only(top: 40),
-                        child: Center(child: const LogoLoader()),
+                        child: LogoLoader(),
                       )
                     else if (visible.isEmpty)
                       Padding(
@@ -160,11 +182,9 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                             style: const TextStyle(color: AppColors.textMuted),
                           ),
                         ),
-                      ),
-                    for (final route in visible) ...[
-                      _card(route),
-                      const SizedBox(height: 28),
-                    ],
+                      )
+                    else
+                      _buildCarousel(visible),
                   ],
                 ),
               ),
@@ -224,76 +244,274 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
     );
   }
 
-  Widget _card(HeritageRoute route) {
-    final cover = route.stops.first.imageAfterUrl;
+  /// Büyük kartlı yatay karusel: ortadaki kart büyük, yanlardakiler küçük ve silik görünür.
+  Widget _buildCarousel(List<HeritageRoute> routes) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 210,
-          child: SquircleFrame(
-            radius: 44,
-            child: DarkCancel(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (cover.isNotEmpty)
-                    AppNetworkImage(imageUrl: cover)
-                  else
-                    const ColoredBox(color: AppColors.heroPetrol),
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: [0.4, 1.0],
-                        colors: [Colors.transparent, Color(0xCC0F2F3A)],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 20,
-                    right: 20,
-                    bottom: 16,
-                    child: Text(
-                      route.nameFor(context.isEn),
-                      style: const TextStyle(
-                        fontFamily: AppTheme.headingFont,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+          height: 450,
+          child: PageView.builder(
+            controller: _pc,
+            itemCount: routes.length,
+            clipBehavior: Clip.none,
+            onPageChanged: (i) => setState(() => _page = i),
+            itemBuilder: (context, i) => AnimatedBuilder(
+              animation: _pc,
+              builder: (_, child) {
+                var page = _page.toDouble();
+                if (_pc.hasClients && _pc.position.haveDimensions) {
+                  page = _pc.page ?? page;
+                }
+                final d = (page - i).abs().clamp(0.0, 1.0);
+                return Transform.scale(
+                  scale: 1 - 0.08 * d,
+                  child: Opacity(opacity: 1 - 0.4 * d, child: child),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                child: _card(routes[i]),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        Text(
-          '${route.stops.first.city} · ${route.stops.length} ${context.t('stops_word')} · ${route.durationLabelFor(context.isEn)}${route.isWalkingExact ? ' ${context.t('walk_word')}' : ''} · ${route.distanceLabelFor(context.isEn)}',
-          style: const TextStyle(fontSize: 14.5, color: AppColors.textMuted),
-        ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 6),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: PillButton.outlined(
-                context.t('hr_see_stops'),
-                onPressed: () => _showStops(route),
+            for (var i = 0; i < routes.length; i++)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: i == _page ? 20 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: i == _page
+                      ? AppColors.primaryTeal
+                      : AppColors.chipBorder,
+                  borderRadius: BorderRadius.circular(3),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: PillButton(
-                context.t('hr_start'),
-                onPressed: () => _start(route),
-              ),
-            ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _glassChip(IconData icon, String text) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.32)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: Colors.white),
+              const SizedBox(width: 5),
+              Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _card(HeritageRoute route) {
+    final en = context.isEn;
+    final cover = route.stops.first.imageAfterUrl;
+    final thumbs = route.stops.take(4).toList();
+    return Semantics(
+      button: true,
+      label: route.nameFor(en),
+      onTap: () => _showStops(route),
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: () => _showStops(route),
+        child: SquircleFrame(
+          radius: 56,
+          sharp: 10,
+          gap: 5,
+          child: DarkCancel(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (cover.isNotEmpty)
+                  AppNetworkImage(imageUrl: cover)
+                else
+                  const ColoredBox(color: AppColors.heroPetrol),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.3, 0.62, 1.0],
+                      colors: [
+                        Colors.transparent,
+                        Color(0x660F2F3A),
+                        Color(0xE60F2F3A),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 18,
+                  top: 18,
+                  child: _glassChip(
+                    Icons.place_outlined,
+                    route.stops.first.city,
+                  ),
+                ),
+                Positioned(
+                  left: 20,
+                  right: 20,
+                  bottom: 18,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        route.nameFor(en),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: AppTheme.headingFont,
+                          fontSize: 28,
+                          height: 1.1,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _glassChip(
+                            Icons.flag_outlined,
+                            '${route.stops.length} ${context.t('stops_word')}',
+                          ),
+                          _glassChip(
+                            Icons.schedule_rounded,
+                            route.durationLabelFor(en),
+                          ),
+                          _glassChip(
+                            Icons.directions_walk_rounded,
+                            route.distanceLabelFor(en),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      // Duraklardan küçük yuvarlak önizlemeler
+                      SizedBox(
+                        height: 38,
+                        child: Stack(
+                          children: [
+                            for (var i = 0; i < thumbs.length; i++)
+                              Positioned(
+                                left: i * 26.0,
+                                child: Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: ClipOval(
+                                    child: AppNetworkImage(
+                                      imageUrl: thumbs[i].imageAfterUrl,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (route.stops.length > thumbs.length)
+                              Positioned(
+                                left: thumbs.length * 26.0,
+                                child: Container(
+                                  width: 38,
+                                  height: 38,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                  ),
+                                  child: Text(
+                                    '+${route.stops.length - thumbs.length}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.textDark,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      // "Rotayı gör" kapsülü ve ok
+                      Container(
+                        height: 52,
+                        padding: const EdgeInsets.fromLTRB(22, 0, 6, 0),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.18),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                context.t('hr_see_stops'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 22,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

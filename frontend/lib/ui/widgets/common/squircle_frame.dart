@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 
-/// Eser kartlarının ortak şekli: iOS ikonları gibi akıcı "squircle" köşeler ve görselin
-/// etrafında ince bir çerçeve (çerçeve ile görsel arasında küçük bir boşluk).
+/// Eser kartlarının ortak şekli: iki çapraz köşe büyük ve akıcı, diğer iki çapraz köşe sivri
+/// (sol üst ve sağ alt), görselin etrafında ince bir çerçeve (aralarında küçük bir boşluk).
 class SquircleFrame extends StatelessWidget {
   final Widget child;
+
+  /// Büyük (yuvarlak) köşelerin yarıçapı: sağ üst ve sol alt.
   final double radius;
+
+  /// Sivri köşelerin yarıçapı: sol üst ve sağ alt.
+  final double sharp;
   final double gap;
   final Color? borderColor;
 
@@ -13,19 +18,24 @@ class SquircleFrame extends StatelessWidget {
     super.key,
     required this.child,
     this.radius = 40,
+    this.sharp = 8,
     this.gap = 4,
     this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final inner = ContinuousRectangleBorder(
-      borderRadius: BorderRadius.circular(radius - gap),
+    BorderRadius shape(double d) => BorderRadius.only(
+      topLeft: Radius.circular((sharp - d).clamp(2, 100)),
+      bottomRight: Radius.circular((sharp - d).clamp(2, 100)),
+      topRight: Radius.circular(radius - d),
+      bottomLeft: Radius.circular(radius - d),
     );
+    final inner = ContinuousRectangleBorder(borderRadius: shape(gap));
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: ContinuousRectangleBorder(
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: shape(0),
           side: BorderSide(
             color:
                 borderColor ?? AppColors.ciniBordeaux.withValues(alpha: 0.45),
