@@ -1,6 +1,5 @@
 import '../widgets/common/app_icon.dart';
 import 'dart:async';
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
@@ -170,35 +169,23 @@ class _SliderScreenState extends State<SliderScreen> {
                     right: 20,
                     child: _buildHotspotPopup(_selectedHotspot!, en),
                   ),
+                // Geri oku: diğer ekranlarla aynı konumda (sol üst), fotoğraf üstünde okunsun diye gölgeli
                 SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: ClipOval(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            width: 46,
-                            height: 46,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.3),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.6),
-                                width: 1,
-                              ),
-                            ),
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              icon: const Icon(
-                                Icons.arrow_back_ios_new,
-                                size: 18,
-                                color: Colors.white,
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                          ),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => Navigator.pop(context),
+                      child: const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 16, 20, 20),
+                        child: Icon(
+                          Icons.arrow_back_ios_new,
+                          size: 22,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(color: Colors.black54, blurRadius: 8),
+                            Shadow(color: Colors.black38, blurRadius: 2),
+                          ],
                         ),
                       ),
                     ),
