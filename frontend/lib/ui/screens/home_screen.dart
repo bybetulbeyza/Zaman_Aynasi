@@ -1,6 +1,5 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
-import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
@@ -37,7 +36,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final HeritageRepository _repository = HeritageRepository();
-  static const String _city = AppCities.active;
 
   List<HeritagePlace> _featuredPlaces = [];
   List<HeritagePlace> _nearbyPlaces = [];
@@ -419,7 +417,7 @@ class _HomeScreenState extends State<HomeScreen> {
         separatorBuilder: (_, __) => const SizedBox(width: 14),
         itemBuilder: (_, i) => _PlaceCard(
           place: places[i],
-          city: _city,
+          city: places[i].city,
           width: large ? 164 : 150,
           distanceLabel: (!large && !_locationOff)
               ? LocationService.formatDistance(places[i].distanceMeters)

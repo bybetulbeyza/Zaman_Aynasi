@@ -39,11 +39,11 @@ const Map<String, String> appStringsTr = {
   'home_featured': 'Öne çıkan vakıf eserleri',
   'home_nearby': 'Yakınımdaki eserler',
   'location_off_note':
-      'Konum kapalı; eserler Bursa merkezine göre gösteriliyor.',
+      'Konum kapalı; eserler şehir merkezine göre gösteriliyor.',
 
   // Envanter
   'inv_title': 'Tarih Envanteri',
-  'inv_count': "Bursa'da {n} eser",
+  'inv_count': '{n} eser',
 
   // Rota oluştur
   'rc_title': 'Rota oluştur',
@@ -77,7 +77,6 @@ const Map<String, String> appStringsTr = {
   'ok_btn': 'Tamam',
   'passport_title': 'Pasaportum',
   'passport_row': 'Pasaportum',
-  'passport_soon': '{city} mühürleri yakında.',
   'passport_count': '{n}/{total} mühür',
   'passport_hint':
       'Bir eseri ziyaret et, QR kodunu okut ya da görevlerini tamamla; mührünü kazan.',
@@ -244,11 +243,11 @@ const Map<String, String> appStringsEn = {
   'home_featured': 'Featured landmarks',
   'home_nearby': 'Landmarks near me',
   'location_off_note':
-      'Location is off; landmarks are shown relative to central Bursa.',
+      'Location is off; landmarks are shown relative to the city centre.',
 
   // Inventory
   'inv_title': 'Heritage Inventory',
-  'inv_count': '{n} landmarks in Bursa',
+  'inv_count': '{n} landmarks',
 
   // Create route
   'rc_title': 'Create route',
@@ -282,7 +281,6 @@ const Map<String, String> appStringsEn = {
   'ok_btn': 'OK',
   'passport_title': 'My Passport',
   'passport_row': 'Passport',
-  'passport_soon': '{city} stamps are coming soon.',
   'passport_count': '{n}/{total} stamps',
   'passport_hint':
       'Visit a landmark, scan its QR code or finish its tasks to earn its stamp.',

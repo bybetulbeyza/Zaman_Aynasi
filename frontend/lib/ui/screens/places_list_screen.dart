@@ -59,6 +59,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
       _filteredPlaces = _allPlaces.where((place) {
         final matchesSearch =
             place.name.toLowerCase().contains(query) ||
+            place.city.toLowerCase().contains(query) ||
             place.nameEn.toLowerCase().contains(query) ||
             place.shortDescription.toLowerCase().contains(query) ||
             place.shortDescriptionEn.toLowerCase().contains(query);

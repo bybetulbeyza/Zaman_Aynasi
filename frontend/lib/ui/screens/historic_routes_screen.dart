@@ -279,7 +279,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          '${AppCities.active} · ${route.stops.length} ${context.t('stops_word')} · ${route.durationLabelFor(context.isEn)}${route.isWalkingExact ? ' ${context.t('walk_word')}' : ''} · ${route.distanceLabelFor(context.isEn)}',
+          '${route.stops.first.city} · ${route.stops.length} ${context.t('stops_word')} · ${route.durationLabelFor(context.isEn)}${route.isWalkingExact ? ' ${context.t('walk_word')}' : ''} · ${route.distanceLabelFor(context.isEn)}',
           style: const TextStyle(fontSize: 14.5, color: AppColors.textMuted),
         ),
         const SizedBox(height: 14),

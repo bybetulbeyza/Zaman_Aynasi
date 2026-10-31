@@ -229,6 +229,7 @@ class MapScreenState extends State<MapScreen> {
         final q = _searchQuery.toLowerCase();
         final matchesSearch =
             place.name.toLowerCase().contains(q) ||
+            place.city.toLowerCase().contains(q) ||
             place.nameEn.toLowerCase().contains(q) ||
             place.shortDescription.toLowerCase().contains(q) ||
             place.shortDescriptionEn.toLowerCase().contains(q);

@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/passport.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
-import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/passport/stamp_widget.dart';
 import 'slider_screen.dart';
 
-/// Bursa Pasaportu: her eser için bir mühür yuvası.
+/// Pasaport: her eser için bir mühür yuvası.
 class PassportScreen extends StatefulWidget {
   const PassportScreen({super.key});
 
@@ -21,7 +19,6 @@ class PassportScreen extends StatefulWidget {
 
 class _PassportScreenState extends State<PassportScreen> {
   List<HeritagePlace> _all = [];
-  String _city = AppCities.active;
   bool _loading = true;
 
   @override
@@ -48,7 +45,7 @@ class _PassportScreenState extends State<PassportScreen> {
           child: ListenableBuilder(
             listenable: Passport.instance,
             builder: (context, _) {
-              final cityPlaces = _all.where((p) => p.city == _city).toList();
+              final cityPlaces = _all;
               final earned = cityPlaces
                   .where((p) => Passport.instance.hasStamp(p.id))
                   .length;
@@ -82,24 +79,7 @@ class _PassportScreenState extends State<PassportScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for (final c in AppCities.all)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: FilterChipPill(
-                              label: c,
-                              selected: _city == c,
-                              onTap: () => setState(() => _city = c),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
@@ -153,31 +133,8 @@ class _PassportScreenState extends State<PassportScreen> {
                         ),
                       ),
                     )
-                  else if (cityPlaces.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 40),
-                      child: Center(
-                        child: Text(
-                          context
-                              .t('passport_soon')
-                              .replaceAll('{city}', _city),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.textMuted),
-                        ),
-                      ),
-                    )
                   else
-                    GridView.count(
-                      crossAxisCount: 3,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 18,
-                      crossAxisSpacing: 8,
-                      childAspectRatio: 0.78,
-                      children: [
-                        for (final p in cityPlaces) _slot(context, p, en),
-                      ],
-                    ),
+                    ..._grouped(context, cityPlaces, en),
                 ],
               );
             },
@@ -185,6 +142,38 @@ class _PassportScreenState extends State<PassportScreen> {
         ),
       ),
     );
+  }
+
+  /// Eserler şehre göre gruplanır; tek şehir varsa başlık gösterilmez.
+  List<Widget> _grouped(
+    BuildContext context,
+    List<HeritagePlace> places,
+    bool en,
+  ) {
+    final byCity = <String, List<HeritagePlace>>{};
+    for (final p in places) {
+      byCity.putIfAbsent(p.city, () => []).add(p);
+    }
+    final showTitles = byCity.length > 1;
+    return [
+      for (final e in byCity.entries) ...[
+        if (showTitles)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12, top: 4),
+            child: Text(e.key, style: AppTheme.titleMedium),
+          ),
+        GridView.count(
+          crossAxisCount: 3,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 18,
+          crossAxisSpacing: 8,
+          childAspectRatio: 0.78,
+          children: [for (final p in e.value) _slot(context, p, en)],
+        ),
+        const SizedBox(height: 18),
+      ],
+    ];
   }
 
   Widget _slot(BuildContext context, HeritagePlace p, bool en) {
