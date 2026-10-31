@@ -245,9 +245,6 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   child: _buildBadge(
                     widget.afterLabel,
                     tint: AppColors.primaryTealDark,
-                    trailing: widget.onAfterBadgeTap == null
-                        ? null
-                        : Icons.info_outline_rounded,
                   ),
                 ),
               ),
