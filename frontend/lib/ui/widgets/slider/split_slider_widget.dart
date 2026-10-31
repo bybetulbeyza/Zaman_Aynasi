@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:before_after/before_after.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/heritage_place.dart';
 import '../common/app_network_image.dart';
@@ -40,6 +41,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   bool _coordinatePickerMode = false; // Koordinat yakalama anahtarı
   late AnimationController _pulseController;
 
+  // Fotoğrafların en/boy oranları: hotspot konumları fotoğrafa göre tutulur, kutuya göre değil.
+  double? _oldAspect; // sol taraf (image_before_url, 'after' hotspot'ları)
+  double? _newAspect; // sağ taraf (image_after_url, 'before' hotspot'ları)
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +52,54 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
+    _resolveAspect(widget.beforeImageUrl, (a) => _oldAspect = a);
+    _resolveAspect(widget.afterImageUrl, (a) => _newAspect = a);
+  }
+
+  void _resolveAspect(String url, void Function(double) assign) {
+    if (url.isEmpty) return;
+    final stream = CachedNetworkImageProvider(
+      url,
+    ).resolve(const ImageConfiguration());
+    late ImageStreamListener listener;
+    listener = ImageStreamListener((info, _) {
+      stream.removeListener(listener);
+      if (!mounted) return;
+      setState(() => assign(info.image.width / info.image.height));
+    }, onError: (_, __) => stream.removeListener(listener));
+    stream.addListener(listener);
+  }
+
+  /// Fotoğraftaki (0-1) konumu, BoxFit.cover ile kırpılmış kutudaki piksel konumuna çevirir.
+  static Offset _imageToBox(
+    double ix,
+    double iy,
+    double a,
+    double w,
+    double h,
+  ) {
+    if (a > w / h) {
+      final dw = a * h; // fotoğraf yüksekliğe sığar, yanlar taşar
+      return Offset(ix * dw - (dw - w) / 2, iy * h);
+    }
+    final dh = w / a; // fotoğraf genişliğe sığar, alt/üst taşar
+    return Offset(ix * w, iy * dh - (dh - h) / 2);
+  }
+
+  /// Kutudaki dokunma noktasını fotoğraftaki (0-1) konuma çevirir ([_imageToBox]'un tersi).
+  static Offset _boxToImage(
+    double px,
+    double py,
+    double a,
+    double w,
+    double h,
+  ) {
+    if (a > w / h) {
+      final dw = a * h;
+      return Offset((px + (dw - w) / 2) / dw, py / h);
+    }
+    final dh = w / a;
+    return Offset(px / w, (py + (dh - h) / 2) / dh);
   }
 
   @override
@@ -178,25 +231,36 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             if (_showHotspots && !_coordinatePickerMode)
               ...widget.hotspots.map((hotspot) {
                 final isBeforeSide =
-                    hotspot.targetSide.toLowerCase() == 'before';
-                final isVisible = isBeforeSide
-                    ? (hotspot.xPercent > _sliderValue)
-                    : (hotspot.xPercent < _sliderValue);
+                    hotspot.targetSide.trim().toLowerCase() == 'before';
+                // 'after' hotspot'ları sol (eski) fotoğrafa, 'before' olanlar sağ (güncel) fotoğrafa aittir
+                final aspect = isBeforeSide ? _newAspect : _oldAspect;
+                final pos = aspect == null
+                    ? Offset(
+                        hotspot.xPercent * totalWidth,
+                        hotspot.yPercent * totalHeight,
+                      )
+                    : _imageToBox(
+                        hotspot.xPercent,
+                        hotspot.yPercent,
+                        aspect,
+                        totalWidth,
+                        totalHeight,
+                      );
 
+                // Kırpılan (görünmeyen) bölgeye düşen nokta gösterilmez
+                final inView =
+                    pos.dx > 12 &&
+                    pos.dx < totalWidth - 12 &&
+                    pos.dy > 12 &&
+                    pos.dy < totalHeight - 12;
+                final isVisible =
+                    inView &&
+                    (isBeforeSide ? pos.dx > dividerX : pos.dx < dividerX);
                 if (!isVisible) return const SizedBox.shrink();
 
-                final leftPos = (hotspot.xPercent * totalWidth).clamp(
-                  20.0,
-                  totalWidth - 40.0,
-                );
-                final topPos = (hotspot.yPercent * totalHeight).clamp(
-                  20.0,
-                  totalHeight - 40.0,
-                );
-
                 return Positioned(
-                  left: leftPos - 16,
-                  top: topPos - 16,
+                  left: pos.dx - 16,
+                  top: pos.dy - 16,
                   child: _buildAnimatedHotspot(
                     onTap: () {
                       if (widget.onHotspotSelected != null) {
@@ -213,17 +277,24 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTapDown: (details) {
-                    final x = (details.localPosition.dx / totalWidth).clamp(
-                      0.0,
-                      1.0,
-                    );
-                    final y = (details.localPosition.dy / totalHeight).clamp(
-                      0.0,
-                      1.0,
-                    );
                     final side = (details.localPosition.dx < dividerX)
                         ? 'after'
                         : 'before';
+                    final aspect = side == 'before' ? _newAspect : _oldAspect;
+                    final img = aspect == null
+                        ? Offset(
+                            details.localPosition.dx / totalWidth,
+                            details.localPosition.dy / totalHeight,
+                          )
+                        : _boxToImage(
+                            details.localPosition.dx,
+                            details.localPosition.dy,
+                            aspect,
+                            totalWidth,
+                            totalHeight,
+                          );
+                    final x = img.dx.clamp(0.0, 1.0);
+                    final y = img.dy.clamp(0.0, 1.0);
 
                     final xStr = x.toStringAsFixed(2);
                     final yStr = y.toStringAsFixed(2);
