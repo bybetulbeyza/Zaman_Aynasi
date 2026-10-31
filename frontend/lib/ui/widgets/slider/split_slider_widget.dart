@@ -41,7 +41,7 @@ class SplitSliderWidget extends StatefulWidget {
 }
 
 class _SplitSliderWidgetState extends State<SplitSliderWidget>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   double _sliderValue = 0.5;
   bool _active = false; // kullanıcı slider'ı sürüklerken tutamaç büyür
   Timer? _activeTimer;
