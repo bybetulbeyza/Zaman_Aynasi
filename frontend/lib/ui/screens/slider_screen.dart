@@ -13,6 +13,7 @@ import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
+import '../widgets/detail/photo_collage.dart';
 import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
@@ -364,6 +365,17 @@ class _SliderScreenState extends State<SliderScreen> {
         ),
       ),
       const SizedBox(height: 26),
+
+      // Eski fotoğraf envanteri (fotoğraf yoksa hiç görünmez)
+      if (_place.oldPhotos.isNotEmpty) ...[
+        SectionTitle(context.t('old_photos')),
+        const SizedBox(height: 12),
+        PhotoCollage(
+          photos: _place.oldPhotos,
+          semanticPrefix: _place.nameFor(en),
+        ),
+        const SizedBox(height: 26),
+      ],
 
       // Kaynakça
       SectionTitle(context.t('sources')),

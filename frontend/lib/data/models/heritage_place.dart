@@ -137,6 +137,9 @@ class HeritagePlace {
   final String
   qrUrl; // Supabase: qr_url (QR görselinin adresi; QR içeriği 'eser:<id>')
   final List<Hotspot> hotspots;
+
+  /// Supabase: old_photos — eski fotoğraf adresleri (liste ya da boşluk/virgülle ayrılmış metin).
+  final List<String> oldPhotos;
   final double? distanceMeters;
 
   HeritagePlace({
@@ -162,6 +165,7 @@ class HeritagePlace {
     this.aiVideoUrl = '',
     this.audioGuideUrl = '',
     this.qrUrl = '',
+    this.oldPhotos = const [],
     this.hotspots = const [],
     this.distanceMeters,
   });
@@ -214,6 +218,7 @@ class HeritagePlace {
       aiVideoUrl: aiVideoUrl,
       audioGuideUrl: audioGuideUrl,
       qrUrl: qrUrl,
+      oldPhotos: oldPhotos,
       hotspots: hotspots,
       distanceMeters: distance,
     );
@@ -258,8 +263,22 @@ class HeritagePlace {
       aiVideoUrl: (json['ai_video'] as String? ?? '').trim(),
       audioGuideUrl: (json['audio_guide'] as String? ?? '').trim(),
       qrUrl: json['qr_url'] as String? ?? '',
+      oldPhotos: _parsePhotos(json['old_photos']),
       hotspots: parsedHotspots,
     );
+  }
+
+  /// `old_photos` bir dizi ya da "url1, url2 ..." biçiminde metin olabilir; ikisini de kabul eder.
+  static List<String> _parsePhotos(dynamic raw) {
+    final items = raw is List
+        ? raw.map((e) => e.toString())
+        : raw is String
+        ? raw.split(RegExp(r'[\s,;]+'))
+        : const <String>[];
+    return items
+        .map((e) => e.trim().replaceAll(RegExp(r'^[{"]+|[}"]+$'), ''))
+        .where((e) => e.startsWith('http'))
+        .toList();
   }
 
   static PlaceCategory _parseCategory(String? cat) {
