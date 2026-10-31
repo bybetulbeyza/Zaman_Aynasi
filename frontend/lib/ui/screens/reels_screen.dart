@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/ai_label.dart';
 import '../widgets/common/app_back_button.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import 'package:video_player/video_player.dart';
-import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
@@ -257,24 +257,7 @@ class _ReelPageState extends State<_ReelPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.ciniBordeaux,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    context.t('ai_generated'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+                const AiLabel(compact: true),
                 const SizedBox(height: 10),
                 Text(
                   r.hotspot.titleFor(en),

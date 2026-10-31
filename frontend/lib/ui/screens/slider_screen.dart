@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/ai_label.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_back_button.dart';
 import '../widgets/common/squircle_frame.dart';
@@ -736,28 +737,7 @@ class _SliderScreenState extends State<SliderScreen>
                       const ColoredBox(color: AppColors.heroPetrol),
                 ),
                 Container(color: Colors.black.withValues(alpha: 0.28)),
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: bordeauxOf(context),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      context.t('ai_generated'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ),
+                Positioned(top: 12, left: 12, child: const AiLabel()),
                 Center(
                   child: Container(
                     width: 64,
