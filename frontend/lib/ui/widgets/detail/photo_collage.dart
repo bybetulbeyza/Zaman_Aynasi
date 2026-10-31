@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
 import '../common/app_network_image.dart';
 
 /// Eski fotoğraflar için kolaj: solda büyük, sağda 2x2 küçük kare; 5'ten fazlaysa "+N".
