@@ -12,6 +12,7 @@ import '../../data/models/heritage_place.dart';
 import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/detail/audio_guide_player.dart';
+import '../widgets/detail/tts_guide_player.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
 
@@ -62,6 +63,19 @@ class _SliderScreenState extends State<SliderScreen> {
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOut,
     );
+  }
+
+  /// Sesli okuma için sayfa metni: ad, kısa tarihçe ve hotspot açıklamaları.
+  String _pageText(bool en) {
+    final b = StringBuffer()
+      ..writeln('${_place.nameFor(en)}.')
+      ..writeln('${_place.descriptionFor(en)}');
+    for (final h in _place.hotspots) {
+      b
+        ..writeln('${h.titleFor(en)}.')
+        ..writeln(h.descriptionFor(en));
+    }
+    return b.toString();
   }
 
   /// "Cilt 1, s. 37" -> İngilizcede "Vol. 1, p. 37"
@@ -309,7 +323,15 @@ class _SliderScreenState extends State<SliderScreen> {
       const SizedBox(height: 16),
 
       // Sesli rehber
-      AudioGuidePlayer(key: ValueKey(audioUrl), url: audioUrl),
+      // Kayıtlı ses varsa onu çalar; yoksa sayfayı cihazın sesiyle okur
+      if (audioUrl.isNotEmpty)
+        AudioGuidePlayer(key: ValueKey(audioUrl), url: audioUrl)
+      else
+        TtsGuidePlayer(
+          key: ValueKey('tts-$en'),
+          english: en,
+          text: _pageText(en),
+        ),
       const SizedBox(height: 26),
 
       // Tarihçe

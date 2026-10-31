@@ -103,8 +103,8 @@ const Map<String, String> appStringsTr = {
   'qr_unknown': "Bu karekod tanınmadı. Tarih Envanteri'nden aramayı deneyin.",
 
   // Detay
-  'period_label': 'Geçmiş',
-  'today_label': 'Bugün',
+  'period_label': 'Tarihî',
+  'today_label': 'Günümüz',
   'period': 'Yapım',
   'architect': 'Mimar',
   'patron': 'Bani',
@@ -115,6 +115,8 @@ const Map<String, String> appStringsTr = {
   'video_soon': 'Video yakında',
   'video_error': 'Video yüklenemedi.',
   'audio_guide': 'Sesli rehber',
+  'tts_hint': 'Sayfayı sesli dinle',
+  'tts_unavailable': 'Bu cihazda sesli okuma kullanılamıyor',
   'history': 'Tarihçe',
   'sources': 'Kaynakça',
   'source_book': 'Vakıf Katılım Envanter Kitabı',
@@ -259,8 +261,8 @@ const Map<String, String> appStringsEn = {
       'This QR code was not recognized. Try searching the Heritage Inventory.',
 
   // Detail
-  'period_label': 'Past',
-  'today_label': 'Today',
+  'period_label': 'Historic',
+  'today_label': 'Present',
   'period': 'Built',
   'architect': 'Architect',
   'patron': 'Patron',
@@ -271,6 +273,8 @@ const Map<String, String> appStringsEn = {
   'video_soon': 'Video coming soon',
   'video_error': 'The video could not be loaded.',
   'audio_guide': 'Audio guide',
+  'tts_hint': 'Listen to this page',
+  'tts_unavailable': 'Text-to-speech is not available on this device',
   'history': 'History',
   'sources': 'Sources',
   'source_book': 'Vakıf Katılım Inventory Book',
