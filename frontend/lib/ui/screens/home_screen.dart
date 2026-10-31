@@ -437,10 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
               }
               // Ortadaki kart büyük ve canlı, yanlardakiler küçük ve silik
               final d = (page - i).abs().clamp(0.0, 1.0);
-              return Transform.scale(
-                scale: 1 - 0.1 * d,
-                child: Opacity(opacity: 1 - 0.35 * d, child: child),
-              );
+              return Transform.scale(scale: 1 - 0.1 * d, child: child);
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 12),

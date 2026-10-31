@@ -263,10 +263,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                   page = _pc.page ?? page;
                 }
                 final d = (page - i).abs().clamp(0.0, 1.0);
-                return Transform.scale(
-                  scale: 1 - 0.08 * d,
-                  child: Opacity(opacity: 1 - 0.4 * d, child: child),
-                );
+                return Transform.scale(scale: 1 - 0.08 * d, child: child);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
