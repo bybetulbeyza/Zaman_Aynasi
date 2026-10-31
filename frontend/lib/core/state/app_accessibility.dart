@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Erişilebilirlik tercihleri (yazı boyutu, yüksek kontrast). Hesap olmadığı için yalnızca bellekte tutulur.
 class AppAccessibility extends ChangeNotifier {
@@ -9,6 +10,27 @@ class AppAccessibility extends ChangeNotifier {
 
   double _textScale = 1.0;
   bool _highContrast = false;
+
+  /// Sesli rehber yerine yazılı metni göstermek (işitme engelliler için); seçim hatırlanır.
+  bool _readGuide = false;
+  bool get readGuide => _readGuide;
+
+  Future<void> init() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      _readGuide = p.getBool('read_guide') ?? false;
+    } catch (_) {}
+  }
+
+  Future<void> setReadGuide(bool value) async {
+    if (value == _readGuide) return;
+    _readGuide = value;
+    notifyListeners();
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setBool('read_guide', value);
+    } catch (_) {}
+  }
 
   double get textScale => _textScale;
   bool get highContrast => _highContrast;

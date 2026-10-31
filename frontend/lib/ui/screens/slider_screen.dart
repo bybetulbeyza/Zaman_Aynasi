@@ -22,6 +22,7 @@ import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
 import '../widgets/detail/photo_collage.dart';
 import '../widgets/detail/activities_section.dart';
+import '../widgets/detail/guide_section.dart';
 import '../widgets/detail/swipe_hint_arrow.dart';
 import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
@@ -521,7 +522,12 @@ class _SliderScreenState extends State<SliderScreen>
 
       // Sesli rehber
       // Kayıtlı ses varsa onu çalar; yoksa sayfayı cihazın sesiyle okur
-      if (audioUrl.isNotEmpty)
+      if (audioUrl.isNotEmpty && _place.hasAudioTranscript)
+        GuideSection(
+          player: AudioGuidePlayer(key: ValueKey(audioUrl), url: audioUrl),
+          transcript: _place.audioTranscript(en),
+        )
+      else if (audioUrl.isNotEmpty)
         AudioGuidePlayer(key: ValueKey(audioUrl), url: audioUrl)
       else
         TtsGuidePlayer(

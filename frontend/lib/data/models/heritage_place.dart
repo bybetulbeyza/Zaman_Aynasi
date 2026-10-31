@@ -133,6 +133,10 @@ class HeritagePlace {
   final String shortDescriptionEn;
   final String routeNameEn;
   final String audioGuideEnUrl;
+
+  /// Supabase: audio_text / audio_text_en — sesli rehberin yazılı metni (işitme engelliler için).
+  final String audioText;
+  final String audioTextEn;
   final String aiVideoEnUrl;
   final String aiVideoUrl; // Supabase: ai_video (tarihî dönüşüm videosu)
   final String
@@ -165,6 +169,8 @@ class HeritagePlace {
     this.shortDescriptionEn = '',
     this.routeNameEn = '',
     this.audioGuideEnUrl = '',
+    this.audioText = '',
+    this.audioTextEn = '',
     this.aiVideoEnUrl = '',
     this.aiVideoUrl = '',
     this.audioGuideUrl = '',
@@ -195,6 +201,24 @@ class HeritagePlace {
   bool get hasAiVideo => aiVideoUrl.isNotEmpty || aiVideoEnUrl.isNotEmpty;
   bool get hasAudioGuide => audioGuideUrl.isNotEmpty;
 
+  /// Sesli rehberin metni, paragraflara bölünmüş. Ses motoru için konan "[1 saniye es]" gibi
+  /// işaretler ekranda görünmesin diye paragraf arası yapılır.
+  List<String> audioTranscript(bool en) {
+    final raw = en && audioTextEn.isNotEmpty ? audioTextEn : audioText;
+    return raw
+        .split(
+          RegExp(
+            r'\s*\[[^\]]*(?:saniye|sn|second|sec|pause)[^\]]*\]\s*',
+            caseSensitive: false,
+          ),
+        )
+        .map((p) => p.trim())
+        .where((p) => p.isNotEmpty)
+        .toList();
+  }
+
+  bool get hasAudioTranscript => audioText.isNotEmpty || audioTextEn.isNotEmpty;
+
   // SliderScreen ile tam geriye dönük uyumluluk
   String get period => constructionDate;
 
@@ -219,6 +243,8 @@ class HeritagePlace {
       shortDescriptionEn: shortDescriptionEn,
       routeNameEn: routeNameEn,
       audioGuideEnUrl: audioGuideEnUrl,
+      audioText: audioText,
+      audioTextEn: audioTextEn,
       aiVideoEnUrl: aiVideoEnUrl,
       aiVideoUrl: aiVideoUrl,
       audioGuideUrl: audioGuideUrl,
@@ -267,6 +293,8 @@ class HeritagePlace {
           .trim(),
       routeNameEn: (json['route_name_en'] as String? ?? '').trim(),
       audioGuideEnUrl: (json['audio_guide_en'] as String? ?? '').trim(),
+      audioText: (json['audio_text'] as String? ?? '').trim(),
+      audioTextEn: (json['audio_text_en'] as String? ?? '').trim(),
       aiVideoEnUrl: (json['ai_video_en'] as String? ?? '').trim(),
       aiVideoUrl: (json['ai_video'] as String? ?? '').trim(),
       audioGuideUrl: (json['audio_guide'] as String? ?? '').trim(),

@@ -16,6 +16,7 @@ Future<void> main() async {
   );
 
   await Passport.instance.init();
+  await AppAccessibility.instance.init();
 
   runApp(const ZamanAynasiApp());
 }
