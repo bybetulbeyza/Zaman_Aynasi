@@ -185,7 +185,7 @@ const Map<String, String> appStringsTr = {
   'ai_sheet_source': 'Dayanak kayıt',
   'ai_sheet_ok': 'Anladım',
   'source_ai_note':
-      'Tarihî görsel, bu kayda dayanarak yapay zekâ ile canlandırılmıştır.',
+      'Tarihî görsel yapay zekâ ile canlandırılmıştır. Nasıl hazırlandı?',
   'about_ai_title': 'Canlandırmalar nasıl üretildi?',
   'about_ai_body':
       'Tarihî görünümler gerçek fotoğraf değildir; envanter kitaplarındaki tarif ve kayıtlara dayanarak yapay zekâ ile canlandırılmıştır ve "Tarihî canlandırma" rozetiyle belirtilir. Günümüz görselleri gerçek fotoğraflardır. Yeni içerikler yayımlanmadan önce kontrol edilir.',
@@ -378,7 +378,7 @@ const Map<String, String> appStringsEn = {
   'ai_sheet_source': 'Source record',
   'ai_sheet_ok': 'Got it',
   'source_ai_note':
-      'The historic image is an AI reconstruction based on this record.',
+      'The historic image is an AI reconstruction. How was it made?',
   'about_ai_title': 'How were the reconstructions made?',
   'about_ai_body':
       'Historic views are not real photographs; they are AI reconstructions based on the descriptions and records in the inventory books and are labelled with the "Historic reconstruction" badge. Present-day images are real photographs. New content is reviewed before it is published.',

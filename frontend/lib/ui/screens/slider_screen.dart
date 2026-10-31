@@ -538,6 +538,8 @@ class _SliderScreenState extends State<SliderScreen> {
       // Kaynakça
       SectionTitle(context.t('sources')),
       const SizedBox(height: 12),
+      _buildAiNote(),
+      const SizedBox(height: 10),
       _buildSourceCard(en),
     ];
   }
@@ -773,6 +775,39 @@ class _SliderScreenState extends State<SliderScreen> {
     );
   }
 
+  /// Tarihî görselin yapay zekâ canlandırması olduğunu söyleyen, dokununca açıklama açan tek satır.
+  Widget _buildAiNote() {
+    return GestureDetector(
+      onTap: _showAiSheet,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: AppColors.primaryTealLight,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                context.t('source_ai_note'),
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  height: 1.35,
+                  color: AppColors.primaryTealDark,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.primaryTeal,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSourceCard(bool en) {
     final inventory = _inventoryLabel(en);
     return GestureDetector(
@@ -812,29 +847,6 @@ class _SliderScreenState extends State<SliderScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: _showAiSheet,
-                    child: Text.rich(
-                      TextSpan(
-                        text: '${context.t('source_ai_note')} ',
-                        children: [
-                          TextSpan(
-                            text: context.t('ai_sheet_title'),
-                            style: const TextStyle(
-                              color: AppColors.primaryTeal,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12.5,
-                        height: 1.4,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisSize: MainAxisSize.min,
