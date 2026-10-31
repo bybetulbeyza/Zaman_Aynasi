@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
@@ -127,11 +128,7 @@ class _PassportScreenState extends State<PassportScreen> {
                   if (_loading)
                     const Padding(
                       padding: EdgeInsets.only(top: 40),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryTeal,
-                        ),
-                      ),
+                      child: Center(child: const LogoLoader()),
                     )
                   else
                     ..._grouped(context, cityPlaces, en),

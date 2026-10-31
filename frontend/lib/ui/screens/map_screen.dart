@@ -1,4 +1,5 @@
 import '../widgets/common/app_icon.dart';
+import '../widgets/common/logo_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -36,6 +37,8 @@ class MapScreenState extends State<MapScreen> {
   List<HeritagePlace> _filteredPlaces = [];
   bool _isLoading = true;
   int _currentStopIndex = 0;
+  bool _cardOpen =
+      false; // normal modda kart yalnızca bir pine dokunulunca açılır
 
   String _searchQuery = '';
   bool _hasRealLocation = false;
@@ -51,31 +54,36 @@ class MapScreenState extends State<MapScreen> {
 
   Future<void> _initDataAndLocation() async {
     final places = await _heritageRepository.getPlaces();
-    _userLocation = await LocationService.getCurrentLocation();
-    _hasRealLocation = !LocationService.lastWasFallback;
+    if (!mounted) return;
 
-    if (mounted) {
-      setState(() {
-        _allPlaces = places;
-        _isLoading = false;
-      });
-
-      if (widget.startWithNearby) {
-        applyNearbyRoute();
-      } else {
-        _applyFilters();
-      }
-
-      // Önceden görsel önbellekleme
-      for (final place in places) {
-        if (place.imageAfterUrl.isNotEmpty) {
-          precacheImage(NetworkImage(place.imageAfterUrl), context);
-        }
-        if (place.imageBeforeUrl.isNotEmpty) {
-          precacheImage(NetworkImage(place.imageBeforeUrl), context);
-        }
-      }
+    // "Yakın rota" konuma ihtiyaç duyar; diğer durumda harita konumu beklemeden açılır.
+    if (widget.startWithNearby) {
+      _userLocation = await LocationService.getCurrentLocation();
+      _hasRealLocation = !LocationService.lastWasFallback;
+      if (!mounted) return;
     }
+
+    setState(() {
+      _allPlaces = places;
+      _isLoading = false;
+    });
+
+    if (widget.startWithNearby) {
+      applyNearbyRoute();
+    } else {
+      _applyFilters();
+      _resolveUserLocation();
+    }
+  }
+
+  /// Konum ve izin penceresi haritayı geciktirmesin diye arka planda çözülür.
+  Future<void> _resolveUserLocation() async {
+    final loc = await LocationService.getCurrentLocation();
+    if (!mounted) return;
+    setState(() {
+      _userLocation = loc;
+      _hasRealLocation = !LocationService.lastWasFallback;
+    });
   }
 
   /// Dışarıdan veya butondan tetiklenebilen "Yakın Rota" Mantığı
@@ -149,7 +157,8 @@ class MapScreenState extends State<MapScreen> {
   List<Marker> _buildPinMarkers() {
     final markers = List.generate(_filteredPlaces.length, (index) {
       final place = _filteredPlaces[index];
-      final isSelected = index == _currentStopIndex;
+      final isSelected =
+          (_routeChip != null || _cardOpen) && index == _currentStopIndex;
       return Marker(
         point: place.location,
         width: CategoryPin.width * 1.2,
@@ -157,7 +166,10 @@ class MapScreenState extends State<MapScreen> {
         alignment: Alignment.topCenter,
         child: GestureDetector(
           onTap: () {
-            setState(() => _currentStopIndex = index);
+            setState(() {
+              _currentStopIndex = index;
+              _cardOpen = true;
+            });
             _moveMap(place.location, 16.8);
           },
           child: Semantics(
@@ -223,6 +235,26 @@ class MapScreenState extends State<MapScreen> {
     _moveMap(_userLocation, 16.5);
   }
 
+  void _stepStop(int delta) {
+    final n = _filteredPlaces.length;
+    if (n == 0) return;
+    setState(() => _currentStopIndex = (_currentStopIndex + delta + n) % n);
+    _moveMap(_filteredPlaces[_currentStopIndex].location, 16.8);
+  }
+
+  /// Kartta eserin altındaki satır: gerçek konum yakınsa mesafe, değilse kategori.
+  String _subtitleFor(HeritagePlace place) {
+    final category = place.category.labelFor(context.isEn);
+    if (!_hasRealLocation) return category;
+    final meters = const Distance().as(
+      LengthUnit.Meter,
+      _userLocation,
+      place.location,
+    );
+    if (meters > 150000) return category;
+    return '$category · ${LocationService.formatDistance(meters)}';
+  }
+
   void _applyFilters() {
     setState(() {
       final filtered = _allPlaces.where((place) {
@@ -249,6 +281,7 @@ class MapScreenState extends State<MapScreen> {
       if (_currentStopIndex >= _filteredPlaces.length) {
         _currentStopIndex = 0;
       }
+      _cardOpen = false;
     });
 
     if (!_isLoading && _filteredPlaces.isNotEmpty) {
@@ -261,9 +294,7 @@ class MapScreenState extends State<MapScreen> {
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: AppColors.bgCanvas,
-        body: Center(
-          child: CircularProgressIndicator(color: AppColors.primaryTeal),
-        ),
+        body: LogoLoader(size: 64),
       );
     }
 
@@ -303,6 +334,7 @@ class MapScreenState extends State<MapScreen> {
 
     final hasPlaces = _filteredPlaces.isNotEmpty;
     final currentPlace = hasPlaces ? _filteredPlaces[_currentStopIndex] : null;
+    final showCard = currentPlace != null && (_routeChip != null || _cardOpen);
     final List<LatLng> routePoints = _filteredPlaces
         .map((p) => p.location)
         .toList();
@@ -319,6 +351,11 @@ class MapScreenState extends State<MapScreen> {
                   ? _allPlaces.first.location
                   : _bursaCenter,
               initialZoom: 16.5,
+              onTap: (_, __) {
+                if (_routeChip == null && _cardOpen) {
+                  setState(() => _cardOpen = false);
+                }
+              },
             ),
             children: [
               TileLayer(
@@ -439,39 +476,38 @@ class MapScreenState extends State<MapScreen> {
             ),
           ),
 
-          // 3. Alt Durak Kartı
-          if (currentPlace != null)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Konumuma dön
-                        Material(
-                          color: Colors.white,
-                          shape: const CircleBorder(),
-                          elevation: 3,
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            onTap: _recenter,
-                            child: const Padding(
-                              padding: EdgeInsets.all(15),
-                              child: AppIcon(
-                                'locate',
-                                color: AppColors.primaryTeal,
-                                size: 26,
-                              ),
+          // 3. Alt alan: konum düğmesi, yol tarifi ve (gerektiğinde) eser kartı
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, showCard ? 10 : 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Material(
+                        color: Colors.white,
+                        shape: const CircleBorder(),
+                        elevation: 3,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: _recenter,
+                          child: const Padding(
+                            padding: EdgeInsets.all(15),
+                            child: AppIcon(
+                              'locate',
+                              color: AppColors.primaryTeal,
+                              size: 26,
                             ),
                           ),
                         ),
+                      ),
+                      if (showCard)
                         ElevatedButton.icon(
                           onPressed: () => LauncherUtil.openDirections(
                             currentPlace.location,
@@ -494,61 +530,58 @@ class MapScreenState extends State<MapScreen> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
-                  RouteStopPreviewSheet(
-                    // Rota seçili değilse kart yalnızca eserin kategorisini gösterir (sahte "rota" yok)
-                    routeTitle: _routeChip == null
-                        ? currentPlace.category.labelFor(context.isEn)
-                        : (currentPlace.routeName.isNotEmpty
-                              ? currentPlace.routeNameFor(context.isEn)
-                              : context.t('nearby_route_title')),
-                    routeStats: _routeChip == null
-                        ? context
-                              .t('map_places_count')
-                              .replaceAll('{n}', '${_filteredPlaces.length}')
-                        : context
-                                  .t('stop_of')
-                                  .replaceAll('{i}', '${_currentStopIndex + 1}')
-                                  .replaceAll(
-                                    '{n}',
-                                    '${_filteredPlaces.length}',
-                                  ) +
-                              (_walk == null
-                                  ? ''
-                                  : ' · ${_walk!.distanceLabel} · ${_walk!.minutes} ${context.t('min_walk')}'),
-                    placeName: currentPlace.nameFor(context.isEn),
-                    placeDistanceTime: LocationService.formatDistance(
-                      LocationService.sortPlacesByDistance(
-                        places: [currentPlace],
-                        userLocation: _userLocation,
-                      ).first.distanceMeters,
-                    ),
-                    placeImageUrl: currentPlace.imageAfterUrl,
-                    onDetailTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              SliderScreen(place: currentPlace),
-                        ),
-                      );
-                    },
-                    onNextStopTap: () {
-                      setState(() {
-                        _currentStopIndex =
-                            (_currentStopIndex + 1) % _filteredPlaces.length;
-                      });
-                      _moveMap(
-                        _filteredPlaces[_currentStopIndex].location,
-                        16.8,
-                      );
-                    },
-                  ),
-                ],
-              ),
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.bottomCenter,
+                  child: showCard
+                      ? RouteStopPreviewSheet(
+                          routeTitle: _routeChip == null
+                              ? null
+                              : (currentPlace.routeName.isNotEmpty
+                                    ? currentPlace.routeNameFor(context.isEn)
+                                    : context.t('nearby_route_title')),
+                          routeStats: _routeChip == null
+                              ? null
+                              : context
+                                        .t('stop_of')
+                                        .replaceAll(
+                                          '{i}',
+                                          '${_currentStopIndex + 1}',
+                                        )
+                                        .replaceAll(
+                                          '{n}',
+                                          '${_filteredPlaces.length}',
+                                        ) +
+                                    (_walk == null
+                                        ? ''
+                                        : ' · ${_walk!.distanceLabel} · ${_walk!.minutes} ${context.t('min_walk')}'),
+                          placeName: currentPlace.nameFor(context.isEn),
+                          placeDistanceTime: _subtitleFor(currentPlace),
+                          placeImageUrl: currentPlace.imageAfterUrl,
+                          onDetailTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SliderScreen(place: currentPlace),
+                            ),
+                          ),
+                          onPrevStopTap:
+                              (_routeChip != null && _filteredPlaces.length > 1)
+                              ? () => _stepStop(-1)
+                              : null,
+                          onNextStopTap:
+                              (_routeChip != null && _filteredPlaces.length > 1)
+                              ? () => _stepStop(1)
+                              : null,
+                        )
+                      : const SizedBox(width: double.infinity),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );

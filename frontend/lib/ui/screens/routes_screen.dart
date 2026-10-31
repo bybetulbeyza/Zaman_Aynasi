@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/logo_loader.dart';
 import 'package:latlong2/latlong.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/category_style.dart';
@@ -238,9 +239,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryTeal),
-      ),
+      builder: (_) => const Center(child: const LogoLoader()),
     );
 
     final finalRoute = _plan().stops;
@@ -326,11 +325,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
         body: SafeArea(
           bottom: false,
           child: _isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primaryTeal,
-                  ),
-                )
+              ? const Center(child: const LogoLoader())
               : SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   child: Column(

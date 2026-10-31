@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
@@ -392,9 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_isLoading) {
       return SizedBox(
         height: height,
-        child: const Center(
-          child: CircularProgressIndicator(color: AppColors.primaryTeal),
-        ),
+        child: const Center(child: const LogoLoader()),
       );
     }
     if (places.isEmpty) {

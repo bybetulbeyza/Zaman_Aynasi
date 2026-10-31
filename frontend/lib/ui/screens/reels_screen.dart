@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/logo_loader.dart';
 import 'package:video_player/video_player.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
@@ -91,9 +92,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
       body: Stack(
         children: [
           if (_loading)
-            const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryTeal),
-            )
+            const Center(child: const LogoLoader())
           else if (_reels.isEmpty)
             Center(
               child: Padding(
@@ -229,9 +228,7 @@ class _ReelPageState extends State<_ReelPage> {
               ),
             )
           else if (!_c.value.isInitialized)
-            const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryTeal),
-            )
+            const Center(child: const LogoLoader())
           else
             FittedBox(
               fit: BoxFit.cover,

@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_categories.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/category_style.dart';
@@ -181,11 +182,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
               ),
               Expanded(
                 child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryTeal,
-                        ),
-                      )
+                    ? const Center(child: const LogoLoader())
                     : _filteredPlaces.isEmpty
                     ? Center(
                         child: Text(
