@@ -17,7 +17,7 @@ class SplitSliderWidget extends StatefulWidget {
   final String beforeLabel;
   final String afterLabel;
   final List<Hotspot> hotspots;
-  final ValueChanged<Hotspot>? onHotspotSelected;
+  final ValueChanged<Hotspot?>? onHotspotSelected;
 
   /// Bu kadar piksel alt kısım bilgi sayfasının altında kalır; butonlar bunun üstüne yerleşir.
   final double bottomInset;
@@ -68,6 +68,12 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   bool _dividerDrag = false;
   Offset _doubleTapPos = Offset.zero;
   Offset? _lensPoint;
+  double _sFrom = 0.5, _sTo = 0.5;
+  bool _animSlider = false;
+
+  // Sinematik tur: kamera hotspot'lara sırayla yaklaşır
+  bool _touring = false;
+  Timer? _tourTimer;
 
   // Açılışta slider'ın bir kez süzülmesi (kaydırılabildiğini gösterir)
   late final AnimationController _intro;
@@ -96,6 +102,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
       setState(() {
         _zoom = _zFrom + (_zTo - _zFrom) * t;
         _pan = Offset.lerp(_pFrom, _pTo, t)!;
+        if (_animSlider) _sliderValue = _sFrom + (_sTo - _sFrom) * t;
       });
     });
     _resolveAspect(widget.beforeImageUrl, (a) => _oldAspect = a);
@@ -160,6 +167,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   void dispose() {
     _intro.dispose();
     _zoomAnim.dispose();
+    _tourTimer?.cancel();
     _activeTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
@@ -168,16 +176,82 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   Offset _clampPan(Offset p, double z, double w, double h) =>
       Offset(p.dx.clamp(w - w * z, 0.0), p.dy.clamp(h - h * z, 0.0));
 
-  void _animateZoomTo(double z, Offset pan) {
+  void _animateZoomTo(double z, Offset pan, {double? slider}) {
     _zoomAnim.stop();
     _zFrom = _zoom;
     _pFrom = _pan;
     _zTo = z;
     _pTo = pan;
+    _animSlider = slider != null;
+    _sFrom = _sliderValue;
+    _sTo = slider ?? _sliderValue;
     _zoomAnim.forward(from: 0);
   }
 
   void _resetZoom() => _animateZoomTo(1, Offset.zero);
+
+  bool _isNewSide(Hotspot h) => h.targetSide.trim().toLowerCase() == 'before';
+
+  /// Hotspot'un fotoğraf içindeki (yakınlaştırmasız) kutu konumu.
+  Offset _hotspotContent(Hotspot h, double w, double hgt) {
+    final aspect = _isNewSide(h) ? _newAspect : _oldAspect;
+    return aspect == null
+        ? Offset(h.xPercent * w, h.yPercent * hgt)
+        : _imageToBox(h.xPercent, h.yPercent, aspect, w, hgt);
+  }
+
+  /// Kamerayı hotspot'a yaklaştırır (nokta, açılan bilgi kartının altında kalsın diye alt yarıya oturur).
+  void _focusHotspot(
+    Hotspot h,
+    double w,
+    double hgt, {
+    double zoom = 2.2,
+    bool moveDivider = false,
+  }) {
+    final c = _hotspotContent(h, w, hgt);
+    final pan = _clampPan(Offset(w / 2, hgt * 0.64) - c * zoom, zoom, w, hgt);
+    // Noktanın bulunduğu dönem görünsün: eski fotoğraf solda, güncel sağda
+    final slider = moveDivider ? (_isNewSide(h) ? 0.04 : 0.96) : null;
+    _animateZoomTo(zoom, pan, slider: slider);
+  }
+
+  List<Hotspot> get _tourStops =>
+      widget.hotspots.where((h) => !h.hasSubPlaceNavigation).take(6).toList();
+
+  void _startTour(double w, double hgt) {
+    final stops = _tourStops;
+    if (stops.isEmpty) return;
+    _userTouched = true;
+    if (_intro.isAnimating) _intro.stop();
+    HapticFeedback.mediumImpact();
+    setState(() => _touring = true);
+    _tourStep(0, stops, w, hgt);
+  }
+
+  void _tourStep(int i, List<Hotspot> stops, double w, double hgt) {
+    if (!mounted || !_touring) return;
+    if (i >= stops.length) {
+      _endTour(reset: true);
+      return;
+    }
+    _focusHotspot(stops[i], w, hgt, moveDivider: true);
+    widget.onHotspotSelected?.call(stops[i]);
+    _tourTimer?.cancel();
+    _tourTimer = Timer(
+      const Duration(milliseconds: 4200),
+      () => _tourStep(i + 1, stops, w, hgt),
+    );
+  }
+
+  void _endTour({required bool reset}) {
+    _tourTimer?.cancel();
+    if (!_touring) return;
+    setState(() => _touring = false);
+    widget.onHotspotSelected?.call(null);
+    if (reset) {
+      _animateZoomTo(1, Offset.zero, slider: 0.5);
+    }
+  }
 
   Matrix4 _matrix(double z, Offset pan) => Matrix4.identity()
     ..setEntry(0, 0, z)
@@ -186,6 +260,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     ..setEntry(1, 3, pan.dy);
 
   void _onScaleStart(ScaleStartDetails d, double w) {
+    if (_touring) {
+      _tourTimer?.cancel();
+      setState(() => _touring = false);
+    }
     _userTouched = true;
     if (_intro.isAnimating) _intro.stop();
     _zoomAnim.stop();
@@ -482,10 +560,79 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 ),
               ),
 
-              // 5. Yakınlaştırınca: oran ve sıfırlama düğmesi
+              // 5a. Turu başlat / durdur (iki ya da daha fazla hotspot varsa)
+              if (_tourStops.length >= 2)
+                Positioned(
+                  right: 16,
+                  top: MediaQuery.of(context).padding.top + 12,
+                  child: Semantics(
+                    button: true,
+                    label: _touring
+                        ? context.t('tour_stop')
+                        : context.t('tour_start'),
+                    excludeSemantics: true,
+                    child: GestureDetector(
+                      onTap: () => _touring
+                          ? _endTour(reset: true)
+                          : _startTour(totalWidth, totalHeight),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _touring
+                                  ? AppColors.ciniBordeaux.withValues(
+                                      alpha: 0.55,
+                                    )
+                                  : Colors.black.withValues(alpha: 0.32),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.38),
+                                width: 0.9,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _touring
+                                      ? Icons.stop_rounded
+                                      : Icons.play_arrow_rounded,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  _touring
+                                      ? context.t('tour_stop')
+                                      : context.t('tour_start'),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              // 5b. Yakınlaştırınca: oran ve sıfırlama düğmesi
               Positioned(
                 right: 16,
-                top: MediaQuery.of(context).padding.top + 12,
+                top:
+                    MediaQuery.of(context).padding.top +
+                    12 +
+                    (_tourStops.length >= 2 ? 46 : 0),
                 child: IgnorePointer(
                   ignoring: _zoom <= 1.05,
                   child: AnimatedOpacity(
@@ -583,9 +730,18 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                           .t('a11y_hotspot')
                           .replaceAll('{name}', hotspot.titleFor(context.isEn)),
                       onTap: () {
-                        if (widget.onHotspotSelected != null) {
-                          widget.onHotspotSelected!(hotspot);
+                        if (_touring) {
+                          _tourTimer?.cancel();
+                          setState(() => _touring = false);
                         }
+                        // Dokununca kamera o noktaya yumuşakça yaklaşır
+                        _focusHotspot(
+                          hotspot,
+                          totalWidth,
+                          totalHeight,
+                          zoom: _zoom > 1.9 ? _zoom : 1.9,
+                        );
+                        widget.onHotspotSelected?.call(hotspot);
                       },
                     ),
                   );
