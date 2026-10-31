@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_categories.dart';
@@ -230,7 +231,6 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   }
 
   Widget _buildPlaceCard(HeritagePlace place) {
-    const radius = BorderRadius.all(Radius.circular(20));
     final style = CategoryStyle.of(place.category);
     final date = place.constructionDate.trim();
 
@@ -239,17 +239,10 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
       children: [
         GestureDetector(
           onTap: () => _openPlace(place),
-          child: Container(
+          child: SizedBox(
             height: 190,
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              border: Border.all(
-                color: AppColors.ciniBordeaux.withValues(alpha: 0.45),
-                width: 1.1,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: radius,
+            child: SquircleFrame(
+              radius: 40,
               child: DarkCancel(
                 child: Stack(
                   fit: StackFit.expand,

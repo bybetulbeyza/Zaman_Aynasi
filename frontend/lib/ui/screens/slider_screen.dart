@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_toast.dart';
 import '../../core/constants/app_colors.dart';
@@ -633,8 +634,9 @@ class _SliderScreenState extends State<SliderScreen>
                 onTap: () => _openPlace(c),
                 child: SizedBox(
                   width: 132,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
+                  child: SquircleFrame(
+                    radius: 30,
+                    gap: 3,
                     child: DarkCancel(
                       child: Stack(
                         fit: StackFit.expand,

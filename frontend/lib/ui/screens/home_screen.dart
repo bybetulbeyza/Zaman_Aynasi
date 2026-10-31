@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_colors.dart';
@@ -447,20 +448,12 @@ class _PlaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const radius = BorderRadius.all(Radius.circular(18));
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: SizedBox(
         width: width,
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          border: Border.all(
-            color: AppColors.ciniBordeaux.withValues(alpha: 0.45),
-            width: 1.1,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: radius,
+        child: SquircleFrame(
+          radius: 40,
           child: DarkCancel(
             child: Stack(
               fit: StackFit.expand,

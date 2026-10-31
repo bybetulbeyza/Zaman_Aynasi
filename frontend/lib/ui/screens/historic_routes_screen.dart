@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_cities.dart';
@@ -224,22 +225,14 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   }
 
   Widget _card(HeritageRoute route) {
-    const radius = BorderRadius.all(Radius.circular(20));
     final cover = route.stops.first.imageAfterUrl;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           height: 210,
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            border: Border.all(
-              color: AppColors.ciniBordeaux.withValues(alpha: 0.45),
-              width: 1.1,
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: radius,
+          child: SquircleFrame(
+            radius: 44,
             child: DarkCancel(
               child: Stack(
                 fit: StackFit.expand,
