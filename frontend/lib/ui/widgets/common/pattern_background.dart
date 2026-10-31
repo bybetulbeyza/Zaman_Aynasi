@@ -19,7 +19,7 @@ class PatternBackground extends StatelessWidget {
     required this.child,
     this.color = AppColors.bgCanvas,
     this.lineColor = const Color(0xFF7A9296),
-    this.lineOpacity = 0.18,
+    this.lineOpacity = 0.08,
     this.scale = 3.2,
   });
 

@@ -24,7 +24,7 @@ class StampWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = CategoryStyle.of(place.category);
-    final color = earned ? style.color : AppColors.chipBorder;
+    final color = earned ? style.color : const Color(0xFF9C978C);
     // Her mühür biraz farklı eğimde basılır
     final tilt = (((int.tryParse(place.id) ?? 0) * 37) % 11 - 5) * 0.025;
     final icon = style.icon.replaceFirst('pin_', 'cat_');
@@ -36,11 +36,7 @@ class StampWidget extends StatelessWidget {
         child: CustomPaint(
           painter: _StampPainter(color: color, earned: earned),
           child: Center(
-            child: AppIcon(
-              icon,
-              size: size * 0.42,
-              color: earned ? color : AppColors.chipBorder,
-            ),
+            child: AppIcon(icon, size: size * 0.42, color: color),
           ),
         ),
       ),
@@ -57,7 +53,7 @@ class _StampPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final c = size.center(Offset.zero);
     final r = size.width / 2 - 2;
-    final ink = color.withValues(alpha: earned ? 0.92 : 0.9);
+    final ink = color.withValues(alpha: earned ? 0.92 : 0.85);
 
     if (earned) {
       canvas.drawCircle(c, r, Paint()..color = color.withValues(alpha: 0.07));
