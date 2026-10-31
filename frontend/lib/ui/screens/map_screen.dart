@@ -10,7 +10,6 @@ import '../../../core/utils/launcher_util.dart';
 import '../../../core/utils/location_service.dart';
 import '../../../data/models/heritage_place.dart';
 import '../../../data/repositories/heritage_repository.dart';
-import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import '../../core/utils/walking_route_service.dart';
 import '../widgets/map/category_pin.dart';
 import '../widgets/map/map_top_search_bar.dart';
@@ -148,7 +147,7 @@ class MapScreenState extends State<MapScreen> {
   }
 
   List<Marker> _buildPinMarkers() {
-    return List.generate(_filteredPlaces.length, (index) {
+    final markers = List.generate(_filteredPlaces.length, (index) {
       final place = _filteredPlaces[index];
       final isSelected = index == _currentStopIndex;
       return Marker(
@@ -172,6 +171,11 @@ class MapScreenState extends State<MapScreen> {
         ),
       );
     });
+    // Seçili pin üst üste binen pinlerin önünde görünsün
+    if (_currentStopIndex < markers.length) {
+      markers.add(markers.removeAt(_currentStopIndex));
+    }
+    return markers;
   }
 
   /// Rota modunda duraklar arası gerçek yürüyüş hattını çeker; olmazsa düz çizgi kullanılır.
@@ -181,6 +185,25 @@ class MapScreenState extends State<MapScreen> {
     final route = await WalkingRouteService.fetch(stops);
     if (!mounted || _routeChip != key) return;
     setState(() => _walk = route);
+  }
+
+  Widget _zoomButton(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: SizedBox(
+        width: 46,
+        height: 46,
+        child: Icon(icon, color: AppColors.textDark, size: 26),
+      ),
+    );
+  }
+
+  void _zoomBy(double delta) {
+    try {
+      final cam = _mapController.camera;
+      _mapController.move(cam.center, (cam.zoom + delta).clamp(10.0, 19.0));
+    } catch (_) {}
   }
 
   void _recenter() {
@@ -352,44 +375,28 @@ class MapScreenState extends State<MapScreen> {
                   ],
                 ),
 
-              // Kategori pinleri: rota modunda sıra rozetli, gezinmede yakın olanlar kümelenir
-              if (_routeChip != null)
-                MarkerLayer(markers: _buildPinMarkers())
-              else
-                MarkerClusterLayerWidget(
-                  options: MarkerClusterLayerOptions(
-                    maxClusterRadius: 48,
-                    size: const Size(44, 44),
-                    markers: _buildPinMarkers(),
-                    builder: (context, markers) => Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.heroPetrol,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFFFBF6EA),
-                          width: 2.4,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${markers.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              // Kategori pinleri (rota modunda sıra rozetli)
+              MarkerLayer(markers: _buildPinMarkers()),
             ],
+          ),
+
+          // Yakınlaştır / uzaklaştır
+          Positioned(
+            right: 16,
+            top: MediaQuery.of(context).padding.top + 124,
+            child: Material(
+              color: Colors.white,
+              elevation: 3,
+              borderRadius: BorderRadius.circular(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _zoomButton(Icons.add_rounded, () => _zoomBy(1)),
+                  Container(width: 28, height: 1, color: AppColors.chipBorder),
+                  _zoomButton(Icons.remove_rounded, () => _zoomBy(-1)),
+                ],
+              ),
+            ),
           ),
 
           // 2. Üst Arama ve Filtre Çubuğu
