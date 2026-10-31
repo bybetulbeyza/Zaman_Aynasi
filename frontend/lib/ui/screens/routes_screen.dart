@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/category_style.dart';
 import '../../core/utils/location_service.dart';
@@ -8,6 +9,7 @@ import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_theme.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/filter_chip_pill.dart';
+import '../widgets/common/app_icon.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/app_logo.dart';
 import '../../core/constants/app_categories.dart';
@@ -38,6 +40,14 @@ class _RoutesScreenState extends State<RoutesScreen> {
   List<HeritagePlace> _allPlaces = [];
   bool _isLoading = true;
 
+  /// null = telefonun konumu; doluysa rota o eserden başlar.
+  HeritagePlace? _startPlace;
+  LatLng _userLocation = LocationService.defaultCenter;
+
+  static const double _walkMetersPerMinute =
+      58; // ≈ 4,5 km/s ve sokak dolambacı payı
+  static const int _visitMinutes = 10; // durak başına ziyaret süresi
+
   @override
   void initState() {
     super.initState();
@@ -46,6 +56,21 @@ class _RoutesScreenState extends State<RoutesScreen> {
       PlaceCategory.han,
     }; // Görseldeki varsayılan seçililer
     _fetchPlaces();
+    _resolveLocation();
+  }
+
+  /// Konumu bir kez çözer. Bursa'dan çok uzaktaysa (örn. yurt dışı) şehir merkezi kullanılır.
+  Future<void> _resolveLocation() async {
+    final loc = await LocationService.getCurrentLocation();
+    final far =
+        const Distance().as(
+          LengthUnit.Kilometer,
+          loc,
+          LocationService.defaultCenter,
+        ) >
+        30;
+    if (!mounted) return;
+    setState(() => _userLocation = far ? LocationService.defaultCenter : loc);
   }
 
   Future<void> _fetchPlaces() async {
@@ -62,20 +87,151 @@ class _RoutesScreenState extends State<RoutesScreen> {
     }
   }
 
-  // Dinamik durak sayısı tahmini (Süre ve kategoriye göre)
-  int get _calculatedStopsCount {
-    if (_allPlaces.isEmpty) return _selectedHours * 2;
-    // Seçili kategorilere uyan eserleri say
-    final matchingCount = _allPlaces
+  /// Seçilen kategori, süre ve başlangıca göre rota planlar: en yakın durağı ekler,
+  /// yürüme + ziyaret süresi seçilen süreyi aşmayana kadar devam eder.
+  ({List<HeritagePlace> stops, int minutes}) _plan() {
+    final pool = _allPlaces
         .where((p) => _selectedCategories.contains(p.category))
-        .length;
+        .where((p) => p.id != _startPlace?.id)
+        .toList();
+    final budget = _selectedHours * 60;
+    final stops = <HeritagePlace>[];
+    var minutes = 0;
+    var current = _startPlace?.location ?? _userLocation;
 
-    // Saat başına ortalama 2-3 durak gezilebilir
-    final maxByTime = _selectedHours * 3;
-    final stops = matchingCount > 0
-        ? matchingCount.clamp(1, maxByTime)
-        : (_selectedHours * 2);
-    return stops;
+    if (_startPlace != null) {
+      stops.add(_startPlace!);
+      minutes += _visitMinutes;
+    }
+
+    const dist = Distance();
+    while (pool.isNotEmpty) {
+      pool.sort(
+        (a, b) => dist
+            .as(LengthUnit.Meter, current, a.location)
+            .compareTo(dist.as(LengthUnit.Meter, current, b.location)),
+      );
+      final next = pool.first;
+      final walk =
+          dist.as(LengthUnit.Meter, current, next.location) /
+          _walkMetersPerMinute;
+      final total = minutes + walk + _visitMinutes;
+      // En az bir durak her zaman eklenir
+      if (total > budget && stops.isNotEmpty) break;
+      stops.add(pool.removeAt(0));
+      minutes = total.round();
+      current = next.location;
+    }
+    return (stops: stops, minutes: minutes);
+  }
+
+  /// Başlangıç noktasını seçtirir: telefonun konumu ya da bir eser.
+  Future<void> _pickStart() async {
+    final en = context.isEn;
+    final places = _allPlaces.where((p) => !p.isSubPlace).toList()
+      ..sort((a, b) => a.nameFor(en).compareTo(b.nameFor(en)));
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.bgCanvas,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (sheetContext) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        maxChildSize: 0.92,
+        builder: (_, controller) => ListView(
+          controller: controller,
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          children: [
+            Text(context.t('rc_start'), style: AppTheme.titleLarge),
+            const SizedBox(height: 14),
+            _startTile(
+              icon: const Icon(
+                Icons.my_location_rounded,
+                color: AppColors.primaryTeal,
+              ),
+              label: context.t('rc_my_location'),
+              selected: _startPlace == null,
+              onTap: () {
+                setState(() => _startPlace = null);
+                Navigator.pop(sheetContext);
+              },
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.t('rc_start_from_place'),
+              style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 8),
+            for (final p in places)
+              _startTile(
+                icon: AppIcon(
+                  CategoryStyle.of(p.category).icon,
+                  size: 22,
+                  color: CategoryStyle.of(p.category).color,
+                ),
+                label: p.nameFor(en),
+                selected: _startPlace?.id == p.id,
+                onTap: () {
+                  setState(() => _startPlace = p);
+                  Navigator.pop(sheetContext);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _startTile({
+    required Widget icon,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: selected ? AppColors.primaryTeal : AppColors.chipBorder,
+                width: selected ? 1.6 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                SizedBox(width: 26, child: Center(child: icon)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (selected)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.primaryTeal,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _handleCreateRoute() async {
@@ -87,30 +243,17 @@ class _RoutesScreenState extends State<RoutesScreen> {
       ),
     );
 
-    final userLocation = await LocationService.getCurrentLocation();
-
-    // Filtreleme: Seçili kategorilere göre eserleri al
-    List<HeritagePlace> pool = _allPlaces
-        .where(
-          (p) =>
-              _selectedCategories.isEmpty ||
-              _selectedCategories.contains(p.category),
-        )
-        .toList();
-
-    if (pool.isEmpty) pool = List.from(_allPlaces);
-
-    // TSP Algoritması ile zikzaksız sırala
-    final optimized = LocationService.optimizeRouteOrder(
-      places: pool,
-      startLocation: userLocation,
-    );
-
-    // Süreye göre durak sayısını sınırla
-    final finalRoute = optimized.take(_calculatedStopsCount).toList();
+    final finalRoute = _plan().stops;
 
     if (mounted) {
       Navigator.pop(context); // Dialog kapat
+
+      if (finalRoute.isEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.t('rc_none_found'))));
+        return;
+      }
 
       ActiveRoute.instance.setRoute(
         finalRoute,
@@ -269,48 +412,42 @@ class _RoutesScreenState extends State<RoutesScreen> {
                             ),
                             const SizedBox(height: 20),
                             _label(context.t('rc_start')),
-                            _field(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.ciniBordeaux,
-                                      shape: BoxShape.circle,
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: _pickStart,
+                              child: _field(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 10,
+                                      height: 10,
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.ciniBordeaux,
+                                        shape: BoxShape.circle,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    context.t('rc_my_location'),
-                                    style: const TextStyle(
-                                      fontSize: 17,
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        _startPlace == null
+                                            ? context.t('rc_my_location')
+                                            : _startPlace!.nameFor(
+                                                context.isEn,
+                                              ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 17,
+                                          color: AppColors.textDark,
+                                        ),
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.keyboard_arrow_down_rounded,
                                       color: AppColors.textDark,
                                     ),
-                                  ),
-                                  const Spacer(),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: AppColors.chipBorder,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      context.t('rc_now'),
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textDark,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                             const SizedBox(height: 20),
@@ -394,15 +531,20 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                   .toList(),
                             ),
                             const SizedBox(height: 20),
-                            Text(
-                              context
-                                  .t('rc_summary')
-                                  .replaceAll('{n}', '$_calculatedStopsCount')
-                                  .replaceAll('{h}', '$_selectedHours'),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textMuted,
-                              ),
+                            Builder(
+                              builder: (context) {
+                                final plan = _plan();
+                                return Text(
+                                  context
+                                      .t('rc_summary')
+                                      .replaceAll('{n}', '${plan.stops.length}')
+                                      .replaceAll('{m}', '${plan.minutes}'),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.textMuted,
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 14),
                             SizedBox(
