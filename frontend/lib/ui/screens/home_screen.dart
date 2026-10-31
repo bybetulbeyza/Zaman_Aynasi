@@ -1,5 +1,10 @@
 import '../widgets/common/app_icon.dart';
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
+import '../../core/constants/category_style.dart';
+import '../../core/state/active_route.dart';
+import '../widgets/common/app_toast.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/squircle_frame.dart';
 import '../widgets/common/logo_loader.dart';
@@ -43,6 +48,15 @@ class _HomeScreenState extends State<HomeScreen> {
   List<HeritagePlace> _nearbyPlaces = [];
   bool _isLoading = true;
   bool _locationOff = false;
+  final PageController _featuredPc = PageController(viewportFraction: 0.5);
+  final PageController _nearPc = PageController(viewportFraction: 0.46);
+
+  @override
+  void dispose() {
+    _featuredPc.dispose();
+    _nearPc.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -409,103 +423,220 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }
+    final pc = large ? _featuredPc : _nearPc;
     return SizedBox(
-      height: height,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+      height: height + 24,
+      child: PageView.builder(
+        controller: pc,
+        clipBehavior: Clip.none,
         itemCount: places.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 14),
-        itemBuilder: (_, i) => _PlaceCard(
-          place: places[i],
-          city: places[i].city,
-          width: large ? 164 : 150,
-          distanceLabel: (!large && !_locationOff)
-              ? LocationService.formatDistance(places[i].distanceMeters)
-              : '',
-          onTap: () => _openSlider(places[i]),
+        itemBuilder: (_, i) => AnimatedBuilder(
+          animation: pc,
+          builder: (_, child) {
+            var page = 0.0;
+            if (pc.hasClients && pc.position.haveDimensions) {
+              page = pc.page ?? 0;
+            }
+            // Ortadaki kart büyük ve canlı, yanlardakiler küçük ve silik
+            final d = (page - i).abs().clamp(0.0, 1.0);
+            return Transform.scale(
+              scale: 1 - 0.1 * d,
+              child: Opacity(opacity: 1 - 0.35 * d, child: child),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 12),
+            child: _PlaceCard(
+              place: places[i],
+              city: places[i].city,
+              distanceLabel: (!large && !_locationOff)
+                  ? LocationService.formatDistance(places[i].distanceMeters)
+                  : '',
+              onTap: () => _openSlider(places[i]),
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-/// Görselin tam kapladığı, altta gradyan üzerinde isim ve "Kategori · Şehir" yazan kart.
+/// Görselin tam kapladığı kart: üstte kategori simgesi ve "rotaya ekle" düğmesi,
+/// altta buzlu cam bilgi paneli (isim, kategori, mesafe/şehir).
 class _PlaceCard extends StatelessWidget {
   final HeritagePlace place;
   final String city;
-  final double width;
   final String distanceLabel;
   final VoidCallback onTap;
 
   const _PlaceCard({
     required this.place,
     required this.city,
-    required this.width,
     this.distanceLabel = '',
     required this.onTap,
   });
 
+  Widget _circle({required Widget child, Color? color}) => Container(
+    width: 34,
+    height: 34,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: color ?? Colors.white.withValues(alpha: 0.9),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.18),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Center(child: child),
+  );
+
   @override
   Widget build(BuildContext context) {
+    final en = context.isEn;
+    final style = CategoryStyle.of(place.category);
     return GestureDetector(
       onTap: onTap,
-      child: SizedBox(
-        width: width,
-        child: SquircleFrame(
-          radius: 40,
-          child: DarkCancel(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                AppNetworkImage(
-                  imageUrl: place.imageAfterUrl,
-                  semanticLabel: place.nameFor(context.isEn),
+      child: SquircleFrame(
+        radius: 42,
+        gap: 0,
+        elevated: true,
+        borderColor: Colors.transparent,
+        child: DarkCancel(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              AppNetworkImage(
+                imageUrl: place.imageAfterUrl,
+                semanticLabel: place.nameFor(en),
+              ),
+              // Üstteki düğmeler okunsun diye hafif karartma
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.center,
+                    colors: [Color(0x55000000), Colors.transparent],
+                  ),
                 ),
-                const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: [0.45, 1.0],
-                      colors: [Colors.transparent, Color(0xCC0F2F3A)],
+              ),
+              // Sol üst: kategori simgesi (kategori renginde)
+              Positioned(
+                left: 10,
+                top: 10,
+                child: _circle(
+                  color: style.color,
+                  child: AppIcon(
+                    style.icon.replaceFirst('pin_', 'cat_'),
+                    size: 19,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              // Sağ üst: rotaya ekle / çıkar
+              Positioned(
+                right: 10,
+                top: 10,
+                child: ListenableBuilder(
+                  listenable: ActiveRoute.instance,
+                  builder: (context, _) {
+                    final inRoute = ActiveRoute.instance.contains(place);
+                    return Semantics(
+                      button: true,
+                      label: inRoute
+                          ? context.t('route_removed')
+                          : context.t('route_add'),
+                      excludeSemantics: true,
+                      child: GestureDetector(
+                        onTap: () {
+                          final route = ActiveRoute.instance;
+                          if (inRoute) {
+                            route.remove(place);
+                            AppToast.show(
+                              context,
+                              context.t('route_removed'),
+                              icon: Icons.remove_circle_outline_rounded,
+                            );
+                          } else {
+                            route.add(place);
+                            AppToast.show(
+                              context,
+                              context
+                                  .t('route_added')
+                                  .replaceAll('{n}', '${route.length}'),
+                            );
+                          }
+                        },
+                        child: _circle(
+                          color: inRoute
+                              ? AppColors.primaryTeal
+                              : Colors.white.withValues(alpha: 0.9),
+                          child: Icon(
+                            inRoute ? Icons.check_rounded : Icons.add_rounded,
+                            size: 21,
+                            color: inRoute ? Colors.white : AppColors.textDark,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              // Alt: buzlu cam bilgi paneli
+              Positioned(
+                left: 8,
+                right: 8,
+                bottom: 8,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(12, 9, 12, 9),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.30),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.28),
+                          width: 0.9,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            place.nameFor(en),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: AppTheme.headingFont,
+                              fontSize: 17,
+                              height: 1.1,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${place.category.labelFor(en)} · ${distanceLabel.isNotEmpty ? distanceLabel : city}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                Positioned(
-                  left: 12,
-                  right: 12,
-                  bottom: 12,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        place.nameFor(context.isEn),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: AppTheme.headingFont,
-                          fontSize: 19,
-                          height: 1.1,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${place.category.labelFor(context.isEn)} · ${distanceLabel.isNotEmpty ? distanceLabel : city}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

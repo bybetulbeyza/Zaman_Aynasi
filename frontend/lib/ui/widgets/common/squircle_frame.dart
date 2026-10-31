@@ -14,6 +14,9 @@ class SquircleFrame extends StatelessWidget {
   final double gap;
   final Color? borderColor;
 
+  /// Altında yumuşak bir gölge (kartlar için).
+  final bool elevated;
+
   const SquircleFrame({
     super.key,
     required this.child,
@@ -21,6 +24,7 @@ class SquircleFrame extends StatelessWidget {
     this.sharp = 8,
     this.gap = 4,
     this.borderColor,
+    this.elevated = false,
   });
 
   @override
@@ -34,6 +38,15 @@ class SquircleFrame extends StatelessWidget {
     final inner = ContinuousRectangleBorder(borderRadius: shape(gap));
     return DecoratedBox(
       decoration: ShapeDecoration(
+        shadows: elevated
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.22),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : null,
         shape: ContinuousRectangleBorder(
           borderRadius: shape(0),
           side: BorderSide(
