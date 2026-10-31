@@ -109,23 +109,6 @@ class _SliderScreenState extends State<SliderScreen> {
     });
   }
 
-  /// Hotspot'un gideceği alt eser. Kolon gerekmez: önce (varsa) `target_place_id`, yoksa hotspot
-  /// başlığında alt yapının adı geçiyorsa (örn. "Muradiye Camii: İnşa Kitabesi") o yapı seçilir.
-  HeritagePlace? _navTarget(Hotspot hotspot) {
-    if (hotspot.hasSubPlaceNavigation) {
-      return _allPlaces.where((p) => p.id == hotspot.targetPlaceId).firstOrNull;
-    }
-    final titles = [hotspot.title, hotspot.titleEn].map((t) => t.toLowerCase());
-    for (final child in _children) {
-      final names = [
-        child.name,
-        child.nameEn,
-      ].where((n) => n.isNotEmpty).map((n) => n.toLowerCase());
-      if (names.any((n) => titles.any((t) => t.contains(n)))) return child;
-    }
-    return null;
-  }
-
   void _openPlace(HeritagePlace place) {
     Navigator.push(
       context,
@@ -1009,118 +992,47 @@ class _SliderScreenState extends State<SliderScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            hotspot.descriptionFor(en),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
+            _shortIntro(hotspot.descriptionFor(en)),
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.textMuted,
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => _showHotspotDetail(hotspot, en),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: const StadiumBorder(),
-                    textStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
+          if (videoUrl != null) ...[
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _openReels(hotspot),
+                icon: const Icon(Icons.play_arrow_rounded, size: 20),
+                label: Text(context.t('ai_story')),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.ciniBordeaux,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const StadiumBorder(),
+                  textStyle: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
                   ),
-                  child: Text('${context.t('see_details')} →'),
                 ),
               ),
-              if (videoUrl != null) ...[
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _openReels(hotspot),
-                    icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                    label: Text(context.t('ai_story')),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.ciniBordeaux,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: const StadiumBorder(),
-                      textStyle: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  void _showHotspotDetail(Hotspot hotspot, bool en) {
-    final target = _navTarget(hotspot);
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.bgCanvas,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.75,
-          ),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(22, 22, 22, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(hotspot.titleFor(en), style: AppTheme.titleLarge),
-                const SizedBox(height: 14),
-                Text(
-                  hotspot.descriptionFor(en),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.6,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                if (target != null) ...[
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(sheetContext);
-                        _openPlace(target);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.heroPetrol,
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        shape: const StadiumBorder(),
-                        textStyle: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      child: Text(
-                        '${target.nameFor(en)}  ·  ${context.t('go_to_part')} →',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  /// Açıklamanın "Kaynak: …" kısmını atıp ilk cümle(ler)den kısa bir tanıtım üretir.
+  String _shortIntro(String text) {
+    var t = text.split(RegExp(r'\s*(Kaynak|Source):')).first.trim();
+    final sentences = t.split(RegExp(r'(?<=[.!?])\s+'));
+    final out = StringBuffer(sentences.first);
+    for (final sentence in sentences.skip(1)) {
+      if (out.length + sentence.length > 130) break;
+      out.write(' $sentence');
+    }
+    return out.toString();
   }
 }
