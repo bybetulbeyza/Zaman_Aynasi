@@ -95,13 +95,11 @@ class _SliderScreenState extends State<SliderScreen> {
   /// Külliye gibi üst yapıysa alt eserleri; alt eserse bağlı olduğu üst yapıyı gösterir.
   List<HeritagePlace> _children = [];
   HeritagePlace? _parent;
-  List<HeritagePlace> _allPlaces = [];
 
   Future<void> _loadRelated() async {
     final all = await HeritageRepository().getPlacesCached();
     if (!mounted || all.isEmpty) return;
     setState(() {
-      _allPlaces = all;
       _children = all.where((p) => p.parentId == _place.id).toList();
       _parent = _place.parentId == null
           ? null
