@@ -1,6 +1,7 @@
 import '../widgets/common/app_icon.dart';
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_links.dart';
@@ -17,6 +18,7 @@ import '../widgets/common/section_title.dart';
 import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
 import '../widgets/detail/photo_collage.dart';
+import 'fullscreen_slider_screen.dart';
 import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
@@ -32,8 +34,56 @@ class SliderScreen extends StatefulWidget {
 }
 
 class _SliderScreenState extends State<SliderScreen> {
-  static const double _sheetMin = 0.42;
   static const double _sheetMax = 0.9;
+  static const double _underlap =
+      28; // fotoğraf, sayfanın yuvarlak köşelerinin altına uzanır
+
+  /// Fotoğraf alanının ekran yüksekliğine oranı: fotoğraf oranına göre hesaplanır,
+  /// böylece büyük görünür ama gereksiz kırpılmaz.
+  double _photoFraction = 0.46;
+  double get _sheetMin => 1 - _photoFraction;
+
+  Future<void> _fitPhotoArea() async {
+    final aspects = <double>[];
+    for (final url in [_place.imageBeforeUrl, _place.imageAfterUrl]) {
+      if (url.isEmpty) continue;
+      final a = await _loadAspect(url);
+      if (a != null) aspects.add(a);
+    }
+    if (aspects.isEmpty || !mounted) return;
+    final avg = aspects.reduce((a, b) => a + b) / aspects.length;
+    final size = MediaQuery.of(context).size;
+    final fraction = ((size.width / avg) * 1.15 / size.height).clamp(
+      0.40,
+      0.52,
+    );
+    if ((fraction - _photoFraction).abs() < 0.005) return;
+    setState(() => _photoFraction = fraction);
+    if (_sheetController.isAttached) _sheetController.jumpTo(_sheetMin);
+  }
+
+  Future<double?> _loadAspect(String url) {
+    final completer = Completer<double?>();
+    final stream = CachedNetworkImageProvider(
+      url,
+    ).resolve(const ImageConfiguration());
+    late ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (info, _) {
+        stream.removeListener(listener);
+        completer.complete(info.image.width / info.image.height);
+      },
+      onError: (_, __) {
+        stream.removeListener(listener);
+        completer.complete(null);
+      },
+    );
+    stream.addListener(listener);
+    return completer.future.timeout(
+      const Duration(seconds: 8),
+      onTimeout: () => null,
+    );
+  }
 
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
@@ -88,6 +138,7 @@ class _SliderScreenState extends State<SliderScreen> {
   void initState() {
     super.initState();
     _loadRelated();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _fitPhotoArea());
     // Hotspot'ların varlığını ilk bakışta anlatan kısa ipucu
     if (_place.hotspots.isNotEmpty) {
       _showHint = true;
@@ -184,7 +235,7 @@ class _SliderScreenState extends State<SliderScreen> {
             top: 0,
             left: 0,
             right: 0,
-            height: size.height * 0.6,
+            height: size.height * _photoFraction + _underlap,
             child: Stack(
               children: [
                 SplitSliderWidget(
@@ -193,6 +244,13 @@ class _SliderScreenState extends State<SliderScreen> {
                   afterLabel: context.t('period_label'),
                   beforeLabel: context.t('today_label'),
                   hotspots: _place.hotspots,
+                  bottomInset: _underlap,
+                  onFullscreen: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FullscreenSliderScreen(place: _place),
+                    ),
+                  ),
                   onHotspotSelected: (h) => setState(() {
                     _selectedHotspot = h;
                     _showHint = false;
@@ -201,7 +259,7 @@ class _SliderScreenState extends State<SliderScreen> {
                 Positioned(
                   left: 0,
                   right: 0,
-                  top: size.height * 0.6 - size.height * 0.2,
+                  top: size.height * _photoFraction - size.height * 0.1,
                   child: IgnorePointer(
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 400),
@@ -242,7 +300,7 @@ class _SliderScreenState extends State<SliderScreen> {
                 ),
                 if (_selectedHotspot != null)
                   Positioned(
-                    top: size.height * 0.15,
+                    top: size.height * 0.11,
                     left: 20,
                     right: 20,
                     child: _buildHotspotPopup(_selectedHotspot!, en),

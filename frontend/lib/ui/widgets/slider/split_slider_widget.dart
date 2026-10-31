@@ -18,6 +18,12 @@ class SplitSliderWidget extends StatefulWidget {
   final List<Hotspot> hotspots;
   final ValueChanged<Hotspot>? onHotspotSelected;
 
+  /// Doluysa sağ altta "tam ekran" butonu gösterilir.
+  final VoidCallback? onFullscreen;
+
+  /// Bu kadar piksel alt kısım bilgi sayfasının altında kalır; butonlar bunun üstüne yerleşir.
+  final double bottomInset;
+
   const SplitSliderWidget({
     super.key,
     required this.beforeImageUrl,
@@ -26,6 +32,8 @@ class SplitSliderWidget extends StatefulWidget {
     this.afterLabel = 'Dönem',
     this.hotspots = const [],
     this.onHotspotSelected,
+    this.onFullscreen,
+    this.bottomInset = 0,
   });
 
   @override
@@ -45,6 +53,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   double? _oldAspect; // sol taraf (image_before_url, 'after' hotspot'ları)
   double? _newAspect; // sağ taraf (image_after_url, 'before' hotspot'ları)
 
+  // Açılışta slider'ın bir kez süzülmesi (kaydırılabildiğini gösterir)
+  late final AnimationController _intro;
+  bool _userTouched = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,9 +64,44 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
+    _intro = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    );
+    _intro.addListener(() {
+      if (_userTouched || !mounted) return;
+      setState(() => _sliderValue = _introCurve.evaluate(_intro));
+    });
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (mounted && !_userTouched) _intro.forward();
+    });
     _resolveAspect(widget.beforeImageUrl, (a) => _oldAspect = a);
     _resolveAspect(widget.afterImageUrl, (a) => _newAspect = a);
   }
+
+  static final TweenSequence<double> _introCurve = TweenSequence<double>([
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 0.5,
+        end: 0.18,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+      weight: 35,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 0.18,
+        end: 0.82,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+      weight: 45,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 0.82,
+        end: 0.5,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+      weight: 20,
+    ),
+  ]);
 
   void _resolveAspect(String url, void Function(double) assign) {
     if (url.isEmpty) return;
@@ -104,6 +151,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
 
   @override
   void dispose() {
+    _intro.dispose();
     _activeTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
@@ -139,6 +187,8 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 ),
                 onValueChanged: (val) {
                   if (!_coordinatePickerMode) {
+                    _userTouched = true;
+                    if (_intro.isAnimating) _intro.stop();
                     // Dörtte bir çizgilerini geçerken hafif titreşim
                     if ((val * 4).floor() != (_sliderValue * 4).floor()) {
                       HapticFeedback.selectionClick();
@@ -344,10 +394,17 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               ),
 
             // 7. Modu Açıp Kapatma Butonu (Sol Alt Köşe)
+            if (widget.onFullscreen != null)
+              Positioned(
+                right: 12,
+                bottom: widget.bottomInset + 12,
+                child: _buildFullscreenButton(),
+              ),
+
             if (kDebugMode)
               Positioned(
                 left: 12,
-                bottom: 12,
+                bottom: widget.bottomInset + 12,
                 child: FloatingActionButton.small(
                   heroTag: 'coordPickerBtn',
                   backgroundColor: _coordinatePickerMode
@@ -503,6 +560,31 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFullscreenButton() {
+    return GestureDetector(
+      onTap: widget.onFullscreen,
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.28),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
+            ),
+            child: const Icon(
+              Icons.fullscreen_rounded,
+              color: Colors.white,
+              size: 26,
+            ),
+          ),
+        ),
       ),
     );
   }
