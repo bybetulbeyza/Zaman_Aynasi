@@ -578,6 +578,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                     left: pos.dx - 16,
                     top: pos.dy - 16,
                     child: _buildAnimatedHotspot(
+                      nav: hotspot.hasSubPlaceNavigation,
                       label: context
                           .t('a11y_hotspot')
                           .replaceAll('{name}', hotspot.titleFor(context.isEn)),
@@ -603,6 +604,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   Widget _buildAnimatedHotspot({
     required VoidCallback onTap,
     required String label,
+    bool nav = false,
   }) {
     return Semantics(
       button: true,
@@ -646,14 +648,21 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primaryTeal,
-                    ),
-                  ),
+                  // Yönlendirme hotspot'ları (alt yapıya geçer) içi oklu bordo nokta olur
+                  child: nav
+                      ? const Icon(
+                          Icons.arrow_outward_rounded,
+                          size: 15,
+                          color: AppColors.ciniBordeaux,
+                        )
+                      : Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primaryTeal,
+                          ),
+                        ),
                 ),
               ],
             );

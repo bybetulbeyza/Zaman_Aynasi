@@ -972,8 +972,15 @@ class _SliderScreenState extends State<SliderScreen>
 
   // --- Hotspot ---
 
+  /// Yönlendirme hotspot'unun gideceği alt eser (yalnızca bu külliyenin alt yapıları arasından).
+  HeritagePlace? _navTarget(Hotspot hotspot) {
+    if (!hotspot.hasSubPlaceNavigation) return null;
+    return _children.where((c) => c.id == hotspot.targetPlaceId).firstOrNull;
+  }
+
   Widget _buildHotspotPopup(Hotspot hotspot, bool en) {
     final videoUrl = hotspot.videoFor(en);
+    final target = _navTarget(hotspot);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1032,8 +1039,27 @@ class _SliderScreenState extends State<SliderScreen>
               height: 1.4,
             ),
           ),
-          if (videoUrl != null) ...[
+          if (target != null) ...[
             const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _openPlace(target),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.heroPetrol,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const StadiumBorder(),
+                  textStyle: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                child: Text('${context.t('go_to_part')} →'),
+              ),
+            ),
+          ],
+          if (videoUrl != null) ...[
+            SizedBox(height: target != null ? 10 : 14),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
