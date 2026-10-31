@@ -16,15 +16,18 @@ class SectionTitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: AppTheme.titleMedium),
-            const SizedBox(height: 4),
-            Container(width: 28, height: 2.5, color: AppColors.ciniBordeaux),
-          ],
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppTheme.titleMedium),
+              const SizedBox(height: 4),
+              Container(width: 28, height: 2.5, color: AppColors.ciniBordeaux),
+            ],
+          ),
         ),
-        if (actionLabel != null)
+        if (actionLabel != null) ...[
+          const SizedBox(width: 12),
           GestureDetector(
             onTap: onAction,
             child: Text(
@@ -35,6 +38,7 @@ class SectionTitle extends StatelessWidget {
               ),
             ),
           ),
+        ],
       ],
     );
   }
