@@ -412,10 +412,10 @@ class _SliderScreenState extends State<SliderScreen>
           padding: EdgeInsets.fromLTRB(0, 12 + topSafe, 0, 16),
           alignment: Alignment.topCenter,
           child: Container(
-            width: 52,
+            width: 44,
             height: 5,
             decoration: BoxDecoration(
-              color: AppColors.ciniBordeaux,
+              color: const Color(0xFFCFC5B3), // sıcak, kremsi gri-bej
               borderRadius: BorderRadius.circular(3),
             ),
           ),
