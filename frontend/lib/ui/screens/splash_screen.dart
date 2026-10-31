@@ -4,6 +4,8 @@ import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../widgets/common/app_logo.dart';
 import 'main_screen.dart';
+import 'auth_screen.dart';
+import '../../core/auth/auth_service.dart';
 
 /// Açılış ekranı: krem zeminde logo, marka adı, lale süslü ayraç ve slogan.
 /// Kısa süre sonra ana ekrana geçer.
@@ -32,7 +34,8 @@ class _SplashScreenState extends State<SplashScreen>
       Navigator.of(context).pushReplacement(
         PageRouteBuilder<void>(
           transitionDuration: const Duration(milliseconds: 500),
-          pageBuilder: (_, __, ___) => const MainScreen(),
+          pageBuilder: (_, __, ___) =>
+              AuthService.isSignedIn ? const MainScreen() : const AuthScreen(),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
         ),

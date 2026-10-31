@@ -146,6 +146,27 @@ const Map<String, String> appStringsTr = {
   'profile_footer':
       'İçerikler Vakıf Katılım envanter\nkaynaklarından alınmıştır.',
 
+  'auth_login': 'Giriş yap',
+  'auth_register': 'Kayıt ol',
+  'auth_sub': 'Hesapla favorilerini ve tercihlerini saklayabilirsin.',
+  'auth_name': 'Ad soyad',
+  'auth_email': 'E-posta',
+  'auth_password': 'Şifre',
+  'auth_or': 'veya',
+  'auth_google': 'Google ile devam et',
+  'auth_guest': 'Misafir olarak devam et',
+  'auth_no_account': 'Hesabın yok mu? Kayıt ol',
+  'auth_have_account': 'Zaten hesabın var mı? Giriş yap',
+  'auth_err_name': 'Adını yaz.',
+  'auth_err_email': 'Geçerli bir e-posta gir.',
+  'auth_err_password': 'Şifre en az 6 karakter olmalı.',
+  'auth_confirm_mail':
+      'Kayıt tamam! E-postana gelen bağlantıyla hesabını doğrula, sonra giriş yap.',
+  'auth_signout': 'Çıkış yap',
+  'auth_signin_card': 'Giriş yap',
+  'auth_signin_card_body':
+      'Giriş yapmak zorunda değilsin; hesapla tercihlerin profilinde saklanır.',
+
   // Hakkında
   'about_title': 'Hakkında ve kaynaklar',
   'about_project': 'Proje',
@@ -318,6 +339,27 @@ const Map<String, String> appStringsEn = {
   'feedback_row': 'Send feedback',
   'profile_footer':
       'Content is taken from the Vakıf Katılım\ninventory sources.',
+
+  'auth_login': 'Sign in',
+  'auth_register': 'Sign up',
+  'auth_sub': 'Keep your favourites and preferences with an account.',
+  'auth_name': 'Full name',
+  'auth_email': 'E-mail',
+  'auth_password': 'Password',
+  'auth_or': 'or',
+  'auth_google': 'Continue with Google',
+  'auth_guest': 'Continue as guest',
+  'auth_no_account': 'No account? Sign up',
+  'auth_have_account': 'Already have an account? Sign in',
+  'auth_err_name': 'Enter your name.',
+  'auth_err_email': 'Enter a valid e-mail.',
+  'auth_err_password': 'Password must be at least 6 characters.',
+  'auth_confirm_mail':
+      'Done! Confirm your account with the link we e-mailed you, then sign in.',
+  'auth_signout': 'Sign out',
+  'auth_signin_card': 'Sign in',
+  'auth_signin_card_body':
+      'Signing in is optional; with an account your preferences are saved to your profile.',
 
   // About
   'about_title': 'About and sources',

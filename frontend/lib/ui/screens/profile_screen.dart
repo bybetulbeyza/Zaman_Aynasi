@@ -7,6 +7,9 @@ import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/app_logo.dart';
 import '../../core/state/app_accessibility.dart';
 import 'about_screen.dart';
+import 'auth_screen.dart';
+import '../../core/auth/auth_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -142,38 +145,9 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Text(context.t('profile_title'), style: AppTheme.displayLarge),
                 const SizedBox(height: 22),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 26,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryTeal,
-                    borderRadius: BorderRadius.circular(26),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.t('no_account'),
-                        style: const TextStyle(
-                          fontFamily: AppTheme.headingFont,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        context.t('no_account_body'),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
+                StreamBuilder<AuthState>(
+                  stream: AuthService.changes,
+                  builder: (context, _) => _accountCard(context),
                 ),
                 const SizedBox(height: 22),
                 _row(
@@ -207,6 +181,59 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _accountCard(BuildContext context) {
+    final signedIn = AuthService.isSignedIn;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+      decoration: BoxDecoration(
+        color: AppColors.primaryTeal,
+        borderRadius: BorderRadius.circular(26),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            signedIn ? AuthService.displayName : context.t('auth_signin_card'),
+            style: const TextStyle(
+              fontFamily: AppTheme.headingFont,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            signedIn
+                ? (AuthService.user?.email ?? '')
+                : context.t('auth_signin_card_body'),
+            style: const TextStyle(fontSize: 15, color: Colors.white70),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton(
+            onPressed: signedIn
+                ? () => AuthService.signOut()
+                : () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AuthScreen(popOnDone: true),
+                    ),
+                  ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Colors.white70),
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: Text(
+              signedIn ? context.t('auth_signout') : context.t('auth_login'),
+            ),
+          ),
+        ],
       ),
     );
   }
