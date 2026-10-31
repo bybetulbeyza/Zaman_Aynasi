@@ -1,5 +1,6 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../../core/state/passport.dart';
 import '../widgets/common/pattern_background.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/constants/app_colors.dart';
@@ -64,6 +65,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           _isProcessing = false;
         });
 
+        Passport.instance.earnStamp(matchedPlace);
         Navigator.push(
           context,
           MaterialPageRoute(

@@ -7,6 +7,8 @@ import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/app_logo.dart';
 import '../../core/state/app_accessibility.dart';
 import 'about_screen.dart';
+import 'passport_screen.dart';
+import '../../core/state/passport.dart';
 import 'auth_screen.dart';
 import '../../core/auth/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -150,6 +152,33 @@ class ProfileScreen extends StatelessWidget {
                   builder: (context, _) => _accountCard(context),
                 ),
                 const SizedBox(height: 22),
+                ListenableBuilder(
+                  listenable: Passport.instance,
+                  builder: (context, _) => _row(
+                    context.t('passport_row'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${Passport.instance.stampCount}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryTeal,
+                            fontSize: 17,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.textMuted,
+                        ),
+                      ],
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PassportScreen()),
+                    ),
+                  ),
+                ),
                 _row(
                   context.t('about_row'),
                   onTap: () => Navigator.push(

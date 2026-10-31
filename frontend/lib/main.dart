@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/app_theme.dart';
 import 'core/l10n/app_lang.dart';
 import 'core/state/app_accessibility.dart';
+import 'core/state/passport.dart';
 import 'ui/screens/splash_screen.dart';
 
 Future<void> main() async {
@@ -13,6 +14,8 @@ Future<void> main() async {
     url: 'https://rozgcvedqcfunjmfhptj.supabase.co',
     anonKey: 'sb_publishable_KCU71TvdS3yGzepKYae-kQ_gIeZzBu_',
   );
+
+  await Passport.instance.init();
 
   runApp(const ZamanAynasiApp());
 }

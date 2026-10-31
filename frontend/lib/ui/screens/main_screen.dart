@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/state/passport.dart';
+import '../widgets/passport/stamp_widget.dart';
+import 'passport_screen.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
@@ -35,6 +38,21 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _startGeofence();
     mainTabRequest.addListener(_onTabRequest);
+    Passport.instance.ceremony.addListener(_onCeremony);
+  }
+
+  void _onCeremony() {
+    final place = Passport.instance.ceremony.value;
+    if (place == null || !mounted) return;
+    Passport.instance.ceremony.value = null;
+    showStampCeremony(
+      context,
+      place,
+      onOpenPassport: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PassportScreen()),
+      ),
+    );
   }
 
   void _onTabRequest() {
@@ -47,6 +65,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void dispose() {
     mainTabRequest.removeListener(_onTabRequest);
+    Passport.instance.ceremony.removeListener(_onCeremony);
     _geofence.stop();
     super.dispose();
   }
@@ -56,6 +75,7 @@ class _MainScreenState extends State<MainScreen> {
     if (!mounted || places.isEmpty) return;
     await _geofence.start(places, (place) {
       if (!mounted) return;
+      Passport.instance.earnStamp(place);
       final messenger = ScaffoldMessenger.of(context);
       messenger.hideCurrentSnackBar();
       messenger.showSnackBar(

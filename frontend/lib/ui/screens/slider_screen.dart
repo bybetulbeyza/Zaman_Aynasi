@@ -19,6 +19,7 @@ import '../widgets/common/section_title.dart';
 import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
 import '../widgets/detail/photo_collage.dart';
+import '../widgets/detail/activities_section.dart';
 import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
@@ -512,6 +513,9 @@ class _SliderScreenState extends State<SliderScreen> {
         ),
       ),
       const SizedBox(height: 26),
+
+      // Keşif görevleri (görev yoksa görünmez)
+      ActivitiesSection(place: _place),
 
       // Eski fotoğraf envanteri (fotoğraf yoksa hiç görünmez)
       if (_place.oldPhotos.isNotEmpty) ...[
