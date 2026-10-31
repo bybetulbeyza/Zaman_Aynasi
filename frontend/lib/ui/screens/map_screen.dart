@@ -251,9 +251,9 @@ class MapScreenState extends State<MapScreen> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),
         child: SizedBox(
-          width: 52,
+          width: 48,
           height: 46,
-          child: Icon(icon, color: AppColors.textDark, size: 25),
+          child: Icon(icon, color: AppColors.textDark, size: 24),
         ),
       ),
     );
@@ -577,7 +577,7 @@ class MapScreenState extends State<MapScreen> {
                                 currentPlace.location,
                               ),
                               child: const Padding(
-                                padding: EdgeInsets.all(15),
+                                padding: EdgeInsets.all(11),
                                 child: AppIcon(
                                   'directions',
                                   size: 26,
@@ -589,47 +589,62 @@ class MapScreenState extends State<MapScreen> {
                         ),
                         const SizedBox(height: 10),
                       ],
-                      // Tek beyaz sütun: yakınlaştır, uzaklaştır, konumum
-                      Material(
-                        color: Colors.white,
-                        elevation: 3,
-                        borderRadius: BorderRadius.circular(26),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _zoomButton(
-                              Icons.add_rounded,
-                              context.t('zoom_in'),
-                              () => _zoomBy(1),
-                            ),
-                            const Divider(height: 1, indent: 10, endIndent: 10),
-                            _zoomButton(
-                              Icons.remove_rounded,
-                              context.t('zoom_out'),
-                              () => _zoomBy(-1),
-                            ),
-                            const Divider(height: 1, indent: 10, endIndent: 10),
-                            Semantics(
-                              button: true,
-                              label: context.t('locate_me'),
-                              excludeSemantics: true,
-                              child: InkWell(
-                                onTap: _recenter,
-                                borderRadius: BorderRadius.circular(26),
-                                child: const SizedBox(
-                                  width: 52,
-                                  height: 52,
-                                  child: Center(
-                                    child: AppIcon(
-                                      'locate',
-                                      color: AppColors.primaryTeal,
-                                      size: 26,
-                                    ),
-                                  ),
+                      // Yakınlaştır / uzaklaştır: dar, sabit genişlikte pill
+                      SizedBox(
+                        width: 48,
+                        child: Material(
+                          color: Colors.white,
+                          elevation: 3,
+                          borderRadius: BorderRadius.circular(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _zoomButton(
+                                Icons.add_rounded,
+                                context.t('zoom_in'),
+                                () => _zoomBy(1),
+                              ),
+                              Container(
+                                height: 1,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                                color: AppColors.chipBorder,
+                              ),
+                              _zoomButton(
+                                Icons.remove_rounded,
+                                context.t('zoom_out'),
+                                () => _zoomBy(-1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      // Konumum: ayrı yuvarlak düğme
+                      Semantics(
+                        button: true,
+                        label: context.t('locate_me'),
+                        excludeSemantics: true,
+                        child: Material(
+                          color: Colors.white,
+                          shape: const CircleBorder(),
+                          elevation: 3,
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: _recenter,
+                            child: const SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: Center(
+                                child: AppIcon(
+                                  'locate',
+                                  color: AppColors.primaryTeal,
+                                  size: 25,
                                 ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
