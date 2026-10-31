@@ -21,6 +21,9 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
+/// Başka ekranlardan (örn. eser sayfası) ana ekrandaki bir sekmeye geçmek için.
+final ValueNotifier<int?> mainTabRequest = ValueNotifier<int?>(null);
+
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0; // Varsayılan olarak Ana Sayfa ile başlar
   final GlobalKey<MapScreenState> _mapKey = GlobalKey<MapScreenState>();
@@ -31,10 +34,19 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _startGeofence();
+    mainTabRequest.addListener(_onTabRequest);
+  }
+
+  void _onTabRequest() {
+    final i = mainTabRequest.value;
+    if (i == null || !mounted) return;
+    mainTabRequest.value = null;
+    setState(() => _currentIndex = i);
   }
 
   @override
   void dispose() {
+    mainTabRequest.removeListener(_onTabRequest);
     _geofence.stop();
     super.dispose();
   }

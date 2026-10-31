@@ -67,6 +67,7 @@ const Map<String, String> appStringsTr = {
   'ar_show_map': 'Haritada göster',
   'route_added': 'Rotana eklendi · {n} durak',
   'route_removed': 'Rotandan çıkarıldı.',
+  'route_view': 'Rotamı gör',
   'add_to_route': 'Rotama ekle',
   'in_route': 'Rotada',
 
@@ -259,6 +260,7 @@ const Map<String, String> appStringsEn = {
   'ar_show_map': 'Show on map',
   'route_added': 'Added to your route · {n} stops',
   'route_removed': 'Removed from your route.',
+  'route_view': 'View route',
   'add_to_route': 'Add to route',
   'in_route': 'In route',
 

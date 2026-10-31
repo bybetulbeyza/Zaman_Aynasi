@@ -1,4 +1,5 @@
 import '../widgets/common/app_icon.dart';
+import 'main_screen.dart' show mainTabRequest;
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -253,23 +254,77 @@ class _SliderScreenState extends State<SliderScreen> {
 
   void _toggleRoute() {
     final route = ActiveRoute.instance;
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
     if (route.contains(_place)) {
       route.remove(_place);
-      messenger.showSnackBar(
-        SnackBar(content: Text(context.t('route_removed'))),
-      );
+      _toast(context.t('route_removed'), Icons.remove_circle_outline_rounded);
     } else {
       route.add(_place);
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            context.t('route_added').replaceAll('{n}', '${route.length}'),
-          ),
-        ),
+      _toast(
+        context.t('route_added').replaceAll('{n}', '${route.length}'),
+        Icons.check_rounded,
+        action: context.t('route_view'),
       );
     }
+  }
+
+  /// Altta yüzen, yuvarlak köşeli bildirim; [action] verilirse rotalar sekmesine götürür.
+  void _toast(String text, IconData icon, {String? action}) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 92),
+        padding: const EdgeInsets.fromLTRB(14, 6, 6, 6),
+        backgroundColor: AppColors.heroPetrol,
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        duration: const Duration(seconds: 4),
+        content: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryTeal,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 17, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (action != null)
+              TextButton(
+                onPressed: () {
+                  messenger.hideCurrentSnackBar();
+                  Navigator.of(context).popUntil((r) => r.isFirst);
+                  mainTabRequest.value = 3;
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white.withValues(alpha: 0.16),
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  textStyle: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                child: Text(action),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
