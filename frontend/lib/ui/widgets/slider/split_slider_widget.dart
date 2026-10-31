@@ -4,7 +4,6 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:before_after/before_after.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -49,6 +48,26 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   double? _oldAspect; // sol taraf (image_before_url, 'after' hotspot'ları)
   double? _newAspect; // sağ taraf (image_after_url, 'before' hotspot'ları)
 
+  // Yakınlaştırma: iki parmakla büyüt, çift dokunmayla 2.5x, basılı tutunca "zaman merceği"
+  static const double _maxZoom = 4;
+  static const double _lensRadius = 72;
+  static const double _lensMagnify = 2.4;
+  double _zoom = 1;
+  Offset _pan = Offset.zero;
+  late final AnimationController _zoomAnim = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 260),
+  );
+  double _zFrom = 1, _zTo = 1;
+  Offset _pFrom = Offset.zero, _pTo = Offset.zero;
+  int _lastPointers = 0;
+  double _baseZoom = 1;
+  Offset _basePan = Offset.zero;
+  Offset _baseFocal = Offset.zero;
+  bool _dividerDrag = false;
+  Offset _doubleTapPos = Offset.zero;
+  Offset? _lensPoint;
+
   // Açılışta slider'ın bir kez süzülmesi (kaydırılabildiğini gösterir)
   late final AnimationController _intro;
   bool _userTouched = false;
@@ -70,6 +89,13 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     });
     Future.delayed(const Duration(milliseconds: 700), () {
       if (mounted && !_userTouched) _intro.forward();
+    });
+    _zoomAnim.addListener(() {
+      final t = Curves.easeOutCubic.transform(_zoomAnim.value);
+      setState(() {
+        _zoom = _zFrom + (_zTo - _zFrom) * t;
+        _pan = Offset.lerp(_pFrom, _pTo, t)!;
+      });
     });
     _resolveAspect(widget.beforeImageUrl, (a) => _oldAspect = a);
     _resolveAspect(widget.afterImageUrl, (a) => _newAspect = a);
@@ -132,9 +158,195 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   @override
   void dispose() {
     _intro.dispose();
+    _zoomAnim.dispose();
     _activeTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
+  }
+
+  Offset _clampPan(Offset p, double z, double w, double h) =>
+      Offset(p.dx.clamp(w - w * z, 0.0), p.dy.clamp(h - h * z, 0.0));
+
+  void _animateZoomTo(double z, Offset pan) {
+    _zoomAnim.stop();
+    _zFrom = _zoom;
+    _pFrom = _pan;
+    _zTo = z;
+    _pTo = pan;
+    _zoomAnim.forward(from: 0);
+  }
+
+  void _resetZoom() => _animateZoomTo(1, Offset.zero);
+
+  Matrix4 _matrix(double z, Offset pan) => Matrix4.identity()
+    ..setEntry(0, 0, z)
+    ..setEntry(1, 1, z)
+    ..setEntry(0, 3, pan.dx)
+    ..setEntry(1, 3, pan.dy);
+
+  void _onScaleStart(ScaleStartDetails d, double w) {
+    _userTouched = true;
+    if (_intro.isAnimating) _intro.stop();
+    _zoomAnim.stop();
+    _lastPointers = d.pointerCount;
+    _baseZoom = _zoom;
+    _basePan = _pan;
+    _baseFocal = d.localFocalPoint;
+    final dividerX = _sliderValue * w;
+    // Yakınlaştırılmamışken her yerden, yakınlaştırılmışken yalnızca çizgiden tutunca çizgi oynar
+    _dividerDrag =
+        d.pointerCount == 1 &&
+        (_zoom <= 1.02 || (d.localFocalPoint.dx - dividerX).abs() < 40);
+  }
+
+  void _onScaleUpdate(ScaleUpdateDetails d, double w, double h) {
+    // Parmak sayısı değişince (ikinci parmak geldi / kalktı) taban değerleri yenilenir
+    if (d.pointerCount != _lastPointers) {
+      _lastPointers = d.pointerCount;
+      _baseZoom = _zoom;
+      _basePan = _pan;
+      _baseFocal = d.localFocalPoint;
+      _dividerDrag = false;
+      return;
+    }
+    if (d.pointerCount >= 2) {
+      final z = (_baseZoom * d.scale).clamp(1.0, _maxZoom);
+      final contentFocal = (_baseFocal - _basePan) / _baseZoom;
+      final pan = d.localFocalPoint - contentFocal * z;
+      setState(() {
+        _zoom = z;
+        _pan = _clampPan(pan, z, w, h);
+      });
+    } else if (_dividerDrag) {
+      final nv = (d.localFocalPoint.dx / w).clamp(0.0, 1.0);
+      // Dörtte bir çizgilerini geçerken hafif titreşim
+      if ((nv * 4).floor() != (_sliderValue * 4).floor()) {
+        HapticFeedback.selectionClick();
+      }
+      _activeTimer?.cancel();
+      _activeTimer = Timer(const Duration(milliseconds: 260), () {
+        if (mounted) setState(() => _active = false);
+      });
+      setState(() {
+        _sliderValue = nv;
+        _active = true;
+      });
+    } else if (_zoom > 1.0) {
+      final pan = _basePan + (d.localFocalPoint - _baseFocal);
+      setState(() => _pan = _clampPan(pan, _zoom, w, h));
+    }
+  }
+
+  void _onScaleEnd(ScaleEndDetails d) {
+    if (_zoom < 1.03 && _zoom != 1) {
+      setState(() {
+        _zoom = 1;
+        _pan = Offset.zero;
+      });
+    }
+  }
+
+  void _onDoubleTap(double w, double h) {
+    if (_zoom > 1.05) {
+      _resetZoom();
+    } else {
+      const z = 2.5;
+      _animateZoomTo(z, _clampPan(_doubleTapPos * (1 - z), z, w, h));
+    }
+  }
+
+  /// Eski ve yeni görseli verilen dönüşümle çizer; çizgi ekran koordinatlarında kırpar.
+  Widget _scene(double w, double h, double dividerX, Matrix4 m) {
+    Widget img(String url) => Transform(
+      transform: m,
+      child: SizedBox(
+        width: w,
+        height: h,
+        child: AppNetworkImage(imageUrl: url, width: w, height: h),
+      ),
+    );
+    return ClipRect(
+      child: Stack(
+        children: [
+          img(widget.afterImageUrl), // sağ: güncel
+          ClipRect(
+            clipper: _LeftClipper(dividerX),
+            child: img(widget.beforeImageUrl), // sol: tarihî
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Parmağın altını büyüten yuvarlak "zaman merceği"; içinde iki dönem de bölünmüş görünür.
+  Widget _buildLens(double w, double h, double dividerX, Matrix4 sceneM) {
+    final f = _lensPoint!;
+    const r = _lensRadius;
+    var c = Offset(f.dx.clamp(r + 8, w - r - 8), f.dy - r - 44);
+    if (c.dy - r < 6) c = Offset(c.dx, f.dy + r + 44);
+    final lensM = Matrix4.identity()
+      ..setEntry(0, 0, _lensMagnify)
+      ..setEntry(1, 1, _lensMagnify)
+      ..setEntry(0, 3, r - _lensMagnify * f.dx)
+      ..setEntry(1, 3, r - _lensMagnify * f.dy);
+    return Stack(
+      children: [
+        // Parmağın altındaki odak noktası
+        Positioned(
+          left: f.dx - 7,
+          top: f.dy - 7,
+          child: IgnorePointer(
+            child: Container(
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                color: Colors.white.withValues(alpha: 0.25),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: c.dx - r,
+          top: c.dy - r,
+          child: IgnorePointer(
+            child: Container(
+              width: r * 2,
+              height: r * 2,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 16,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: OverflowBox(
+                  alignment: Alignment.topLeft,
+                  minWidth: 0,
+                  minHeight: 0,
+                  maxWidth: w,
+                  maxHeight: h,
+                  child: Transform(
+                    transform: lensM,
+                    child: SizedBox(
+                      width: w,
+                      height: h,
+                      child: _scene(w, h, dividerX, sceneM),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -146,10 +358,11 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             ? constraints.maxHeight
             : 340.0;
         final dividerX = _sliderValue * totalWidth;
+        final sceneM = _matrix(_zoom, _pan);
 
         return Stack(
           children: [
-            // 1. Before-After Karşılaştırma Katmanı
+            // 1. Karşılaştırma katmanı: çizgi + iki parmakla yakınlaştırma + çift dokunma + mercek
             Semantics(
               slider: true,
               label: context.t('a11y_slider'),
@@ -168,42 +381,26 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 _intro.stop();
                 _sliderValue = (_sliderValue - 0.1).clamp(0.0, 1.0);
               }),
-              child: SizedBox(
-                width: totalWidth,
-                height: totalHeight,
-                child: BeforeAfter(
-                  value: _sliderValue,
-                  before: AppNetworkImage(
-                    imageUrl: widget.afterImageUrl,
-                    width: totalWidth,
-                    height: totalHeight,
-                  ),
-                  after: AppNetworkImage(
-                    imageUrl: widget.beforeImageUrl,
-                    width: totalWidth,
-                    height: totalHeight,
-                  ),
-                  onValueChanged: (val) {
-                    {
-                      _userTouched = true;
-                      if (_intro.isAnimating) _intro.stop();
-                      // Dörtte bir çizgilerini geçerken hafif titreşim
-                      if ((val * 4).floor() != (_sliderValue * 4).floor()) {
-                        HapticFeedback.selectionClick();
-                      }
-                      _activeTimer?.cancel();
-                      _activeTimer = Timer(
-                        const Duration(milliseconds: 260),
-                        () {
-                          if (mounted) setState(() => _active = false);
-                        },
-                      );
-                      setState(() {
-                        _sliderValue = val;
-                        _active = true;
-                      });
-                    }
-                  },
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onScaleStart: (d) => _onScaleStart(d, totalWidth),
+                onScaleUpdate: (d) =>
+                    _onScaleUpdate(d, totalWidth, totalHeight),
+                onScaleEnd: _onScaleEnd,
+                onDoubleTapDown: (d) => _doubleTapPos = d.localPosition,
+                onDoubleTap: () => _onDoubleTap(totalWidth, totalHeight),
+                onLongPressStart: (d) {
+                  HapticFeedback.mediumImpact();
+                  setState(() => _lensPoint = d.localPosition);
+                },
+                onLongPressMoveUpdate: (d) =>
+                    setState(() => _lensPoint = d.localPosition),
+                onLongPressEnd: (_) => setState(() => _lensPoint = null),
+                onLongPressCancel: () => setState(() => _lensPoint = null),
+                child: SizedBox(
+                  width: totalWidth,
+                  height: totalHeight,
+                  child: _scene(totalWidth, totalHeight, dividerX, sceneM),
                 ),
               ),
             ),
@@ -255,12 +452,14 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             Positioned(
               left: 16,
               top: 68,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 150),
-                opacity: (_sliderValue > 0.12) ? 1.0 : 0.0,
-                child: _buildBadge(
-                  widget.afterLabel,
-                  tint: AppColors.primaryTealDark,
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 150),
+                  opacity: (_sliderValue > 0.12) ? 1.0 : 0.0,
+                  child: _buildBadge(
+                    widget.afterLabel,
+                    tint: AppColors.primaryTealDark,
+                  ),
                 ),
               ),
             ),
@@ -269,24 +468,86 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             Positioned(
               right: 16,
               top: 68,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 150),
-                opacity: (_sliderValue < 0.88) ? 1.0 : 0.0,
-                child: _buildBadge(
-                  widget.beforeLabel,
-                  tint: AppColors.ciniCobalt,
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 150),
+                  opacity: (_sliderValue < 0.88) ? 1.0 : 0.0,
+                  child: _buildBadge(
+                    widget.beforeLabel,
+                    tint: AppColors.ciniCobalt,
+                  ),
                 ),
               ),
             ),
 
-            // 5. Dinamik Hotspot'lar
+            // 5. Yakınlaştırınca: oran ve sıfırlama düğmesi
+            Positioned(
+              right: 16,
+              top: 110,
+              child: IgnorePointer(
+                ignoring: _zoom <= 1.05,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 180),
+                  opacity: _zoom > 1.05 ? 1 : 0,
+                  child: Semantics(
+                    button: true,
+                    label: context.t('zoom_reset'),
+                    excludeSemantics: true,
+                    child: GestureDetector(
+                      onTap: _resetZoom,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.32),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.38),
+                                width: 0.9,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.zoom_out_map_rounded,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${_zoom.toStringAsFixed(1)}×',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // 6. Dinamik hotspot'lar (fotoğrafla birlikte hareket eder, boyutu sabit kalır)
             if (_showHotspots)
               ...widget.hotspots.map((hotspot) {
                 final isBeforeSide =
                     hotspot.targetSide.trim().toLowerCase() == 'before';
                 // 'after' hotspot'ları sol (eski) fotoğrafa, 'before' olanlar sağ (güncel) fotoğrafa aittir
                 final aspect = isBeforeSide ? _newAspect : _oldAspect;
-                final pos = aspect == null
+                final content = aspect == null
                     ? Offset(
                         hotspot.xPercent * totalWidth,
                         hotspot.yPercent * totalHeight,
@@ -298,6 +559,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                         totalWidth,
                         totalHeight,
                       );
+                final pos = content * _zoom + _pan;
 
                 // Kırpılan (görünmeyen) bölgeye düşen nokta gösterilmez
                 final inView =
@@ -325,6 +587,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   ),
                 );
               }),
+
+            // 7. Zaman merceği (basılı tutunca)
+            if (_lensPoint != null)
+              _buildLens(totalWidth, totalHeight, dividerX, sceneM),
           ],
         );
       },
@@ -510,4 +776,15 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
       ),
     );
   }
+}
+
+class _LeftClipper extends CustomClipper<Rect> {
+  final double dividerX;
+  const _LeftClipper(this.dividerX);
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTWH(0, 0, dividerX, size.height);
+
+  @override
+  bool shouldReclip(_LeftClipper old) => old.dividerX != dividerX;
 }
