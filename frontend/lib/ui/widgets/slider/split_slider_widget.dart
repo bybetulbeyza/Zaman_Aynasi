@@ -46,7 +46,6 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   bool _active = false; // kullanıcı slider'ı sürüklerken tutamaç büyür
   Timer? _activeTimer;
   bool _showHotspots = true;
-  bool _coordinatePickerMode = false; // Koordinat yakalama anahtarı
   late AnimationController _pulseController;
 
   // Fotoğrafların en/boy oranları: hotspot konumları fotoğrafa göre tutulur, kutuya göre değil.
@@ -133,22 +132,6 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     return Offset(ix * w, iy * dh - (dh - h) / 2);
   }
 
-  /// Kutudaki dokunma noktasını fotoğraftaki (0-1) konuma çevirir ([_imageToBox]'un tersi).
-  static Offset _boxToImage(
-    double px,
-    double py,
-    double a,
-    double w,
-    double h,
-  ) {
-    if (a > w / h) {
-      final dw = a * h;
-      return Offset((px + (dw - w) / 2) / dw, py / h);
-    }
-    final dh = w / a;
-    return Offset(px / w, (py + (dh - h) / 2) / dh);
-  }
-
   @override
   void dispose() {
     _intro.dispose();
@@ -186,7 +169,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   height: totalHeight,
                 ),
                 onValueChanged: (val) {
-                  if (!_coordinatePickerMode) {
+                  {
                     _userTouched = true;
                     if (_intro.isAnimating) _intro.stop();
                     // Dörtte bir çizgilerini geçerken hafif titreşim
@@ -285,7 +268,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
             ),
 
             // 5. Dinamik Hotspot'lar
-            if (_showHotspots && !_coordinatePickerMode)
+            if (_showHotspots)
               ...widget.hotspots.map((hotspot) {
                 final isBeforeSide =
                     hotspot.targetSide.trim().toLowerCase() == 'before';
@@ -327,105 +310,6 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   ),
                 );
               }),
-
-            // 6. En Üst Katman: KOORDİNAT YAKALAYICI PERDE (Aktifken dokunmaları doğrudan kapar)
-            if (_coordinatePickerMode)
-              Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: (details) {
-                    final side = (details.localPosition.dx < dividerX)
-                        ? 'after'
-                        : 'before';
-                    final aspect = side == 'before' ? _newAspect : _oldAspect;
-                    final img = aspect == null
-                        ? Offset(
-                            details.localPosition.dx / totalWidth,
-                            details.localPosition.dy / totalHeight,
-                          )
-                        : _boxToImage(
-                            details.localPosition.dx,
-                            details.localPosition.dy,
-                            aspect,
-                            totalWidth,
-                            totalHeight,
-                          );
-                    final x = img.dx.clamp(0.0, 1.0);
-                    final y = img.dy.clamp(0.0, 1.0);
-
-                    final xStr = x.toStringAsFixed(2);
-                    final yStr = y.toStringAsFixed(2);
-
-                    // 1. Terminale / Konsola yazdırır
-                    debugPrint(
-                      '📍 YENİ HOTSPOT -> x_percent: $xStr | y_percent: $yStr | target_side: $side',
-                    );
-
-                    // 2. Ekranda direkt bildirim olarak gösterir
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'x_percent: $xStr, y_percent: $yStr, side: $side',
-                        ),
-                        duration: const Duration(seconds: 4),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: AppColors.ciniBordeaux,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    color: Colors.black.withOpacity(0.15),
-                    alignment: Alignment.topCenter,
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'Nokta koymak istediğin yere tıkla',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-            // 7. Modu Açıp Kapatma Butonu (Sol Alt Köşe)
-            if (kDebugMode)
-              Positioned(
-                left: 12,
-                bottom: widget.bottomInset + 12,
-                child: FloatingActionButton.small(
-                  heroTag: 'coordPickerBtn',
-                  backgroundColor: _coordinatePickerMode
-                      ? AppColors.ciniBordeaux
-                      : Colors.white,
-                  onPressed: () {
-                    setState(() {
-                      _coordinatePickerMode = !_coordinatePickerMode;
-                    });
-                  },
-                  child: Icon(
-                    _coordinatePickerMode
-                        ? Icons.check_rounded
-                        : Icons.add_location_alt_outlined,
-                    color: _coordinatePickerMode
-                        ? Colors.white
-                        : AppColors.textDark,
-                    size: 20,
-                  ),
-                ),
-              ),
           ],
         );
       },
