@@ -37,10 +37,30 @@ class SliderScreen extends StatefulWidget {
   State<SliderScreen> createState() => _SliderScreenState();
 }
 
-class _SliderScreenState extends State<SliderScreen> {
-  // Kart tamamen açılsa bile fotoğrafın üst kısmı görünür kalır
-  static const double _sheetMax = 0.78;
-  bool _sheetRaised = false;
+class _SliderScreenState extends State<SliderScreen>
+    with SingleTickerProviderStateMixin {
+  // Kart, yalnızca bordo tutamaçtan sürüklenince büyür; içeriği kaydırmak kartı oynatmaz.
+  // En fazla tam ekran olur.
+  static const double _sheetMax = 1.0;
+  double _extent =
+      0.54; // kartın ekran yüksekliğine oranı (başlangıçta _sheetMin)
+  bool get _sheetRaised => _extent > _sheetMin + 0.04;
+
+  late final AnimationController _extentAnim = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 300),
+  );
+  Animatable<double>? _extentTween;
+
+  void _animateExtentTo(double to) {
+    _extentAnim.stop();
+    _extentTween = Tween<double>(
+      begin: _extent,
+      end: to,
+    ).chain(CurveTween(curve: Curves.easeOutCubic));
+    _extentAnim.forward(from: 0);
+  }
+
   static const double _underlap =
       28; // fotoğraf, sayfanın yuvarlak köşelerinin altına uzanır
 
@@ -64,8 +84,11 @@ class _SliderScreenState extends State<SliderScreen> {
       0.52,
     );
     if ((fraction - _photoFraction).abs() < 0.005) return;
-    setState(() => _photoFraction = fraction);
-    if (_sheetController.isAttached) _sheetController.jumpTo(_sheetMin);
+    final wasMin = !_sheetRaised;
+    setState(() {
+      _photoFraction = fraction;
+      if (wasMin) _extent = _sheetMin;
+    });
   }
 
   Future<double?> _loadAspect(String url) {
@@ -91,8 +114,6 @@ class _SliderScreenState extends State<SliderScreen> {
     );
   }
 
-  final DraggableScrollableController _sheetController =
-      DraggableScrollableController();
   Hotspot? _selectedHotspot;
   bool _showHint = false;
   Timer? _hintTimer;
@@ -125,6 +146,12 @@ class _SliderScreenState extends State<SliderScreen> {
   void initState() {
     super.initState();
     _loadRelated();
+    _extentAnim.addListener(() {
+      final t = _extentTween;
+      if (t != null && mounted) {
+        setState(() => _extent = t.evaluate(_extentAnim));
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _fitPhotoArea());
     // Hotspot'ların varlığını ilk bakışta anlatan kısa ipucu
     if (_place.hotspots.isNotEmpty) {
@@ -138,17 +165,11 @@ class _SliderScreenState extends State<SliderScreen> {
   @override
   void dispose() {
     _hintTimer?.cancel();
-    _sheetController.dispose();
+    _extentAnim.dispose();
     super.dispose();
   }
 
-  void _expandSheet() {
-    _sheetController.animateTo(
-      _sheetMax,
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOut,
-    );
-  }
+  void _expandSheet() => _animateExtentTo(_sheetMax);
 
   bool get _hasHotspotVideos =>
       _place.hotspots.any((h) => h.videoFor(context.isEn) != null);
@@ -295,83 +316,143 @@ class _SliderScreenState extends State<SliderScreen> {
                     right: 20,
                     child: _buildHotspotPopup(_selectedHotspot!, en),
                   ),
-                // Geri oku: diğer ekranlarla aynı konumda (sol üst), fotoğraf üstünde okunsun diye gölgeli
-                SafeArea(
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => Navigator.pop(context),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                        child: Semantics(
-                          button: true,
-                          label: context.t('a11y_back'),
-                          excludeSemantics: true,
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            size: 22,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(color: Colors.black54, blurRadius: 8),
-                              Shadow(color: Colors.black38, blurRadius: 2),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
 
-          // 2. Alttan açılan bilgi sayfası
-          NotificationListener<DraggableScrollableNotification>(
-            onNotification: (n) {
-              final raised = n.extent > _sheetMin + 0.04;
-              if (raised != _sheetRaised) setState(() => _sheetRaised = raised);
-              return false;
-            },
-            child: DraggableScrollableSheet(
-              controller: _sheetController,
-              initialChildSize: _sheetMin,
-              minChildSize: _sheetMin,
-              maxChildSize: _sheetMax,
-              builder: (context, scrollController) => Container(
-                decoration: BoxDecoration(
-                  color: AppColors.bgCanvas,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.10),
-                      blurRadius: 16,
-                      offset: const Offset(0, -4),
-                    ),
-                  ],
+          // 2. Alt bilgi kartı: yalnızca tutamaçtan sürüklenir, içerik kendi içinde kayar
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: size.height * _extent,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.bgCanvas,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
                 ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.10),
+                    blurRadius: 16,
+                    offset: const Offset(0, -4),
                   ),
-                  child: PatternBackground(
-                    lineOpacity: 0.07,
-                    child: ListView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
-                      children: _buildSheetContent(en),
-                    ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
+                child: PatternBackground(
+                  lineOpacity: 0.07,
+                  child: Column(
+                    children: [
+                      _buildDragHandle(size),
+                      Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+                          children: _buildSheetContent(en),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
 
+          // Geri oku: kart tam ekran olunca da görünsün diye kartın üstünde durur
+          _buildBackArrow(),
+
           // 3. Sabit alt eylem çubuğu
           Positioned(left: 0, right: 0, bottom: 0, child: _buildActionBar()),
         ],
+      ),
+    );
+  }
+
+  /// Bordo tutamaç: yukarı çekince kart tam ekran olur, aşağı çekince fotoğraf geri gelir.
+  Widget _buildDragHandle(Size size) {
+    final progress = ((_extent - _sheetMin) / (_sheetMax - _sheetMin)).clamp(
+      0.0,
+      1.0,
+    );
+    final topSafe = MediaQuery.of(context).padding.top * progress;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _animateExtentTo(_sheetRaised ? _sheetMin : _sheetMax),
+      onVerticalDragUpdate: (d) {
+        _extentAnim.stop();
+        setState(() {
+          _extent = (_extent - d.delta.dy / size.height).clamp(
+            _sheetMin,
+            _sheetMax,
+          );
+        });
+      },
+      onVerticalDragEnd: (d) {
+        final v = d.primaryVelocity ?? 0;
+        final mid = (_sheetMin + _sheetMax) / 2;
+        final to = v < -300
+            ? _sheetMax
+            : v > 300
+            ? _sheetMin
+            : (_extent > mid ? _sheetMax : _sheetMin);
+        _animateExtentTo(to);
+      },
+      child: Semantics(
+        button: true,
+        label: _sheetRaised
+            ? context.t('a11y_sheet_down')
+            : context.t('a11y_sheet_up'),
+        excludeSemantics: true,
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.fromLTRB(0, 12 + topSafe, 0, 16),
+          alignment: Alignment.topCenter,
+          child: Container(
+            width: 52,
+            height: 5,
+            decoration: BoxDecoration(
+              color: AppColors.ciniBordeaux,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Sol üstte geri oku. Fotoğraf üzerindeyken beyaz ve gölgeli, kart tam ekranken koyu.
+  Widget _buildBackArrow() {
+    final onSheet = _extent > 0.9;
+    return SafeArea(
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.pop(context),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: Semantics(
+              button: true,
+              label: context.t('a11y_back'),
+              excludeSemantics: true,
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                size: 22,
+                color: onSheet ? AppColors.textDark : Colors.white,
+                shadows: onSheet
+                    ? null
+                    : const [
+                        Shadow(color: Colors.black54, blurRadius: 8),
+                        Shadow(color: Colors.black38, blurRadius: 2),
+                      ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -389,19 +470,6 @@ class _SliderScreenState extends State<SliderScreen> {
     ];
 
     return [
-      // Tutamaç
-      Center(
-        child: Container(
-          width: 52,
-          height: 5,
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: AppColors.ciniBordeaux,
-            borderRadius: BorderRadius.circular(3),
-          ),
-        ),
-      ),
-
       // Başlık + dil
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -431,7 +499,10 @@ class _SliderScreenState extends State<SliderScreen> {
       AnimatedOpacity(
         duration: const Duration(milliseconds: 250),
         opacity: _sheetRaised ? 0 : 1,
-        child: SwipeHintArrow(onTap: _expandSheet),
+        child: IgnorePointer(
+          ignoring: _sheetRaised,
+          child: SwipeHintArrow(onTap: _expandSheet),
+        ),
       ),
 
       // Külliye ise alt yapıları, alt eser ise bağlı olduğu yapı

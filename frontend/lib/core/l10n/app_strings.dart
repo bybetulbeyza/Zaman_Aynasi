@@ -87,6 +87,8 @@ const Map<String, String> appStringsTr = {
       'Bir eseri ziyaret et, QR kodunu okut ya da görevlerini tamamla; mührünü kazan.',
 
   'a11y_back': 'Geri',
+  'a11y_sheet_up': 'Bilgi kartını genişlet',
+  'a11y_sheet_down': 'Bilgi kartını küçült',
   'a11y_close': 'Kapat',
   'a11y_slider': 'Tarihî ve günümüz karşılaştırma kaydırıcısı',
   'a11y_hotspot': 'Bilgi noktası: {name}',
@@ -295,6 +297,8 @@ const Map<String, String> appStringsEn = {
       'Visit a landmark, scan its QR code or finish its tasks to earn its stamp.',
 
   'a11y_back': 'Back',
+  'a11y_sheet_up': 'Expand the info card',
+  'a11y_sheet_down': 'Collapse the info card',
   'a11y_close': 'Close',
   'a11y_slider': 'Historic and present comparison slider',
   'a11y_hotspot': 'Point of interest: {name}',
