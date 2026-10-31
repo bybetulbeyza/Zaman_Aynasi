@@ -14,6 +14,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
   final VoidCallback onDetailTap;
   final VoidCallback? onNextStopTap;
   final VoidCallback? onPrevStopTap;
+  final VoidCallback? onCloseRoute;
 
   const RouteStopPreviewSheet({
     super.key,
@@ -25,6 +26,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
     required this.onDetailTap,
     this.onNextStopTap,
     this.onPrevStopTap,
+    this.onCloseRoute,
   });
 
   Widget _placeholder() => Container(
@@ -139,6 +141,23 @@ class RouteStopPreviewSheet extends StatelessWidget {
                     context.t('next_stop'),
                     onNextStopTap,
                   ),
+                  if (onCloseRoute != null) ...[
+                    const SizedBox(width: 4),
+                    Semantics(
+                      button: true,
+                      label: context.t('route_close'),
+                      excludeSemantics: true,
+                      child: IconButton(
+                        onPressed: onCloseRoute,
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          size: 22,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -255,9 +255,9 @@ class MapScreenState extends State<MapScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
       child: SizedBox(
-        width: 46,
-        height: 46,
-        child: Icon(icon, color: AppColors.textDark, size: 26),
+        width: 42,
+        height: 42,
+        child: Icon(icon, color: AppColors.textDark, size: 24),
       ),
     );
   }
@@ -277,6 +277,40 @@ class MapScreenState extends State<MapScreen> {
       return;
     }
     _moveMap(_userLocation, 16.5);
+  }
+
+  /// Rotayı haritadan kapatır. Hazırladığı rotaysa (aktif rota) silinir; "Geri al" ile geri gelir.
+  void _closeRoute() {
+    final wasActive = _routeChip == 'active';
+    final stops = ActiveRoute.instance.stops;
+    final titleTr = ActiveRoute.instance.titleFor(false);
+    final titleEn = ActiveRoute.instance.titleFor(true);
+    setState(() {
+      _routeChip = null;
+      _walk = null;
+      _cardOpen = false;
+    });
+    _applyFilters();
+    if (!wasActive) return;
+    ActiveRoute.instance.clear();
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(context.t('route_closed')),
+        action: SnackBarAction(
+          label: context.t('undo'),
+          onPressed: () {
+            ActiveRoute.instance.setRoute(
+              stops,
+              titleTr: titleTr,
+              titleEn: titleEn,
+            );
+            loadCustomRoute(stops);
+          },
+        ),
+      ),
+    );
   }
 
   void _stepStop(int delta) {
@@ -486,33 +520,6 @@ class MapScreenState extends State<MapScreen> {
             ),
           ),
 
-          // Yakınlaştır / uzaklaştır
-          Positioned(
-            right: 16,
-            top: 0,
-            bottom: 0,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Material(
-                color: Colors.white,
-                elevation: 3,
-                borderRadius: BorderRadius.circular(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _zoomButton(Icons.add_rounded, () => _zoomBy(1)),
-                    Container(
-                      width: 28,
-                      height: 1,
-                      color: AppColors.chipBorder,
-                    ),
-                    _zoomButton(Icons.remove_rounded, () => _zoomBy(-1)),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           // 2. Üst Arama ve Filtre Çubuğu
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
@@ -554,6 +561,27 @@ class MapScreenState extends State<MapScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                // Yakınlaştır / uzaklaştır: başparmağın erişiminde, kontrol grubunun üstünde
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: Material(
+                    color: Colors.white,
+                    elevation: 3,
+                    borderRadius: BorderRadius.circular(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _zoomButton(Icons.add_rounded, () => _zoomBy(1)),
+                        Container(
+                          width: 26,
+                          height: 1,
+                          color: AppColors.chipBorder,
+                        ),
+                        _zoomButton(Icons.remove_rounded, () => _zoomBy(-1)),
+                      ],
+                    ),
+                  ),
+                ),
                 Padding(
                   padding: EdgeInsets.fromLTRB(16, 0, 16, showCard ? 10 : 16),
                   child: Row(
@@ -637,6 +665,7 @@ class MapScreenState extends State<MapScreen> {
                               builder: (_) => SliderScreen(place: currentPlace),
                             ),
                           ),
+                          onCloseRoute: _routeChip != null ? _closeRoute : null,
                           onPrevStopTap:
                               (_routeChip != null && _filteredPlaces.length > 1)
                               ? () => _stepStop(-1)
