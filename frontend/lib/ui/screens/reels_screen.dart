@@ -18,7 +18,19 @@ class _Reel {
 /// [initialPlace] verilirse akış o eserin videosundan başlar.
 class ReelsScreen extends StatefulWidget {
   final HeritagePlace? initialPlace;
-  const ReelsScreen({super.key, this.initialPlace});
+
+  /// true ise akış yalnızca [initialPlace] eserinin hotspot videolarını içerir.
+  final bool placeOnly;
+
+  /// Verilirse akış bu hotspot'un videosundan başlar.
+  final dynamic initialHotspotId;
+
+  const ReelsScreen({
+    super.key,
+    this.initialPlace,
+    this.placeOnly = false,
+    this.initialHotspotId,
+  });
 
   @override
   State<ReelsScreen> createState() => _ReelsScreenState();
@@ -36,17 +48,24 @@ class _ReelsScreenState extends State<ReelsScreen> {
   }
 
   Future<void> _load() async {
-    final places = await HeritageRepository().getPlaces();
+    final en = AppLang.instance.isEnglish;
+    final List<HeritagePlace> places =
+        widget.placeOnly && widget.initialPlace != null
+        ? [widget.initialPlace!]
+        : await HeritageRepository().getPlaces();
     final reels = <_Reel>[];
     for (final p in places) {
       for (final h in p.hotspots) {
-        final url = h.videoFor(false);
+        final url = h.videoFor(en);
         if (url != null) reels.add(_Reel(p, h, url));
       }
     }
-    final start = widget.initialPlace == null
-        ? -1
-        : reels.indexWhere((r) => r.place.id == widget.initialPlace!.id);
+    var start = -1;
+    if (widget.initialHotspotId != null) {
+      start = reels.indexWhere((r) => r.hotspot.id == widget.initialHotspotId);
+    } else if (widget.initialPlace != null) {
+      start = reels.indexWhere((r) => r.place.id == widget.initialPlace!.id);
+    }
     if (!mounted) return;
     setState(() {
       _reels = reels;

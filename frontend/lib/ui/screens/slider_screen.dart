@@ -13,6 +13,7 @@ import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
+import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
 
@@ -62,6 +63,23 @@ class _SliderScreenState extends State<SliderScreen> {
       _sheetMax,
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOut,
+    );
+  }
+
+  bool get _hasHotspotVideos =>
+      _place.hotspots.any((h) => h.videoFor(context.isEn) != null);
+
+  /// Eserin hotspot videolarını dikey kaydırmalı akışta açar (verilirse o hotspot'tan başlar).
+  void _openReels(Hotspot? start) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReelsScreen(
+          initialPlace: _place,
+          placeOnly: true,
+          initialHotspotId: start?.id,
+        ),
+      ),
     );
   }
 
@@ -377,10 +395,14 @@ class _SliderScreenState extends State<SliderScreen> {
   }
 
   Widget _buildVideoCard(String videoUrl) {
-    final available = videoUrl.isNotEmpty;
+    final available = videoUrl.isNotEmpty || _hasHotspotVideos;
     const radius = BorderRadius.all(Radius.circular(20));
     return GestureDetector(
-      onTap: available ? () => showVideoDialog(context, videoUrl) : null,
+      onTap: !available
+          ? null
+          : (videoUrl.isNotEmpty
+                ? () => showVideoDialog(context, videoUrl)
+                : () => _openReels(null)),
       child: Container(
         height: 190,
         decoration: BoxDecoration(
@@ -690,7 +712,7 @@ class _SliderScreenState extends State<SliderScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => showVideoDialog(context, videoUrl),
+                    onPressed: () => _openReels(hotspot),
                     icon: const Icon(Icons.play_arrow_rounded, size: 18),
                     label: Text(context.t('ai_story')),
                     style: ElevatedButton.styleFrom(
