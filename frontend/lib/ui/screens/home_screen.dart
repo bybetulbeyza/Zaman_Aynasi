@@ -158,8 +158,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final top = MediaQuery.of(context).padding.top;
     return Container(
       padding: EdgeInsets.fromLTRB(20, top + 10, 20, 24),
-      // Desen hero'da silik tutulur; marka, arama ve kısayollar öne çıksın
-      decoration: PatternBackground.onDarkDecoration(lineOpacity: 0.12),
+      // Desensiz, sade: üstten alta hafifçe koyulaşan petrol geçişi
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF1A4F5F), AppColors.heroPetrol, Color(0xFF0F3340)],
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
