@@ -242,6 +242,30 @@ class MapScreenState extends State<MapScreen> {
     setState(() => _walk = route);
   }
 
+  Widget _zoomButton(IconData icon, String label, VoidCallback onTap) {
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: SizedBox(
+          width: 52,
+          height: 46,
+          child: Icon(icon, color: AppColors.textDark, size: 25),
+        ),
+      ),
+    );
+  }
+
+  void _zoomBy(double delta) {
+    try {
+      final cam = _mapController.camera;
+      _mapController.move(cam.center, (cam.zoom + delta).clamp(10.0, 19.0));
+    } catch (_) {}
+  }
+
   void _recenter() {
     if (!_hasRealLocation) {
       AppToast.show(
@@ -565,26 +589,47 @@ class MapScreenState extends State<MapScreen> {
                         ),
                         const SizedBox(height: 10),
                       ],
-                      Semantics(
-                        button: true,
-                        label: context.t('locate_me'),
-                        excludeSemantics: true,
-                        child: Material(
-                          color: Colors.white,
-                          shape: const CircleBorder(),
-                          elevation: 3,
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            onTap: _recenter,
-                            child: const Padding(
-                              padding: EdgeInsets.all(15),
-                              child: AppIcon(
-                                'locate',
-                                color: AppColors.primaryTeal,
-                                size: 26,
+                      // Tek beyaz sütun: yakınlaştır, uzaklaştır, konumum
+                      Material(
+                        color: Colors.white,
+                        elevation: 3,
+                        borderRadius: BorderRadius.circular(26),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _zoomButton(
+                              Icons.add_rounded,
+                              context.t('zoom_in'),
+                              () => _zoomBy(1),
+                            ),
+                            const Divider(height: 1, indent: 10, endIndent: 10),
+                            _zoomButton(
+                              Icons.remove_rounded,
+                              context.t('zoom_out'),
+                              () => _zoomBy(-1),
+                            ),
+                            const Divider(height: 1, indent: 10, endIndent: 10),
+                            Semantics(
+                              button: true,
+                              label: context.t('locate_me'),
+                              excludeSemantics: true,
+                              child: InkWell(
+                                onTap: _recenter,
+                                borderRadius: BorderRadius.circular(26),
+                                child: const SizedBox(
+                                  width: 52,
+                                  height: 52,
+                                  child: Center(
+                                    child: AppIcon(
+                                      'locate',
+                                      color: AppColors.primaryTeal,
+                                      size: 26,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ],
