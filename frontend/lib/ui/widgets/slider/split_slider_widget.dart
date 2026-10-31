@@ -262,6 +262,9 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   child: _buildBadge(
                     widget.afterLabel,
                     tint: AppColors.primaryTealDark,
+                    trailing: widget.onAfterBadgeTap == null
+                        ? null
+                        : Icons.info_outline_rounded,
                   ),
                 ),
               ),
@@ -561,7 +564,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     );
   }
 
-  Widget _buildBadge(String text, {required Color tint}) {
+  Widget _buildBadge(String text, {required Color tint, IconData? trailing}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: BackdropFilter(
@@ -576,15 +579,24 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               width: 0.9,
             ),
           ),
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.2,
-              shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                  shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+                ),
+              ),
+              if (trailing != null) ...[
+                const SizedBox(width: 6),
+                Icon(trailing, size: 15, color: Colors.white),
+              ],
+            ],
           ),
         ),
       ),

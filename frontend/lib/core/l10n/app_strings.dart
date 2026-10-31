@@ -103,7 +103,7 @@ const Map<String, String> appStringsTr = {
   'qr_unknown': "Bu karekod tanınmadı. Tarih Envanteri'nden aramayı deneyin.",
 
   // Detay
-  'period_label': 'Tarihî canlandırma ✦',
+  'period_label': 'Tarihî canlandırma',
   'today_label': 'Günümüz',
   'period': 'Yapım',
   'architect': 'Mimar',
@@ -184,12 +184,11 @@ const Map<String, String> appStringsTr = {
       'Soldaki "Tarihî canlandırma", Vakıf Katılım envanter kitaplarındaki tarif ve kayıtlara dayanarak yapay zekâ ile oluşturulmuş bir canlandırmadır. Gerçek bir fotoğraf değildir. Sağdaki "Günümüz" görseli ise eserin bugünkü gerçek fotoğrafıdır.',
   'ai_sheet_source': 'Dayanak kayıt',
   'ai_sheet_ok': 'Anladım',
-  'ai_hint': '✦ Sol taraf yapay zekâ canlandırması',
   'source_ai_note':
       'Tarihî görsel, bu kayda dayanarak yapay zekâ ile canlandırılmıştır.',
   'about_ai_title': 'Canlandırmalar nasıl üretildi?',
   'about_ai_body':
-      'Tarihî görünümler gerçek fotoğraf değildir; envanter kitaplarındaki tarif ve kayıtlara dayanarak yapay zekâ ile canlandırılmıştır ve "✦" işaretiyle belirtilir. Günümüz görselleri gerçek fotoğraflardır. Yeni içerikler yayımlanmadan önce kontrol edilir.',
+      'Tarihî görünümler gerçek fotoğraf değildir; envanter kitaplarındaki tarif ve kayıtlara dayanarak yapay zekâ ile canlandırılmıştır ve rozetteki bilgi simgesiyle belirtilir. Günümüz görselleri gerçek fotoğraflardır. Yeni içerikler yayımlanmadan önce kontrol edilir.',
 };
 
 const Map<String, String> appStringsEn = {
@@ -297,7 +296,7 @@ const Map<String, String> appStringsEn = {
       'This QR code was not recognized. Try searching the Heritage Inventory.',
 
   // Detail
-  'period_label': 'Historic reconstruction ✦',
+  'period_label': 'Historic reconstruction',
   'today_label': 'Present',
   'period': 'Built',
   'architect': 'Architect',
@@ -378,10 +377,9 @@ const Map<String, String> appStringsEn = {
       'The "Historic reconstruction" on the left is an AI-generated reconstruction based on the descriptions and records in the Vakıf Katılım inventory books. It is not a real photograph. The "Present" image on the right is a real, current photo of the landmark.',
   'ai_sheet_source': 'Source record',
   'ai_sheet_ok': 'Got it',
-  'ai_hint': '✦ Left side is an AI reconstruction',
   'source_ai_note':
       'The historic image is an AI reconstruction based on this record.',
   'about_ai_title': 'How were the reconstructions made?',
   'about_ai_body':
-      'Historic views are not real photographs; they are AI reconstructions based on the descriptions and records in the inventory books and are marked with "✦". Present-day images are real photographs. New content is reviewed before it is published.',
+      'Historic views are not real photographs; they are AI reconstructions based on the descriptions and records in the inventory books and are labelled with the info icon on the badge. Present-day images are real photographs. New content is reviewed before it is published.',
 };

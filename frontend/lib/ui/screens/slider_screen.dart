@@ -88,8 +88,6 @@ class _SliderScreenState extends State<SliderScreen> {
       DraggableScrollableController();
   Hotspot? _selectedHotspot;
   bool _showHint = false;
-  bool _showAiHint = true;
-  Timer? _aiHintTimer;
   Timer? _hintTimer;
 
   HeritagePlace get _place => widget.place;
@@ -139,9 +137,6 @@ class _SliderScreenState extends State<SliderScreen> {
   void initState() {
     super.initState();
     _loadRelated();
-    _aiHintTimer = Timer(const Duration(seconds: 5), () {
-      if (mounted) setState(() => _showAiHint = false);
-    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _fitPhotoArea());
     // Hotspot'ların varlığını ilk bakışta anlatan kısa ipucu
     if (_place.hotspots.isNotEmpty) {
@@ -155,7 +150,6 @@ class _SliderScreenState extends State<SliderScreen> {
   @override
   void dispose() {
     _hintTimer?.cancel();
-    _aiHintTimer?.cancel();
     _sheetController.dispose();
     super.dispose();
   }
@@ -363,37 +357,6 @@ class _SliderScreenState extends State<SliderScreen> {
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: 112,
-                  child: IgnorePointer(
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 400),
-                      opacity: _showAiHint && _selectedHotspot == null ? 1 : 0,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 7,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.55),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Text(
-                            context.t('ai_hint'),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
                           ),
                         ),
                       ),
