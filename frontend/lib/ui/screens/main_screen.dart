@@ -93,6 +93,10 @@ class _MainScreenState extends State<MainScreen> {
             Navigator.pop(context); // formu kapat
             _showRouteOnMap(places);
           },
+          onBrowseRoutes: () {
+            Navigator.pop(context); // formu kapat, hazır rotalar sekmesine dön
+            setState(() => _currentIndex = 3);
+          },
         ),
       ),
     );

@@ -17,7 +17,10 @@ import '../../core/state/active_route.dart';
 class RoutesScreen extends StatefulWidget {
   final Function(List<HeritagePlace>)? onRouteCreated;
 
-  const RoutesScreen({super.key, this.onRouteCreated});
+  /// "Tarihi Rotalar'a göz at": hazır rotalar listesine döner.
+  final VoidCallback? onBrowseRoutes;
+
+  const RoutesScreen({super.key, this.onRouteCreated, this.onBrowseRoutes});
 
   @override
   State<RoutesScreen> createState() => _RoutesScreenState();
@@ -413,7 +416,39 @@ class _RoutesScreenState extends State<RoutesScreen> {
                         ),
                       ),
                       const SizedBox(height: 28),
-                      const Center(child: AppLogo(size: 92)),
+                      Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              context.t('rc_ready_q'),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: widget.onBrowseRoutes,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
+                                child: Text(
+                                  context.t('rc_browse'),
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primaryTeal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            const AppLogo(size: 92),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
