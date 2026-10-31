@@ -9,6 +9,9 @@ import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
 import '../../core/utils/launcher_util.dart';
 import '../../data/models/heritage_place.dart';
+import '../../core/constants/category_style.dart';
+import '../../data/repositories/heritage_repository.dart';
+import '../widgets/common/app_network_image.dart';
 import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/detail/audio_guide_player.dart';
@@ -40,9 +43,51 @@ class _SliderScreenState extends State<SliderScreen> {
 
   HeritagePlace get _place => widget.place;
 
+  /// Külliye gibi üst yapıysa alt eserleri; alt eserse bağlı olduğu üst yapıyı gösterir.
+  List<HeritagePlace> _children = [];
+  HeritagePlace? _parent;
+  List<HeritagePlace> _allPlaces = [];
+
+  Future<void> _loadRelated() async {
+    final all = await HeritageRepository().getPlacesCached();
+    if (!mounted || all.isEmpty) return;
+    setState(() {
+      _allPlaces = all;
+      _children = all.where((p) => p.parentId == _place.id).toList();
+      _parent = _place.parentId == null
+          ? null
+          : all.where((p) => p.id == _place.parentId).firstOrNull;
+    });
+  }
+
+  /// Hotspot'un gideceği alt eser. Kolon gerekmez: önce (varsa) `target_place_id`, yoksa hotspot
+  /// başlığında alt yapının adı geçiyorsa (örn. "Muradiye Camii: İnşa Kitabesi") o yapı seçilir.
+  HeritagePlace? _navTarget(Hotspot hotspot) {
+    if (hotspot.hasSubPlaceNavigation) {
+      return _allPlaces.where((p) => p.id == hotspot.targetPlaceId).firstOrNull;
+    }
+    final titles = [hotspot.title, hotspot.titleEn].map((t) => t.toLowerCase());
+    for (final child in _children) {
+      final names = [
+        child.name,
+        child.nameEn,
+      ].where((n) => n.isNotEmpty).map((n) => n.toLowerCase());
+      if (names.any((n) => titles.any((t) => t.contains(n)))) return child;
+    }
+    return null;
+  }
+
+  void _openPlace(HeritagePlace place) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadRelated();
     // Hotspot'ların varlığını ilk bakışta anlatan kısa ipucu
     if (_place.hotspots.isNotEmpty) {
       _showHint = true;
@@ -337,6 +382,16 @@ class _SliderScreenState extends State<SliderScreen> {
       ),
       const SizedBox(height: 22),
 
+      // Külliye ise alt yapıları, alt eser ise bağlı olduğu yapı
+      if (_parent != null) ...[
+        _buildParentLink(en),
+        const SizedBox(height: 18),
+      ],
+      if (_children.isNotEmpty) ...[
+        _buildChildren(en),
+        const SizedBox(height: 24),
+      ],
+
       // AI videosu
       _buildVideoCard(videoUrl),
       const SizedBox(height: 16),
@@ -382,6 +437,129 @@ class _SliderScreenState extends State<SliderScreen> {
       const SizedBox(height: 12),
       _buildSourceCard(en),
     ];
+  }
+
+  /// Alt eserde: "… yapısının bir parçası" bağlantısı.
+  Widget _buildParentLink(bool en) {
+    final parent = _parent!;
+    return GestureDetector(
+      onTap: () => _openPlace(parent),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.primaryTealLight,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.account_tree_outlined,
+              size: 20,
+              color: AppColors.primaryTeal,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                context.t('part_of').replaceAll('{name}', parent.nameFor(en)),
+                style: const TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryTealDark,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.primaryTeal,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Külliyede: alt yapıların fotoğraflı, yatay kaydırmalı listesi.
+  Widget _buildChildren(bool en) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionTitle(context.t('complex_parts')),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 150,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _children.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (_, i) {
+              final c = _children[i];
+              final style = CategoryStyle.of(c.category);
+              return GestureDetector(
+                onTap: () => _openPlace(c),
+                child: SizedBox(
+                  width: 132,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        AppNetworkImage(
+                          imageUrl: c.imageAfterUrl,
+                          semanticLabel: c.nameFor(en),
+                        ),
+                        const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              stops: [0.4, 1.0],
+                              colors: [Colors.transparent, Color(0xCC0F2F3A)],
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: style.color,
+                              shape: BoxShape.circle,
+                            ),
+                            child: AppIcon(
+                              style.icon,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: 10,
+                          right: 10,
+                          bottom: 10,
+                          child: Text(
+                            c.nameFor(en),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: AppTheme.headingFont,
+                              fontSize: 15,
+                              height: 1.1,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _metaItem(String label, String value) {
@@ -648,6 +826,7 @@ class _SliderScreenState extends State<SliderScreen> {
 
   Widget _buildHotspotPopup(Hotspot hotspot, bool en) {
     final videoUrl = hotspot.videoFor(en);
+    final target = _navTarget(hotspot);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -741,6 +920,27 @@ class _SliderScreenState extends State<SliderScreen> {
               ],
             ],
           ),
+          if (target != null) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _openPlace(target),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.heroPetrol,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const StadiumBorder(),
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                child: Text(
+                  '${target.nameFor(en)}  ·  ${context.t('go_to_part')} →',
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
