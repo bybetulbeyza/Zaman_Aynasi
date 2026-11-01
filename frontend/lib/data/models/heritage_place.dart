@@ -288,7 +288,11 @@ class HeritagePlace {
       final all = rawHotspots
           .map((item) => Hotspot.fromJson(item as Map<String, dynamic>))
           .toList();
-      parsedHotspots = all.where((h) => !h.isModelHotspot).toList();
+      // target_side = 'model' olanlar yalnızca 3B'dedir; diğerleri fotoğrafta kalır
+      // (model_pos de doluysa 3B'de de görünür).
+      parsedHotspots = all
+          .where((h) => h.targetSide.trim().toLowerCase() != 'model')
+          .toList();
       parsedModelHotspots = all.where((h) => h.isModelHotspot).toList();
     }
 
