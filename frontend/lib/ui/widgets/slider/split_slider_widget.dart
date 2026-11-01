@@ -31,6 +31,9 @@ class SplitSliderWidget extends StatefulWidget {
   /// Bu kadar piksel alt kısım bilgi sayfasının altında kalır; butonlar bunun üstüne yerleşir.
   final double bottomInset;
 
+  /// Üstteki sağ düğme sütununa (ör. 2B|3B geçişi) yer açmak için kaydırma.
+  final double topOffset;
+
   const SplitSliderWidget({
     super.key,
     required this.beforeImageUrl,
@@ -42,6 +45,7 @@ class SplitSliderWidget extends StatefulWidget {
     this.selectedHotspot,
     this.navCategories = const {},
     this.bottomInset = 0,
+    this.topOffset = 0,
   });
 
   @override
@@ -593,7 +597,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
               if (_tourStops.length >= 2)
                 Positioned(
                   right: 16,
-                  top: MediaQuery.of(context).padding.top + 12,
+                  top:
+                      MediaQuery.of(context).padding.top +
+                      12 +
+                      widget.topOffset,
                   child: Semantics(
                     button: true,
                     label: _touring
@@ -661,6 +668,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 top:
                     MediaQuery.of(context).padding.top +
                     12 +
+                    widget.topOffset +
                     (_tourStops.length >= 2 ? 46 : 0),
                 child: IgnorePointer(
                   ignoring: _zoom <= 1.05,

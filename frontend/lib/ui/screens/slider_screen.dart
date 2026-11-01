@@ -152,6 +152,7 @@ class _SliderScreenState extends State<SliderScreen>
   @override
   void initState() {
     super.initState();
+    _view3d = _place.has3dModel; // 3B varsa önce 3B açılır
     _loadRelated();
     _extentAnim.addListener(() {
       final t = _extentTween;
@@ -268,11 +269,13 @@ class _SliderScreenState extends State<SliderScreen>
                     oldUrl: _place.modelOldUrl,
                     name: _place.nameFor(en),
                     hotspots: _place.modelHotspots,
+                    selected: _selectedHotspot,
                     onHotspot: (h) => setState(() => _selectedHotspot = h),
                     bottomInset: _underlap,
                   )
                 else
                   SplitSliderWidget(
+                    topOffset: _place.has3dModel ? 46 : 0,
                     beforeImageUrl: _place.imageBeforeUrl,
                     afterImageUrl: _place.imageAfterUrl,
                     afterLabel: context.t('period_label'),
@@ -295,7 +298,9 @@ class _SliderScreenState extends State<SliderScreen>
                   child: IgnorePointer(
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 400),
-                      opacity: _showHint && _selectedHotspot == null ? 1 : 0,
+                      opacity: _showHint && _selectedHotspot == null && !_view3d
+                          ? 1
+                          : 0,
                       child: Center(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
