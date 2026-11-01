@@ -145,6 +145,10 @@ class HeritagePlace {
   qrUrl; // Supabase: qr_url (QR görselinin adresi; QR içeriği 'eser:<id>')
   final List<Hotspot> hotspots;
 
+  /// Supabase: model_new_url / model_old_url — 3B model (GLB) adresleri.
+  final String modelNewUrl;
+  final String modelOldUrl;
+
   /// Supabase: old_photos — eski fotoğraf adresleri (liste ya da boşluk/virgülle ayrılmış metin).
   final List<String> oldPhotos;
   final double? distanceMeters;
@@ -177,6 +181,8 @@ class HeritagePlace {
     this.qrUrl = '',
     this.oldPhotos = const [],
     this.hotspots = const [],
+    this.modelNewUrl = '',
+    this.modelOldUrl = '',
     this.distanceMeters,
   });
 
@@ -199,6 +205,7 @@ class HeritagePlace {
       en && aiVideoEnUrl.isNotEmpty ? aiVideoEnUrl : aiVideoUrl;
 
   bool get hasAiVideo => aiVideoUrl.isNotEmpty || aiVideoEnUrl.isNotEmpty;
+  bool get has3dModel => modelNewUrl.isNotEmpty || modelOldUrl.isNotEmpty;
   bool get hasAudioGuide => audioGuideUrl.isNotEmpty;
 
   /// Sesli rehberin metni, paragraflara bölünmüş. Ses motoru için konan "[1 saniye es]" gibi
@@ -251,6 +258,8 @@ class HeritagePlace {
       qrUrl: qrUrl,
       oldPhotos: oldPhotos,
       hotspots: hotspots,
+      modelNewUrl: modelNewUrl,
+      modelOldUrl: modelOldUrl,
       distanceMeters: distance,
     );
   }
@@ -301,6 +310,8 @@ class HeritagePlace {
       qrUrl: json['qr_url'] as String? ?? '',
       oldPhotos: _parsePhotos(json['old_photos']),
       hotspots: parsedHotspots,
+      modelNewUrl: (json['model_new_url'] as String? ?? '').trim(),
+      modelOldUrl: (json['model_old_url'] as String? ?? '').trim(),
     );
   }
 

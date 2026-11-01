@@ -139,6 +139,10 @@ const Map<String, String> appStringsTr = {
   // Detay
   'period_label': 'Tarihî canlandırma',
   'today_label': 'Günümüz',
+  'view_2d': '2B',
+  'view_3d': '3B',
+  'model_hint': 'Döndürmek için sürükle, yakınlaştırmak için kıstır',
+  'model_old': 'Tarihî',
   'period': 'Yapım',
   'architect': 'Mimar',
   'patron': 'Bani (Yaptıran)',
@@ -366,6 +370,10 @@ const Map<String, String> appStringsEn = {
   // Detail
   'period_label': 'Historic reconstruction',
   'today_label': 'Present',
+  'view_2d': '2D',
+  'view_3d': '3D',
+  'model_hint': 'Drag to rotate, pinch to zoom',
+  'model_old': 'Historic',
   'period': 'Built',
   'architect': 'Architect',
   'patron': 'Commissioned by',

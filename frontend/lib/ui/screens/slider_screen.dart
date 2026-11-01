@@ -28,6 +28,7 @@ import '../widgets/detail/photo_collage.dart';
 import '../widgets/detail/activities_section.dart';
 import '../widgets/detail/guide_section.dart';
 import '../widgets/detail/swipe_hint_arrow.dart';
+import '../widgets/slider/model_3d_view.dart';
 import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
@@ -121,6 +122,7 @@ class _SliderScreenState extends State<SliderScreen>
 
   Hotspot? _selectedHotspot;
   bool _showHint = false;
+  bool _view3d = false;
   Timer? _hintTimer;
 
   HeritagePlace get _place => widget.place;
@@ -260,20 +262,30 @@ class _SliderScreenState extends State<SliderScreen>
             height: size.height * _photoFraction + _underlap,
             child: Stack(
               children: [
-                SplitSliderWidget(
-                  beforeImageUrl: _place.imageBeforeUrl,
-                  afterImageUrl: _place.imageAfterUrl,
-                  afterLabel: context.t('period_label'),
-                  beforeLabel: context.t('today_label'),
-                  hotspots: _place.hotspots,
-                  selectedHotspot: _selectedHotspot,
-                  navCategories: {for (final c in _children) c.id: c.category},
-                  bottomInset: _underlap,
-                  onHotspotSelected: (h) => setState(() {
-                    _selectedHotspot = h;
-                    _showHint = false;
-                  }),
-                ),
+                if (_view3d)
+                  Model3DView(
+                    newUrl: _place.modelNewUrl,
+                    oldUrl: _place.modelOldUrl,
+                    name: _place.nameFor(en),
+                    bottomInset: _underlap,
+                  )
+                else
+                  SplitSliderWidget(
+                    beforeImageUrl: _place.imageBeforeUrl,
+                    afterImageUrl: _place.imageAfterUrl,
+                    afterLabel: context.t('period_label'),
+                    beforeLabel: context.t('today_label'),
+                    hotspots: _place.hotspots,
+                    selectedHotspot: _selectedHotspot,
+                    navCategories: {
+                      for (final c in _children) c.id: c.category,
+                    },
+                    bottomInset: _underlap,
+                    onHotspotSelected: (h) => setState(() {
+                      _selectedHotspot = h;
+                      _showHint = false;
+                    }),
+                  ),
                 Positioned(
                   left: 0,
                   right: 0,
@@ -316,6 +328,14 @@ class _SliderScreenState extends State<SliderScreen>
                     ),
                   ),
                 ),
+                if (_place.has3dModel)
+                  Positioned(
+                    top:
+                        MediaQuery.of(context).padding.top +
+                        (_view3d ? 12 : 64),
+                    right: 14,
+                    child: _viewToggle(),
+                  ),
                 if (_selectedHotspot != null)
                   Positioned(
                     top: size.height * 0.11,
@@ -432,6 +452,57 @@ class _SliderScreenState extends State<SliderScreen>
   }
 
   /// Sol üstte geri düğmesi: fotoğraf üstündeyken buzlu cam, kart tam ekranken beyaz yuvarlak düğme.
+  Widget _viewToggle() {
+    Widget seg(String label, bool on, VoidCallback tap) => Semantics(
+      button: true,
+      selected: on,
+      label: label,
+      child: GestureDetector(
+        onTap: tap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: on ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+              color: on ? const Color(0xFF1B3A4B) : Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(19),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          seg(context.t('view_2d'), !_view3d, () {
+            setState(() {
+              _view3d = false;
+              _selectedHotspot = null;
+            });
+          }),
+          seg(context.t('view_3d'), _view3d, () {
+            setState(() {
+              _view3d = true;
+              _selectedHotspot = null;
+            });
+          }),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBackArrow() {
     final onSheet = _extent > 0.9;
     return SafeArea(
