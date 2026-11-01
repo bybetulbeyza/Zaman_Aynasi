@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/heritage_place.dart';
+import 'slider_parts.dart';
 
 /// Eserin 3B modeli: döndür, yakınlaştır, AR'da aç.
 /// İki model de varsa aynı sayfada üst üste biner; sürüklenen çizginin solu tarihî, sağı günümüz
@@ -54,12 +55,66 @@ class Model3DView extends StatefulWidget {
   }
 }
 
-class _Model3DViewState extends State<Model3DView> {
+class _Model3DViewState extends State<Model3DView>
+    with SingleTickerProviderStateMixin {
   dynamic _web; // WebViewController (webview_flutter üzerinden gelir)
   double _zoom = 1;
   Timer? _tourTimer;
   bool _touring = false;
   int _tourIdx = 0;
+  double _f = 0.5; // bölücü konumu (0..1), fotoğraf slider'ındaki gibi
+  bool _active = false;
+  bool _userTouched = false;
+  bool _canAr = false;
+
+  late final AnimationController _intro = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2200),
+  );
+
+  static final TweenSequence<double> _introCurve = TweenSequence<double>([
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 0.5,
+        end: 0.18,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+      weight: 35,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 0.18,
+        end: 0.82,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+      weight: 45,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 0.82,
+        end: 0.5,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+      weight: 20,
+    ),
+  ]);
+
+  @override
+  void initState() {
+    super.initState();
+    _intro.addListener(() {
+      if (_userTouched || !mounted) return;
+      _setSplit(_introCurve.evaluate(_intro));
+    });
+    // Fotoğraf slider'ındaki gibi: açılışta çizgi kendiliğinden iki yana gider
+    Future.delayed(const Duration(milliseconds: 1600), () {
+      if (mounted && !_userTouched && widget.oldUrl.isNotEmpty) {
+        _intro.forward();
+      }
+    });
+  }
+
+  void _setSplit(double v) {
+    setState(() => _f = v.clamp(0.0, 1.0));
+    _js('window.zaSplit&&window.zaSplit($_f)');
+  }
 
   List<Hotspot> get _valid => widget.hotspots
       .where((h) => Model3DView._num.hasMatch(h.modelPos ?? ''))
@@ -108,11 +163,13 @@ class _Model3DViewState extends State<Model3DView> {
   @override
   void dispose() {
     _tourTimer?.cancel();
+    _intro.dispose();
     super.dispose();
   }
 
   String _hotspotHtml() {
-    final b = StringBuffer();
+    final b = StringBuffer()
+      ..writeln('<button slot="ar-button" style="display:none"></button>');
     var n = 0;
     for (final h in _valid) {
       final normal = Model3DView._num.hasMatch(h.modelNormal ?? '')
@@ -138,9 +195,6 @@ class _Model3DViewState extends State<Model3DView> {
     final cfg = jsonEncode({
       'oldSrc': both ? oldUrl : '',
       'single': both ? '' : (newUrl.isNotEmpty ? 'new' : 'old'),
-      'oldLabel': context.t('model_old'),
-      'newLabel': context.t('today_label'),
-      'botPad': widget.bottomInset + 64,
       'hs': [
         for (final h in _valid)
           {
@@ -152,193 +206,204 @@ class _Model3DViewState extends State<Model3DView> {
     });
     final top = MediaQuery.of(context).padding.top + 12;
     final canTour = _valid.length >= 2;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: widget.bottomInset),
-          child: ModelViewer(
-            key: ValueKey('$newUrl|$oldUrl|${widget.hotspots.length}'),
-            src: src,
-            alt: widget.name,
-            backgroundColor: Colors.transparent,
-            cameraControls: true,
-            disableZoom: false,
-            ar: true,
-            arModes: const ['scene-viewer', 'quick-look', 'webxr'],
-            interactionPrompt: InteractionPrompt.none,
-            shadowIntensity: 1,
-            exposure: 1.05,
-            cameraOrbit: '35deg 70deg auto',
-            innerModelViewerHtml: _hotspotHtml(),
-            relatedCss: _css,
-            relatedJs: _js_.replaceFirst('__CFG__', cfg),
-            onWebViewCreated: (c) => _web = c,
-            javascriptChannels: {
-              JavascriptChannel(
-                'HotspotTap',
-                onMessageReceived: (m) {
-                  for (final h in widget.hotspots) {
-                    if (h.id.toString() == m.message) {
-                      widget.onHotspot(h);
-                      break;
-                    }
-                  }
+    return LayoutBuilder(
+      builder: (context, box) {
+        final w = box.maxWidth;
+        final h = box.maxHeight;
+        final dividerX = _f * w;
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(bottom: widget.bottomInset),
+              child: ModelViewer(
+                key: ValueKey('$newUrl|$oldUrl|${widget.hotspots.length}'),
+                src: src,
+                alt: widget.name,
+                backgroundColor: Colors.transparent,
+                cameraControls: true,
+                disableZoom: false,
+                ar: true,
+                arModes: const ['scene-viewer', 'quick-look', 'webxr'],
+                interactionPrompt: InteractionPrompt.none,
+                shadowIntensity: 1,
+                exposure: 1.05,
+                cameraOrbit: '35deg 70deg auto',
+                innerModelViewerHtml: _hotspotHtml(),
+                relatedCss: _css,
+                relatedJs: _js_.replaceFirst('__CFG__', cfg),
+                onWebViewCreated: (c) => _web = c,
+                javascriptChannels: {
+                  JavascriptChannel(
+                    'HotspotTap',
+                    onMessageReceived: (m) {
+                      for (final hs in widget.hotspots) {
+                        if (hs.id.toString() == m.message) {
+                          widget.onHotspot(hs);
+                          break;
+                        }
+                      }
+                    },
+                  ),
+                  JavascriptChannel(
+                    'ZoomCh',
+                    onMessageReceived: (m) {
+                      final msg = m.message;
+                      if (msg == 'ready') {
+                        _js('window.zaSplit&&window.zaSplit($_f)');
+                      } else if (msg == 'ar') {
+                        if (mounted) setState(() => _canAr = true);
+                      } else {
+                        final z = double.tryParse(msg);
+                        if (z != null && (z - _zoom).abs() > 0.05 && mounted) {
+                          setState(() => _zoom = z);
+                        }
+                      }
+                    },
+                  ),
                 },
               ),
-              JavascriptChannel(
-                'ZoomCh',
-                onMessageReceived: (m) {
-                  final z = double.tryParse(m.message);
-                  if (z != null && (z - _zoom).abs() > 0.05 && mounted) {
-                    setState(() => _zoom = z);
-                  }
-                },
-              ),
-            },
-          ),
-        ),
-        // Turu başlat / durdur (fotoğraf slider'ındaki gibi)
-        if (canTour)
-          Positioned(
-            right: 16,
-            top: top + 46,
-            child: _glass(
-              onTap: _touring ? _stopTour : _startTour,
-              label: _touring
-                  ? context.t('tour_stop')
-                  : context.t('tour_start'),
-              icon: _touring ? Icons.stop_rounded : Icons.play_arrow_rounded,
-              text: _touring ? context.t('tour_stop') : context.t('tour_start'),
-              tint: _touring ? AppColors.ciniBordeaux : null,
             ),
-          ),
-        // Yakınlaşınca oran + sıfırla
-        Positioned(
-          right: 16,
-          top: top + (canTour ? 92 : 46),
-          child: IgnorePointer(
-            ignoring: _zoom <= 1.05,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 180),
-              opacity: _zoom > 1.05 ? 1 : 0,
-              child: _glass(
-                onTap: () {
-                  if (_touring) _stopTour(notify: false);
-                  widget.onHotspot(null);
-                  _js('window.zaReset()');
-                },
-                label: context.t('zoom_reset'),
-                icon: Icons.zoom_out_map_rounded,
-                text: '${_zoom.toStringAsFixed(1)}×',
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: widget.bottomInset + 14,
-          child: IgnorePointer(
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.55),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  context.t('model_hint'),
-                  style: const TextStyle(color: Colors.white, fontSize: 12.5),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _glass({
-    required VoidCallback onTap,
-    required String label,
-    required IconData icon,
-    required String text,
-    Color? tint,
-  }) {
-    return Semantics(
-      button: true,
-      label: label,
-      excludeSemantics: true,
-      child: GestureDetector(
-        onTap: onTap,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: tint != null
-                    ? tint.withValues(alpha: 0.55)
-                    : Colors.black.withValues(alpha: 0.32),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.38),
-                  width: 0.9,
+            if (both) ...[
+              // Cam efektli bölücü çizgi ve tutamaç (fotoğraf slider'ıyla aynı)
+              Positioned(
+                left: dividerX - 1.25,
+                top: 0,
+                bottom: widget.bottomInset,
+                child: const GlassDividerLine(),
+              ),
+              Positioned(
+                left: dividerX - 28,
+                top: (h - widget.bottomInset) * 0.5 - 28,
+                child: GlassKnob(active: _active),
+              ),
+              // Tutamaçtan sürüklenir (model başka yerde döndürülür)
+              Positioned(
+                left: dividerX - 28,
+                top: (h - widget.bottomInset) * 0.5 - 70,
+                width: 56,
+                height: 140,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragStart: (_) {
+                    _userTouched = true;
+                    if (_intro.isAnimating) _intro.stop();
+                    HapticFeedback.mediumImpact();
+                    setState(() => _active = true);
+                  },
+                  onHorizontalDragUpdate: (d) => _setSplit(_f + d.delta.dx / w),
+                  onHorizontalDragEnd: (_) => setState(() => _active = false),
+                  onHorizontalDragCancel: () => setState(() => _active = false),
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 17, color: Colors.white),
-                  const SizedBox(width: 5),
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+              Positioned(
+                left: 16,
+                bottom: widget.bottomInset + 14,
+                child: IgnorePointer(
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: _f > 0.12 ? 1.0 : 0.0,
+                    child: GlassBadge(
+                      context.t('period_label'),
+                      tint: AppColors.primaryTealDark,
                     ),
                   ),
-                ],
+                ),
+              ),
+              Positioned(
+                right: 16,
+                bottom: widget.bottomInset + 14,
+                child: IgnorePointer(
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: _f < 0.88 ? 1.0 : 0.0,
+                    child: GlassBadge(
+                      context.t('today_label'),
+                      tint: AppColors.ciniCobalt,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            // AR (cihaz destekliyorsa), geri okun altında
+            if (_canAr)
+              Positioned(
+                left: 14,
+                top: top + 52,
+                child: GlassPill(
+                  onTap: () => _js('window.zaAR&&window.zaAR()'),
+                  label: 'AR',
+                  icon: Icons.view_in_ar_rounded,
+                ),
+              ),
+
+            // Turu başlat / durdur (fotoğraf slider'ındaki gibi)
+            if (canTour)
+              Positioned(
+                right: 16,
+                top: top + 46,
+                child: GlassPill(
+                  onTap: _touring ? _stopTour : _startTour,
+                  label: _touring
+                      ? context.t('tour_stop')
+                      : context.t('tour_start'),
+                  icon: _touring
+                      ? Icons.stop_rounded
+                      : Icons.play_arrow_rounded,
+                  text: _touring
+                      ? context.t('tour_stop')
+                      : context.t('tour_start'),
+                  tint: _touring ? AppColors.ciniBordeaux : null,
+                ),
+              ),
+
+            // Yakınlaşınca: oran ve sıfırlama
+            Positioned(
+              right: 16,
+              top: top + (canTour ? 92 : 46),
+              child: IgnorePointer(
+                ignoring: _zoom <= 1.05,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 180),
+                  opacity: _zoom > 1.05 ? 1 : 0,
+                  child: GlassPill(
+                    onTap: () {
+                      if (_touring) _stopTour(notify: false);
+                      widget.onHotspot(null);
+                      _js('window.zaReset()');
+                    },
+                    label: context.t('zoom_reset'),
+                    icon: Icons.zoom_out_map_rounded,
+                    text: '${_zoom.toStringAsFixed(1)}×',
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ),
+          ],
+        );
+      },
     );
   }
 
   static const _css = r'''
 html, body { overflow: hidden; background: transparent; }
 .hs {
-  width: 30px; height: 30px; border-radius: 50%;
-  border: 2.5px solid #fff; background: #17a2a4; color: #fff;
-  font: 700 13px sans-serif; padding: 0; cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,.45);
-  animation: hspulse 2.2s ease-out infinite;
+  position: relative; width: 26px; height: 26px; border-radius: 50%; padding: 0;
+  border: 0; background: rgba(255,255,255,.96); cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  animation: hspulse 1.8s ease-out infinite;
+}
+.hs::after {
+  content: ''; position: absolute; left: 7px; top: 7px; width: 12px; height: 12px;
+  border-radius: 50%; background: #17a2a4;
 }
 @keyframes hspulse {
-  0% { box-shadow: 0 0 0 0 rgba(23,162,164,.6), 0 2px 8px rgba(0,0,0,.45); }
-  70% { box-shadow: 0 0 0 12px rgba(23,162,164,0), 0 2px 8px rgba(0,0,0,.45); }
-  100% { box-shadow: 0 0 0 0 rgba(23,162,164,0), 0 2px 8px rgba(0,0,0,.45); }
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,.65), 0 2px 8px rgba(0,0,0,.4); }
+  70% { box-shadow: 0 0 0 11px rgba(255,255,255,0), 0 2px 8px rgba(0,0,0,.4); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0), 0 2px 8px rgba(0,0,0,.4); }
 }
-.lbl {
-  position: absolute; top: 0; z-index: 5; pointer-events: none;
-  padding: 6px 12px; border-radius: 16px; background: rgba(0,0,0,.55);
-  color: #fff; font: 700 12.5px sans-serif;
-}
-.bar { position: absolute; top: 0; bottom: 0; width: 44px; margin-left: -22px;
-  z-index: 6; touch-action: none; cursor: ew-resize; }
-.bar i { position: absolute; left: 21px; top: 0; bottom: 0; width: 2px; background: #fff;
-  box-shadow: 0 0 6px rgba(0,0,0,.5); }
-.bar b { position: absolute; left: 2px; top: 50%; margin-top: -20px; width: 40px; height: 40px;
-  border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.5);
-  color: #17606a; font: 800 15px sans-serif; text-align: center; line-height: 38px; }
 ''';
 
   static const _js_ = r'''
@@ -395,12 +460,11 @@ html, body { overflow: hidden; background: transparent; }
       }
     }
 
-    // --- Tarihî / günümüz ayırıcı
+    // --- Tarihî / günümüz ayırıcı (çizgiyi Flutter çizer, burada yalnızca kırpma)
     let f = 0.5;
     function apply() {
       if (!od) return;
       od.style.clipPath = 'inset(0 ' + ((1 - f) * 100) + '% 0 0)';
-      bar.style.left = (f * 100) + '%';
       const x = f * window.innerWidth;
       for (const b of od.querySelectorAll('.hs')) {
         const r = b.getBoundingClientRect();
@@ -411,27 +475,13 @@ html, body { overflow: hidden; background: transparent; }
         b.style.visibility = (r.left + r.width / 2) >= x ? 'visible' : 'hidden';
       }
     }
-    let bar = null;
-    if (od) {
-      const lo = document.createElement('div');
-      lo.className = 'lbl'; lo.textContent = CFG.oldLabel; lo.style.left = '14px'; lo.style.bottom = CFG.botPad + 'px';
-      const ln = document.createElement('div');
-      ln.className = 'lbl'; ln.textContent = CFG.newLabel; ln.style.right = '14px'; ln.style.bottom = CFG.botPad + 'px';
-      bar = document.createElement('div');
-      bar.className = 'bar';
-      bar.innerHTML = '<i></i><b>↔</b>';
-      document.body.append(lo, ln, bar);
-      let dragging = false;
-      bar.addEventListener('pointerdown', function (e) { dragging = true; bar.setPointerCapture(e.pointerId); });
-      bar.addEventListener('pointerup', function () { dragging = false; });
-      bar.addEventListener('pointercancel', function () { dragging = false; });
-      bar.addEventListener('pointermove', function (e) {
-        if (!dragging) return;
-        f = Math.min(0.94, Math.max(0.06, e.clientX / window.innerWidth));
-        apply();
-      });
-      apply();
-    }
+    window.zaSplit = function (v) { f = v; apply(); };
+    apply();
+    window.zaAR = function () { try { nw.activateAR(); } catch (e) {} };
+    if (nw.canActivateAR) ZoomCh.postMessage('ar');
+    nw.addEventListener('ar-status', function () { if (nw.canActivateAR) ZoomCh.postMessage('ar'); });
+    nw.addEventListener('load', function () { if (nw.canActivateAR) ZoomCh.postMessage('ar'); });
+    ZoomCh.postMessage('ready');
 
     // --- Kamerayı iki modelde birlikte hareket ettir
     let active = null, until = 0, lastZ = 0;
@@ -487,7 +537,7 @@ html, body { overflow: hidden; background: transparent; }
     let lt = 0, lx = 0, ly = 0, dx = 0, dy = 0;
     document.addEventListener('pointerdown', function (e) { dx = e.clientX; dy = e.clientY; }, true);
     document.addEventListener('pointerup', function (e) {
-      if (e.target.closest && (e.target.closest('.bar') || e.target.closest('.hs'))) return;
+      if (e.target.closest && (e.target.closest('.hs'))) return;
       if (Math.hypot(e.clientX - dx, e.clientY - dy) > 10) return;
       const now = performance.now();
       if (now - lt < 320 && Math.hypot(e.clientX - lx, e.clientY - ly) < 30 && home) {
