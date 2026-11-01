@@ -26,6 +26,7 @@ import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
 import '../widgets/detail/photo_collage.dart';
 import '../widgets/detail/activities_section.dart';
+import '../widgets/detail/guide_card.dart';
 import '../widgets/detail/guide_section.dart';
 import '../widgets/detail/swipe_hint_arrow.dart';
 import '../widgets/slider/model_3d_view.dart';
@@ -532,70 +533,54 @@ class _SliderScreenState extends State<SliderScreen>
     );
   }
 
-  /// Bilgi kartındaki tur düğmesi (ekrandaki düğmenin yerine).
+  /// Bilgi kartındaki tur kartı: sesli rehberle aynı yumuşak tasarım, durak çubuklarıyla ilerler.
   Widget _tourCard() {
     return ListenableBuilder(
       listenable: _tour,
       builder: (context, _) {
         if (!_tour.available) return const SizedBox.shrink();
         final on = _tour.touring;
-        final color = on ? AppColors.ciniBordeaux : AppColors.primaryTealDark;
+        final n = _tour.stops;
+        void toggle() {
+          // Turun görünmesi için kart aşağı iner
+          if (!on && _sheetRaised) _animateExtentTo(_sheetMin);
+          _tour.toggle();
+        }
+
         return Padding(
           padding: const EdgeInsets.only(bottom: 18),
           child: Semantics(
             button: true,
             label: on ? context.t('tour_stop') : context.t('tour_start'),
             excludeSemantics: true,
-            child: Material(
-              color: color,
-              borderRadius: BorderRadius.circular(16),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () {
-                  // Turun görünmesi için kart aşağı iner
-                  if (!on && _sheetRaised) _animateExtentTo(_sheetMin);
-                  _tour.toggle();
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        on ? Icons.stop_rounded : Icons.play_arrow_rounded,
-                        color: Colors.white,
-                        size: 26,
-                      ),
-                      const SizedBox(width: 10),
+            child: GestureDetector(
+              onTap: toggle,
+              child: GuideCard(
+                compact: true,
+                playing: on,
+                activeIcon: Icons.stop_rounded,
+                onTap: toggle,
+                title: on ? context.t('tour_stop') : context.t('tour_start'),
+                trailing: on
+                    ? '${_tour.step + 1}/$n'
+                    : '$n ${context.t('tour_stops')}',
+                bottom: Row(
+                  children: [
+                    for (var i = 0; i < n; i++)
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              on
-                                  ? context.t('tour_stop')
-                                  : context.t('tour_start'),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          height: 5,
+                          margin: EdgeInsets.only(right: i == n - 1 ? 0 : 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(3),
+                            color: AppColors.primaryTeal.withValues(
+                              alpha: on && i <= _tour.step ? 0.9 : 0.25,
                             ),
-                            if (!on)
-                              Text(
-                                context.t('tour_card_sub'),
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                  fontSize: 12.5,
-                                ),
-                              ),
-                          ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),

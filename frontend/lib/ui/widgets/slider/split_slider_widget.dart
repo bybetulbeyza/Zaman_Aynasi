@@ -251,12 +251,18 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
 
   double _lastW = 0, _lastH = 0;
   bool _tourSynced = false;
+  int _tourI = 0;
 
   void _syncTour() {
     final c = widget.tourController;
     if (c == null) return;
     final n = _tourStops.length;
-    if (_tourSynced && c.stops == n && c.touring == _touring) return;
+    if (_tourSynced &&
+        c.stops == n &&
+        c.touring == _touring &&
+        c.step == _tourI) {
+      return;
+    }
     _tourSynced = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -264,6 +270,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
         n,
         _touring,
         () => _touring ? _endTour(reset: true) : _startTour(_lastW, _lastH),
+        step: _tourI,
       );
     });
   }
@@ -287,6 +294,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
       _endTour(reset: true);
       return;
     }
+    setState(() => _tourI = i);
     _focusHotspot(stops[i], w, hgt, moveDivider: true);
     widget.onHotspotSelected?.call(stops[i]);
     _tourTimer?.cancel();

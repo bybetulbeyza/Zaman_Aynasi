@@ -142,17 +142,28 @@ class _Model3DViewState extends State<Model3DView>
 
   int _syncedStops = -1;
   bool _syncedTouring = false;
+  int _syncedStep = 0;
 
   void _syncTour() {
     final c = widget.tourController;
     if (c == null) return;
     final n = _valid.length;
-    if (_syncedStops == n && _syncedTouring == _touring) return;
+    if (_syncedStops == n &&
+        _syncedTouring == _touring &&
+        _syncedStep == _tourIdx) {
+      return;
+    }
     _syncedStops = n;
     _syncedTouring = _touring;
+    _syncedStep = _tourIdx;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      c.sync(n, _touring, () => _touring ? _stopTour() : _startTour());
+      c.sync(
+        n,
+        _touring,
+        () => _touring ? _stopTour() : _startTour(),
+        step: _tourIdx,
+      );
     });
   }
 

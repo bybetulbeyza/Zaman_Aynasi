@@ -141,7 +141,7 @@ const Map<String, String> appStringsTr = {
   'today_label': 'Günümüz',
   'view_2d': 'Fotoğraf',
   'view_3d': '3D Model',
-  'tour_card_sub': 'Önemli noktaları sırayla gez',
+  'tour_stops': 'durak',
   'model_hint':
       'Sürükle: döndür · Kıstır: yakınlaş · Çizgiyi kaydır: tarihî ↔ günümüz',
   'model_old': 'Tarihî',
@@ -374,7 +374,7 @@ const Map<String, String> appStringsEn = {
   'today_label': 'Present',
   'view_2d': 'Photo',
   'view_3d': '3D Model',
-  'tour_card_sub': 'Visit the key points one by one',
+  'tour_stops': 'stops',
   'model_hint':
       'Drag to rotate · Pinch to zoom · Slide the line: historic ↔ present',
   'model_old': 'Historic',

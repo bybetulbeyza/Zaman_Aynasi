@@ -12,6 +12,12 @@ class GuideCard extends StatefulWidget {
   final String? trailing;
   final bool dimmed;
 
+  /// Daha küçük düğme ve dolgu (ör. tur kartı).
+  final bool compact;
+
+  /// Çalarken düğmede gösterilecek simge (varsayılan: duraklat).
+  final IconData activeIcon;
+
   const GuideCard({
     super.key,
     required this.playing,
@@ -20,6 +26,8 @@ class GuideCard extends StatefulWidget {
     required this.bottom,
     this.trailing,
     this.dimmed = false,
+    this.compact = false,
+    this.activeIcon = Icons.pause_rounded,
   });
 
   @override
@@ -61,7 +69,9 @@ class _GuideCardState extends State<GuideCard>
     return Opacity(
       opacity: widget.dimmed ? 0.6 : 1,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 12, 18, 12),
+        padding: widget.compact
+            ? const EdgeInsets.fromLTRB(10, 9, 16, 9)
+            : const EdgeInsets.fromLTRB(12, 12, 18, 12),
         decoration: ShapeDecoration(
           color: AppColors.primaryTealLight,
           shape: ContinuousRectangleBorder(
@@ -82,8 +92,8 @@ class _GuideCardState extends State<GuideCard>
             GestureDetector(
               onTap: widget.onTap,
               child: SizedBox(
-                width: 62,
-                height: 62,
+                width: widget.compact ? 46 : 62,
+                height: widget.compact ? 46 : 62,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -92,8 +102,8 @@ class _GuideCardState extends State<GuideCard>
                       builder: (_, __) => Transform.scale(
                         scale: 1 + 0.28 * _pulse.value,
                         child: Container(
-                          width: 54,
-                          height: 54,
+                          width: widget.compact ? 40 : 54,
+                          height: widget.compact ? 40 : 54,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
@@ -109,8 +119,8 @@ class _GuideCardState extends State<GuideCard>
                       ),
                     ),
                     Container(
-                      width: 52,
-                      height: 52,
+                      width: widget.compact ? 38 : 52,
+                      height: widget.compact ? 38 : 52,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.primaryTeal,
@@ -126,10 +136,10 @@ class _GuideCardState extends State<GuideCard>
                       ),
                       child: Icon(
                         widget.playing
-                            ? Icons.pause_rounded
+                            ? widget.activeIcon
                             : Icons.play_arrow_rounded,
                         color: Colors.white,
-                        size: 30,
+                        size: widget.compact ? 24 : 30,
                       ),
                     ),
                   ],
@@ -143,13 +153,13 @@ class _GuideCardState extends State<GuideCard>
                 children: [
                   Text(
                     widget.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.primaryTealDark,
                       fontWeight: FontWeight.w800,
-                      fontSize: 16.5,
+                      fontSize: widget.compact ? 15 : 16.5,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: widget.compact ? 5 : 6),
                   widget.bottom,
                 ],
               ),

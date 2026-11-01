@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 class TourController extends ChangeNotifier {
   int stops = 0;
   bool touring = false;
+  int step = 0; // turda şu anki durak (0'dan)
   VoidCallback? _toggle;
 
   bool get available => stops >= 2 && _toggle != null;
@@ -13,12 +14,16 @@ class TourController extends ChangeNotifier {
   void toggle() => _toggle?.call();
 
   /// Slider'lar build sırasında çağırır; değişim yoksa bildirim göndermez.
-  void sync(int stops, bool touring, VoidCallback? toggle) {
-    if (this.stops == stops && this.touring == touring && _toggle == toggle) {
+  void sync(int stops, bool touring, VoidCallback? toggle, {int step = 0}) {
+    if (this.stops == stops &&
+        this.touring == touring &&
+        this.step == step &&
+        _toggle == toggle) {
       return;
     }
     this.stops = stops;
     this.touring = touring;
+    this.step = step;
     _toggle = toggle;
     notifyListeners();
   }
