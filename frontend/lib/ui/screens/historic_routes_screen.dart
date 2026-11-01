@@ -48,6 +48,18 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   bool _isLoading = true;
   final PageController _pc = PageController(viewportFraction: 0.84);
   int _page = 0;
+  final GlobalKey _headerKey = GlobalKey();
+  double _headerH = 0;
+
+  /// Başlık bölümünün yüksekliğini ölçer; karusel kalan alanı dolduracak şekilde boylanır.
+  void _measureHeader() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final h = _headerKey.currentContext?.size?.height;
+      if (mounted && h != null && (h - _headerH).abs() > 1) {
+        setState(() => _headerH = h);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -123,69 +135,99 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
           child: Stack(
             children: [
               Positioned.fill(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(0, 16, 0, 24),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        context.t('hr_title'),
-                        style: AppTheme.displayLarge,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children: _cities
-                            .map(
-                              (c) => Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: FilterChipPill(
-                                  label: c == 'Tümü'
-                                      ? context.t('all_filter')
-                                      : c,
-                                  selected: _city == c,
-                                  onTap: () => setState(() => _city = c),
+                child: LayoutBuilder(
+                  builder: (context, box) {
+                    _measureHeader();
+                    final carouselH = (box.maxHeight - _headerH - 56).clamp(
+                      380.0,
+                      680.0,
+                    );
+                    return ListView(
+                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 24),
+                      children: [
+                        Column(
+                          key: _headerKey,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Text(
+                                context.t('hr_title'),
+                                style: AppTheme.displayLarge,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Row(
+                                children: _cities
+                                    .map(
+                                      (c) => Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 10,
+                                        ),
+                                        child: FilterChipPill(
+                                          label: c == 'Tümü'
+                                              ? context.t('all_filter')
+                                              : c,
+                                          selected: _city == c,
+                                          onTap: () =>
+                                              setState(() => _city = c),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: _buildCreateRow(),
+                            ),
+                            const SizedBox(height: 20),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: ActiveRouteCard(
+                                onShowOnMap: (stops) =>
+                                    widget.onRouteStarted?.call(stops),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_isLoading)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 40),
+                            child: LogoLoader(),
+                          )
+                        else if (visible.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 40),
+                            child: Center(
+                              child: Text(
+                                context
+                                    .t('hr_soon')
+                                    .replaceAll('{city}', _city),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: AppColors.textMuted,
                                 ),
                               ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _buildCreateRow(),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: ActiveRouteCard(
-                        onShowOnMap: (stops) =>
-                            widget.onRouteStarted?.call(stops),
-                      ),
-                    ),
-                    if (_isLoading)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 40),
-                        child: LogoLoader(),
-                      )
-                    else if (visible.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 40),
-                        child: Center(
-                          child: Text(
-                            context.t('hr_soon').replaceAll('{city}', _city),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: AppColors.textMuted),
-                          ),
-                        ),
-                      )
-                    else
-                      _buildCarousel(visible),
-                  ],
+                            ),
+                          )
+                        else
+                          _buildCarousel(visible, carouselH),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
@@ -245,11 +287,11 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   }
 
   /// Büyük kartlı yatay karusel: ortadaki kart büyük, yanlardakiler küçük ve silik görünür.
-  Widget _buildCarousel(List<HeritageRoute> routes) {
+  Widget _buildCarousel(List<HeritageRoute> routes, double height) {
     return Column(
       children: [
         SizedBox(
-          height: 450,
+          height: height,
           child: PageView.builder(
             controller: _pc,
             itemCount: routes.length,
