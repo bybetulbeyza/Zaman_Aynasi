@@ -943,22 +943,43 @@ class _SliderScreenState extends State<SliderScreen>
     return _children.where((c) => c.id == hotspot.targetPlaceId).firstOrNull;
   }
 
-  Widget _buildHotspotPopup(Hotspot hotspot, bool en) {
-    final videoUrl = hotspot.videoFor(en);
-    final target = _navTarget(hotspot);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
+  /// Hotspot kartının kabuğu: uygulamanın krem zemini ve çini deseni, diğer kartlarla aynı köşe dili.
+  Widget _popupShell({required Widget child}) {
+    const border = BorderRadius.only(
+      topLeft: Radius.circular(10),
+      bottomRight: Radius.circular(10),
+      topRight: Radius.circular(34),
+      bottomLeft: Radius.circular(34),
+    );
+    final shape = ContinuousRectangleBorder(
+      borderRadius: border,
+      side: const BorderSide(color: AppColors.chipBorder, width: 1.2),
+    );
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        shape: shape,
+        shadows: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.14),
-            blurRadius: 18,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
+      child: ClipPath(
+        clipper: ShapeBorderClipper(shape: shape),
+        child: PatternBackground(
+          lineOpacity: 0.07,
+          child: Padding(padding: const EdgeInsets.all(18), child: child),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHotspotPopup(Hotspot hotspot, bool en) {
+    final videoUrl = hotspot.videoFor(en);
+    final target = _navTarget(hotspot);
+    return _popupShell(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
