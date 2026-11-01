@@ -2,6 +2,28 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+/// Turu bilgi kartından başlatıp durdurmak için: slider (fotoğraf ya da 3B) kendini buraya bağlar.
+class TourController extends ChangeNotifier {
+  int stops = 0;
+  bool touring = false;
+  VoidCallback? _toggle;
+
+  bool get available => stops >= 2 && _toggle != null;
+
+  void toggle() => _toggle?.call();
+
+  /// Slider'lar build sırasında çağırır; değişim yoksa bildirim göndermez.
+  void sync(int stops, bool touring, VoidCallback? toggle) {
+    if (this.stops == stops && this.touring == touring && _toggle == toggle) {
+      return;
+    }
+    this.stops = stops;
+    this.touring = touring;
+    _toggle = toggle;
+    notifyListeners();
+  }
+}
+
 /// Fotoğraf slider'ındaki cam bölücü çizgi, tutamaç, rozet ve düğmelerin aynısı (3B görünümde de kullanılır).
 
 class GlassDividerLine extends StatelessWidget {

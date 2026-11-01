@@ -10,6 +10,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../data/models/heritage_place.dart';
 import '../common/app_icon.dart';
+import 'slider_parts.dart';
 import '../common/app_network_image.dart';
 import '../../../core/constants/category_style.dart';
 
@@ -34,6 +35,9 @@ class SplitSliderWidget extends StatefulWidget {
   /// Üstteki sağ düğme sütununa (ör. 2B|3B geçişi) yer açmak için kaydırma.
   final double topOffset;
 
+  /// Turu dışarıdaki (bilgi kartındaki) düğmeden başlatmak için.
+  final TourController? tourController;
+
   const SplitSliderWidget({
     super.key,
     required this.beforeImageUrl,
@@ -46,6 +50,7 @@ class SplitSliderWidget extends StatefulWidget {
     this.navCategories = const {},
     this.bottomInset = 0,
     this.topOffset = 0,
+    this.tourController,
   });
 
   @override
@@ -192,6 +197,8 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
 
   @override
   void dispose() {
+    final tc = widget.tourController;
+    if (tc != null) Future.microtask(() => tc.sync(0, false, null));
     _intro.dispose();
     _zoomAnim.dispose();
     _tourTimer?.cancel();
@@ -240,6 +247,25 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     // Noktanın bulunduğu dönem görünsün: eski fotoğraf solda, güncel sağda
     final slider = moveDivider ? (_isNewSide(h) ? 0.04 : 0.96) : null;
     _animateZoomTo(zoom, pan, slider: slider);
+  }
+
+  double _lastW = 0, _lastH = 0;
+  bool _tourSynced = false;
+
+  void _syncTour() {
+    final c = widget.tourController;
+    if (c == null) return;
+    final n = _tourStops.length;
+    if (_tourSynced && c.stops == n && c.touring == _touring) return;
+    _tourSynced = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      c.sync(
+        n,
+        _touring,
+        () => _touring ? _endTour(reset: true) : _startTour(_lastW, _lastH),
+      );
+    });
   }
 
   List<Hotspot> get _tourStops =>
@@ -464,6 +490,9 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
           final totalHeight = constraints.maxHeight.isFinite
               ? constraints.maxHeight
               : 340.0;
+          _lastW = totalWidth;
+          _lastH = totalHeight;
+          _syncTour();
           final dividerX = _sliderValue * totalWidth;
           final sceneM = _matrix(_zoom, _pan);
 
@@ -593,83 +622,10 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 ),
               ),
 
-              // 5a. Turu başlat / durdur (iki ya da daha fazla hotspot varsa)
-              if (_tourStops.length >= 2)
-                Positioned(
-                  right: 16,
-                  top:
-                      MediaQuery.of(context).padding.top +
-                      12 +
-                      widget.topOffset,
-                  child: Semantics(
-                    button: true,
-                    label: _touring
-                        ? context.t('tour_stop')
-                        : context.t('tour_start'),
-                    excludeSemantics: true,
-                    child: GestureDetector(
-                      onTap: () => _touring
-                          ? _endTour(reset: true)
-                          : _startTour(totalWidth, totalHeight),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _touring
-                                  ? AppColors.ciniBordeaux.withValues(
-                                      alpha: 0.55,
-                                    )
-                                  : Colors.black.withValues(alpha: 0.32),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.38),
-                                width: 0.9,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  _touring
-                                      ? Icons.stop_rounded
-                                      : Icons.play_arrow_rounded,
-                                  size: 18,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  _touring
-                                      ? context.t('tour_stop')
-                                      : context.t('tour_start'),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
               // 5b. Yakınlaştırınca: oran ve sıfırlama düğmesi
               Positioned(
                 right: 16,
-                top:
-                    MediaQuery.of(context).padding.top +
-                    12 +
-                    widget.topOffset +
-                    (_tourStops.length >= 2 ? 46 : 0),
+                top: MediaQuery.of(context).padding.top + 12 + widget.topOffset,
                 child: IgnorePointer(
                   ignoring: _zoom <= 1.05,
                   child: AnimatedOpacity(

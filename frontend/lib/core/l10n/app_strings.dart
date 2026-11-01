@@ -139,8 +139,9 @@ const Map<String, String> appStringsTr = {
   // Detay
   'period_label': 'Tarihî canlandırma',
   'today_label': 'Günümüz',
-  'view_2d': '2B',
-  'view_3d': '3B',
+  'view_2d': 'Fotoğraf',
+  'view_3d': '3B Model',
+  'tour_card_sub': 'Önemli noktaları sırayla gez',
   'model_hint':
       'Sürükle: döndür · Kıstır: yakınlaş · Çizgiyi kaydır: tarihî ↔ günümüz',
   'model_old': 'Tarihî',
@@ -371,8 +372,9 @@ const Map<String, String> appStringsEn = {
   // Detail
   'period_label': 'Historic reconstruction',
   'today_label': 'Present',
-  'view_2d': '2D',
-  'view_3d': '3D',
+  'view_2d': 'Photo',
+  'view_3d': '3D Model',
+  'tour_card_sub': 'Visit the key points one by one',
   'model_hint':
       'Drag to rotate · Pinch to zoom · Slide the line: historic ↔ present',
   'model_old': 'Historic',

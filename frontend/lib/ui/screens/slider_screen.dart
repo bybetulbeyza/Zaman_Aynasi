@@ -29,6 +29,7 @@ import '../widgets/detail/activities_section.dart';
 import '../widgets/detail/guide_section.dart';
 import '../widgets/detail/swipe_hint_arrow.dart';
 import '../widgets/slider/model_3d_view.dart';
+import '../widgets/slider/slider_parts.dart';
 import 'reels_screen.dart';
 import '../widgets/detail/video_dialog.dart';
 import '../widgets/slider/split_slider_widget.dart';
@@ -123,6 +124,7 @@ class _SliderScreenState extends State<SliderScreen>
   Hotspot? _selectedHotspot;
   bool _showHint = false;
   bool _view3d = false;
+  final TourController _tour = TourController();
   Timer? _hintTimer;
 
   HeritagePlace get _place => widget.place;
@@ -174,6 +176,7 @@ class _SliderScreenState extends State<SliderScreen>
   void dispose() {
     _hintTimer?.cancel();
     _extentAnim.dispose();
+    _tour.dispose();
     super.dispose();
   }
 
@@ -270,12 +273,14 @@ class _SliderScreenState extends State<SliderScreen>
                     name: _place.nameFor(en),
                     hotspots: _place.modelHotspots,
                     selected: _selectedHotspot,
+                    tourController: _tour,
                     onHotspot: (h) => setState(() => _selectedHotspot = h),
                     bottomInset: _underlap,
                   )
                 else
                   SplitSliderWidget(
                     topOffset: _place.has3dModel ? 46 : 0,
+                    tourController: _tour,
                     beforeImageUrl: _place.imageBeforeUrl,
                     afterImageUrl: _place.imageAfterUrl,
                     afterLabel: context.t('period_label'),
@@ -460,30 +465,43 @@ class _SliderScreenState extends State<SliderScreen>
 
   /// Sol üstte geri düğmesi: fotoğraf üstündeyken buzlu cam, kart tam ekranken beyaz yuvarlak düğme.
   Widget _viewToggle() {
-    Widget seg(String label, bool on, VoidCallback tap) => Semantics(
-      button: true,
-      selected: on,
-      label: label,
-      child: GestureDetector(
-        onTap: tap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(
-            color: on ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
-              color: on ? const Color(0xFF1B3A4B) : Colors.white,
+    Widget seg(IconData icon, String label, bool on, VoidCallback tap) =>
+        Semantics(
+          button: true,
+          selected: on,
+          label: label,
+          excludeSemantics: true,
+          child: GestureDetector(
+            onTap: tap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: on ? Colors.white : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 16,
+                    color: on ? const Color(0xFF1B3A4B) : Colors.white,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12.5,
+                      color: on ? const Color(0xFF1B3A4B) : Colors.white,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        );
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -493,20 +511,99 @@ class _SliderScreenState extends State<SliderScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          seg(context.t('view_2d'), !_view3d, () {
-            setState(() {
+          seg(
+            Icons.photo_library_outlined,
+            context.t('view_2d'),
+            !_view3d,
+            () => setState(() {
               _view3d = false;
               _selectedHotspot = null;
-            });
-          }),
-          seg(context.t('view_3d'), _view3d, () {
-            setState(() {
+            }),
+          ),
+          seg(
+            Icons.view_in_ar_rounded,
+            context.t('view_3d'),
+            _view3d,
+            () => setState(() {
               _view3d = true;
               _selectedHotspot = null;
-            });
-          }),
+            }),
+          ),
         ],
       ),
+    );
+  }
+
+  /// Bilgi kartındaki tur düğmesi (ekrandaki düğmenin yerine).
+  Widget _tourCard() {
+    return ListenableBuilder(
+      listenable: _tour,
+      builder: (context, _) {
+        if (!_tour.available) return const SizedBox.shrink();
+        final on = _tour.touring;
+        final color = on ? AppColors.ciniBordeaux : AppColors.primaryTealDark;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 18),
+          child: Semantics(
+            button: true,
+            label: on ? context.t('tour_stop') : context.t('tour_start'),
+            excludeSemantics: true,
+            child: Material(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  // Turun görünmesi için kart aşağı iner
+                  if (!on && _sheetRaised) _animateExtentTo(_sheetMin);
+                  _tour.toggle();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        on ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              on
+                                  ? context.t('tour_stop')
+                                  : context.t('tour_start'),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            if (!on)
+                              Text(
+                                context.t('tour_card_sub'),
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                  fontSize: 12.5,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -560,6 +657,9 @@ class _SliderScreenState extends State<SliderScreen>
           children: [for (final m in meta) _metaItem(m.key, m.value)],
         ),
       const SizedBox(height: 18),
+
+      // Tarihî tur (en az iki hotspot varsa)
+      _tourCard(),
 
       // Kartın yukarı çekilebildiğini gösteren zıplayan ok (kart açılınca solar)
       AnimatedOpacity(

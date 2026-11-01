@@ -21,6 +21,7 @@ class Model3DView extends StatefulWidget {
   final Hotspot? selected;
   final ValueChanged<Hotspot?> onHotspot;
   final double bottomInset;
+  final TourController? tourController;
 
   const Model3DView({
     super.key,
@@ -31,6 +32,7 @@ class Model3DView extends StatefulWidget {
     this.selected,
     this.hotspots = const [],
     this.bottomInset = 0,
+    this.tourController,
   });
 
   static final _num = RegExp(r'^[-+0-9.eE\s]+$');
@@ -111,9 +113,47 @@ class _Model3DViewState extends State<Model3DView>
     });
   }
 
+  bool _splitInFlight = false, _splitDirty = false;
+
+  /// Her karede en fazla bir çağrı gider; web tarafı yetişemezse son değer beklenir
+  /// (kuyruk birikmez, renk geçişi çizgiden geride kalmaz).
+  void _pushSplit() {
+    if (_web == null) return;
+    if (_splitInFlight) {
+      _splitDirty = true;
+      return;
+    }
+    _splitInFlight = true;
+    Future<dynamic>.value(
+      _web.runJavaScript('window.zaSplit&&window.zaSplit($_f)'),
+    ).catchError((_) {}).whenComplete(() {
+      _splitInFlight = false;
+      if (_splitDirty) {
+        _splitDirty = false;
+        _pushSplit();
+      }
+    });
+  }
+
   void _setSplit(double v) {
     setState(() => _f = v.clamp(0.0, 1.0));
-    _js('window.zaSplit&&window.zaSplit($_f)');
+    _pushSplit();
+  }
+
+  int _syncedStops = -1;
+  bool _syncedTouring = false;
+
+  void _syncTour() {
+    final c = widget.tourController;
+    if (c == null) return;
+    final n = _valid.length;
+    if (_syncedStops == n && _syncedTouring == _touring) return;
+    _syncedStops = n;
+    _syncedTouring = _touring;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      c.sync(n, _touring, () => _touring ? _stopTour() : _startTour());
+    });
   }
 
   List<Hotspot> get _valid => widget.hotspots
@@ -162,6 +202,8 @@ class _Model3DViewState extends State<Model3DView>
 
   @override
   void dispose() {
+    final tc = widget.tourController;
+    if (tc != null) Future.microtask(() => tc.sync(0, false, null));
     _tourTimer?.cancel();
     _intro.dispose();
     super.dispose();
@@ -205,7 +247,7 @@ class _Model3DViewState extends State<Model3DView>
       ],
     });
     final top = MediaQuery.of(context).padding.top + 12;
-    final canTour = _valid.length >= 2;
+    _syncTour();
     return LayoutBuilder(
       builder: (context, box) {
         final w = box.maxWidth;
@@ -250,7 +292,7 @@ class _Model3DViewState extends State<Model3DView>
                     onMessageReceived: (m) {
                       final msg = m.message;
                       if (msg == 'ready') {
-                        _js('window.zaSplit&&window.zaSplit($_f)');
+                        _pushSplit();
                       } else if (msg == 'ar') {
                         if (mounted) setState(() => _canAr = true);
                       } else {
@@ -339,30 +381,10 @@ class _Model3DViewState extends State<Model3DView>
                 ),
               ),
 
-            // Turu başlat / durdur (fotoğraf slider'ındaki gibi)
-            if (canTour)
-              Positioned(
-                right: 16,
-                top: top + 46,
-                child: GlassPill(
-                  onTap: _touring ? _stopTour : _startTour,
-                  label: _touring
-                      ? context.t('tour_stop')
-                      : context.t('tour_start'),
-                  icon: _touring
-                      ? Icons.stop_rounded
-                      : Icons.play_arrow_rounded,
-                  text: _touring
-                      ? context.t('tour_stop')
-                      : context.t('tour_start'),
-                  tint: _touring ? AppColors.ciniBordeaux : null,
-                ),
-              ),
-
             // Yakınlaşınca: oran ve sıfırlama
             Positioned(
               right: 16,
-              top: top + (canTour ? 92 : 46),
+              top: top + 46,
               child: IgnorePointer(
                 ignoring: _zoom <= 1.05,
                 child: AnimatedOpacity(
@@ -418,7 +440,7 @@ html, body { overflow: hidden; background: transparent; }
     nw.style.cssText = fill;
     document.body.style.position = 'relative';
     nw.style.background = CFG.single === 'old' ? OLD_BG : NEW_BG;
-    let od = null;
+    let od = null, oldWrap = null;
     if (CFG.oldSrc) {
       od = document.createElement('model-viewer');
       for (const a of nw.attributes) {
@@ -428,8 +450,13 @@ html, body { overflow: hidden; background: transparent; }
       }
       od.setAttribute('src', CFG.oldSrc);
       od.innerHTML = nw.innerHTML;
-      od.style.cssText = fill + 'background:' + OLD_BG + ';';
-      nw.after(od);
+      od.style.cssText = 'position:absolute;left:0;top:0;height:100%;background:' + OLD_BG + ';';
+      oldWrap = document.createElement('div');
+      oldWrap.style.cssText = 'position:absolute;left:0;top:0;height:100%;width:50%;overflow:hidden;will-change:width;';
+      oldWrap.appendChild(od);
+      nw.after(oldWrap);
+      const fit = function () { od.style.width = window.innerWidth + 'px'; };
+      fit(); window.addEventListener('resize', fit);
     }
     const els = od ? [nw, od] : [nw];
     els.forEach(function (e) { e.setAttribute('interpolation-decay', '90'); });
@@ -462,9 +489,14 @@ html, body { overflow: hidden; background: transparent; }
 
     // --- Tarihî / günümüz ayırıcı (çizgiyi Flutter çizer, burada yalnızca kırpma)
     let f = 0.5;
+    let visT = 0;
     function apply() {
       if (!od) return;
-      od.style.clipPath = 'inset(0 ' + ((1 - f) * 100) + '% 0 0)';
+      oldWrap.style.width = (f * 100) + '%';
+      if (visT) return;
+      visT = setTimeout(function () { visT = 0; vis(); }, 90);
+    }
+    function vis() {
       const x = f * window.innerWidth;
       for (const b of od.querySelectorAll('.hs')) {
         const r = b.getBoundingClientRect();
@@ -513,11 +545,12 @@ html, body { overflow: hidden; background: transparent; }
 
     // --- Uçuş: ikisine de aynı hedef verilir
     function fly(th, ph, r, tx, ty, tz) {
-      active = null;
-      els.forEach(function (e) {
-        e.cameraOrbit = th + 'rad ' + ph + 'rad ' + r + 'm';
-        e.cameraTarget = tx + 'm ' + ty + 'm ' + tz + 'm';
-      });
+      // Tek model sürer (hedefi o alır), öteki her karede onun anlık kamerasını kopyalar;
+      // böylece iki model uçuş boyunca ve sonunda birebir aynı kalır.
+      const lead = od || nw;
+      lead.cameraOrbit = th + 'rad ' + ph + 'rad ' + r + 'm';
+      lead.cameraTarget = tx + 'm ' + ty + 'm ' + tz + 'm';
+      active = lead; until = performance.now() + 2200;
       setTimeout(apply, 120); setTimeout(apply, 600); setTimeout(apply, 1400);
     }
     window.zaReset = function () {
