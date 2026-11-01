@@ -163,7 +163,6 @@ class _SliderScreenState extends State<SliderScreen>
     });
     WidgetsBinding.instance.addPostFrameCallback((_) => _fitPhotoArea());
   }
-  }
 
   @override
   void dispose() {
