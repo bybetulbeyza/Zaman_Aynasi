@@ -140,7 +140,7 @@ const Map<String, String> appStringsTr = {
   'period_label': 'Tarihî canlandırma',
   'today_label': 'Günümüz',
   'view_2d': 'Fotoğraf',
-  'view_3d': '3B Model',
+  'view_3d': '3D Model',
   'tour_card_sub': 'Önemli noktaları sırayla gez',
   'model_hint':
       'Sürükle: döndür · Kıstır: yakınlaş · Çizgiyi kaydır: tarihî ↔ günümüz',

@@ -342,9 +342,7 @@ class _SliderScreenState extends State<SliderScreen>
                 ),
                 if (_place.has3dModel)
                   Positioned(
-                    top:
-                        MediaQuery.of(context).padding.top +
-                        (_view3d ? 12 : 64),
+                    top: MediaQuery.of(context).padding.top + 12,
                     right: 14,
                     child: _viewToggle(),
                   ),
