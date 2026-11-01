@@ -9,7 +9,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../data/models/heritage_place.dart';
+import '../common/app_icon.dart';
 import '../common/app_network_image.dart';
+import '../../../core/constants/category_style.dart';
 
 class SplitSliderWidget extends StatefulWidget {
   final String beforeImageUrl;
@@ -18,6 +20,10 @@ class SplitSliderWidget extends StatefulWidget {
   final String afterLabel;
   final List<Hotspot> hotspots;
   final ValueChanged<Hotspot?>? onHotspotSelected;
+
+  /// Yönlendirme hotspot'unun gideceği yapının kategorisi (id -> kategori). Nokta bu renkte ve
+  /// bu kategorinin simgesiyle çizilir.
+  final Map<String, PlaceCategory> navCategories;
 
   /// Bu kadar piksel alt kısım bilgi sayfasının altında kalır; butonlar bunun üstüne yerleşir.
   final double bottomInset;
@@ -30,6 +36,7 @@ class SplitSliderWidget extends StatefulWidget {
     this.afterLabel = 'Dönem',
     this.hotspots = const [],
     this.onHotspotSelected,
+    this.navCategories = const {},
     this.bottomInset = 0,
   });
 
@@ -725,7 +732,9 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                     left: pos.dx - 16,
                     top: pos.dy - 16,
                     child: _buildAnimatedHotspot(
-                      nav: hotspot.hasSubPlaceNavigation,
+                      navCategory: hotspot.hasSubPlaceNavigation
+                          ? widget.navCategories[hotspot.targetPlaceId]
+                          : null,
                       label: context
                           .t('a11y_hotspot')
                           .replaceAll('{name}', hotspot.titleFor(context.isEn)),
@@ -760,8 +769,9 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   Widget _buildAnimatedHotspot({
     required VoidCallback onTap,
     required String label,
-    bool nav = false,
+    PlaceCategory? navCategory,
   }) {
+    final navStyle = navCategory == null ? null : CategoryStyle.of(navCategory);
     return Semantics(
       button: true,
       label: label,
@@ -785,41 +795,62 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                     height: 34,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(opacity.clamp(0.08, 0.4)),
+                      color: (navStyle?.color ?? Colors.white).withValues(
+                        alpha: opacity.clamp(0.08, 0.4),
+                      ),
                     ),
                   ),
                 ),
-                Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  // Yönlendirme hotspot'ları (alt yapıya geçer) içi oklu bordo nokta olur
-                  child: nav
-                      ? const Icon(
-                          Icons.arrow_outward_rounded,
-                          size: 15,
-                          color: AppColors.ciniBordeaux,
-                        )
-                      : Container(
-                          width: 10,
-                          height: 10,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.primaryTeal,
-                          ),
+                if (navStyle != null)
+                  // Yönlendirme: gidilecek yapının kategori renginde, kategori simgeli daire
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: navStyle.color,
+                      border: Border.all(color: Colors.white, width: 2.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: AppIcon(
+                      navStyle.icon.replaceFirst('pin_', 'cat_'),
+                      size: 17,
+                      color: Colors.white,
+                    ),
+                  )
+                else
+                  // Bilgi noktası: beyaz daire, ortada teal nokta
+                  Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primaryTeal,
+                      ),
+                    ),
+                  ),
               ],
             );
           },
