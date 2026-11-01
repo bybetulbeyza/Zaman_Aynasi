@@ -198,7 +198,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
   @override
   void dispose() {
     final tc = widget.tourController;
-    if (tc != null) Future.microtask(() => tc.sync(0, false, null));
+    if (tc != null) tc.release(this);
     _intro.dispose();
     _zoomAnim.dispose();
     _tourTimer?.cancel();
@@ -271,6 +271,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
         _touring,
         () => _touring ? _endTour(reset: true) : _startTour(_lastW, _lastH),
         step: _tourI,
+        owner: this,
       );
     });
   }

@@ -8,13 +8,31 @@ class TourController extends ChangeNotifier {
   bool touring = false;
   int step = 0; // turda şu anki durak (0'dan)
   VoidCallback? _toggle;
+  Object? _owner;
 
   bool get available => stops >= 2 && _toggle != null;
 
   void toggle() => _toggle?.call();
 
   /// Slider'lar build sırasında çağırır; değişim yoksa bildirim göndermez.
-  void sync(int stops, bool touring, VoidCallback? toggle, {int step = 0}) {
+  /// [owner] turu şu an yöneten slider'dır (fotoğraf ya da 3D); kapanan slider yalnızca
+  /// kendi bağladığını temizler, böylece geçişte yeni slider'ın düğmesi silinmez.
+  void release(Object owner) {
+    if (_owner != owner) return;
+    _owner = null;
+    Future.microtask(() {
+      if (_owner == null) sync(0, false, null);
+    });
+  }
+
+  void sync(
+    int stops,
+    bool touring,
+    VoidCallback? toggle, {
+    int step = 0,
+    Object? owner,
+  }) {
+    if (owner != null) _owner = owner;
     if (this.stops == stops &&
         this.touring == touring &&
         this.step == step &&

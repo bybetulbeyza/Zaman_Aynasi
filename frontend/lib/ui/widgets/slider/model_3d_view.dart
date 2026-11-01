@@ -90,6 +90,7 @@ class _Model3DViewState extends State<Model3DView> {
         _touring,
         () => _touring ? _stopTour() : _startTour(),
         step: _tourIdx,
+        owner: this,
       );
     });
   }
@@ -141,7 +142,7 @@ class _Model3DViewState extends State<Model3DView> {
   @override
   void dispose() {
     final tc = widget.tourController;
-    if (tc != null) Future.microtask(() => tc.sync(0, false, null));
+    if (tc != null) tc.release(this);
     _tourTimer?.cancel();
     super.dispose();
   }
