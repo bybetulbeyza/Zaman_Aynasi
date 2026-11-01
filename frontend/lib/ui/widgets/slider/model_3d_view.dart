@@ -57,88 +57,15 @@ class Model3DView extends StatefulWidget {
   }
 }
 
-class _Model3DViewState extends State<Model3DView>
-    with SingleTickerProviderStateMixin {
+class _Model3DViewState extends State<Model3DView> {
   dynamic _web; // WebViewController (webview_flutter üzerinden gelir)
   double _zoom = 1;
   Timer? _tourTimer;
   bool _touring = false;
   int _tourIdx = 0;
-  double _f = 0.5; // bölücü konumu (0..1), fotoğraf slider'ındaki gibi
-  bool _active = false;
-  bool _userTouched = false;
+  double _f =
+      0.5; // bölücü konumu; çizgi ve geçiş web sayfasında çizilir, burada yalnızca rozetler için
   bool _canAr = false;
-
-  late final AnimationController _intro = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 2200),
-  );
-
-  static final TweenSequence<double> _introCurve = TweenSequence<double>([
-    TweenSequenceItem(
-      tween: Tween(
-        begin: 0.5,
-        end: 0.18,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-      weight: 35,
-    ),
-    TweenSequenceItem(
-      tween: Tween(
-        begin: 0.18,
-        end: 0.82,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-      weight: 45,
-    ),
-    TweenSequenceItem(
-      tween: Tween(
-        begin: 0.82,
-        end: 0.5,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-      weight: 20,
-    ),
-  ]);
-
-  @override
-  void initState() {
-    super.initState();
-    _intro.addListener(() {
-      if (_userTouched || !mounted) return;
-      _setSplit(_introCurve.evaluate(_intro));
-    });
-    // Fotoğraf slider'ındaki gibi: açılışta çizgi kendiliğinden iki yana gider
-    Future.delayed(const Duration(milliseconds: 1600), () {
-      if (mounted && !_userTouched && widget.oldUrl.isNotEmpty) {
-        _intro.forward();
-      }
-    });
-  }
-
-  bool _splitInFlight = false, _splitDirty = false;
-
-  /// Her karede en fazla bir çağrı gider; web tarafı yetişemezse son değer beklenir
-  /// (kuyruk birikmez, renk geçişi çizgiden geride kalmaz).
-  void _pushSplit() {
-    if (_web == null) return;
-    if (_splitInFlight) {
-      _splitDirty = true;
-      return;
-    }
-    _splitInFlight = true;
-    Future<dynamic>.value(
-      _web.runJavaScript('window.zaSplit&&window.zaSplit($_f)'),
-    ).catchError((_) {}).whenComplete(() {
-      _splitInFlight = false;
-      if (_splitDirty) {
-        _splitDirty = false;
-        _pushSplit();
-      }
-    });
-  }
-
-  void _setSplit(double v) {
-    setState(() => _f = v.clamp(0.0, 1.0));
-    _pushSplit();
-  }
 
   int _syncedStops = -1;
   bool _syncedTouring = false;
@@ -216,7 +143,6 @@ class _Model3DViewState extends State<Model3DView>
     final tc = widget.tourController;
     if (tc != null) Future.microtask(() => tc.sync(0, false, null));
     _tourTimer?.cancel();
-    _intro.dispose();
     super.dispose();
   }
 
@@ -261,9 +187,6 @@ class _Model3DViewState extends State<Model3DView>
     _syncTour();
     return LayoutBuilder(
       builder: (context, box) {
-        final w = box.maxWidth;
-        final h = box.maxHeight;
-        final dividerX = _f * w;
         return Stack(
           fit: StackFit.expand,
           children: [
@@ -302,8 +225,11 @@ class _Model3DViewState extends State<Model3DView>
                     'ZoomCh',
                     onMessageReceived: (m) {
                       final msg = m.message;
-                      if (msg == 'ready') {
-                        _pushSplit();
+                      if (msg == 'haptic') {
+                        HapticFeedback.mediumImpact();
+                      } else if (msg.startsWith('f:')) {
+                        final v = double.tryParse(msg.substring(2));
+                        if (v != null && mounted) setState(() => _f = v);
                       } else if (msg == 'ar') {
                         if (mounted) setState(() => _canAr = true);
                       } else {
@@ -319,37 +245,6 @@ class _Model3DViewState extends State<Model3DView>
             ),
 
             if (both) ...[
-              // Cam efektli bölücü çizgi ve tutamaç (fotoğraf slider'ıyla aynı)
-              Positioned(
-                left: dividerX - 1.25,
-                top: 0,
-                bottom: widget.bottomInset,
-                child: const GlassDividerLine(),
-              ),
-              Positioned(
-                left: dividerX - 28,
-                top: (h - widget.bottomInset) * 0.5 - 28,
-                child: GlassKnob(active: _active),
-              ),
-              // Tutamaçtan sürüklenir (model başka yerde döndürülür)
-              Positioned(
-                left: dividerX - 28,
-                top: (h - widget.bottomInset) * 0.5 - 70,
-                width: 56,
-                height: 140,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onHorizontalDragStart: (_) {
-                    _userTouched = true;
-                    if (_intro.isAnimating) _intro.stop();
-                    HapticFeedback.mediumImpact();
-                    setState(() => _active = true);
-                  },
-                  onHorizontalDragUpdate: (d) => _setSplit(_f + d.delta.dx / w),
-                  onHorizontalDragEnd: (_) => setState(() => _active = false),
-                  onHorizontalDragCancel: () => setState(() => _active = false),
-                ),
-              ),
               Positioned(
                 left: 16,
                 bottom: widget.bottomInset + 14,
@@ -432,6 +327,22 @@ html, body { overflow: hidden; background: transparent; }
   content: ''; position: absolute; left: 7px; top: 7px; width: 12px; height: 12px;
   border-radius: 50%; background: #17a2a4;
 }
+#gline { position: absolute; top: 0; bottom: 0; width: 2.5px; margin-left: -1.25px; z-index: 6;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.95) 20%, rgba(255,255,255,.95) 80%, rgba(255,255,255,0));
+  box-shadow: 0 0 10px rgba(255,255,255,.45); }
+#gknob { position: absolute; top: 50%; width: 56px; height: 140px; margin: -70px 0 0 -28px; z-index: 7;
+  touch-action: none; display: flex; align-items: center; justify-content: center; }
+#gknob .ring { position: absolute; width: 56px; height: 56px; border-radius: 50%;
+  border: 1.4px solid rgba(255,255,255,.42); animation: kring 1.4s ease-in-out infinite alternate; pointer-events: none; }
+#gknob .dot { width: 48px; height: 48px; border-radius: 50%; box-sizing: border-box;
+  background: linear-gradient(135deg, rgba(255,255,255,.46), rgba(255,255,255,.14));
+  border: 1.3px solid rgba(255,255,255,.75); box-shadow: 0 4px 14px rgba(0,0,0,.22);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  transition: transform .16s ease-out; pointer-events: none; }
+#gknob.on .dot { transform: scale(1.14); }
+@keyframes kring { from { transform: scale(1); opacity: 1; } to { transform: scale(1.28); opacity: .2; } }
 @keyframes hspulse {
   0% { box-shadow: 0 0 0 0 rgba(255,255,255,.65), 0 2px 8px rgba(0,0,0,.4); }
   70% { box-shadow: 0 0 0 11px rgba(255,255,255,0), 0 2px 8px rgba(0,0,0,.4); }
@@ -498,15 +409,8 @@ html, body { overflow: hidden; background: transparent; }
       }
     }
 
-    // --- Tarihî / günümüz ayırıcı (çizgiyi Flutter çizer, burada yalnızca kırpma)
-    let f = 0.5;
-    let visT = 0;
-    function apply() {
-      if (!od) return;
-      oldWrap.style.width = (f * 100) + '%';
-      if (visT) return;
-      visT = setTimeout(function () { visT = 0; vis(); }, 90);
-    }
+    // --- Tarihî / günümüz ayırıcı: çizgi, tutamaç ve geçiş aynı sayfada çizilir (gecikme olmaz)
+    let f = 0.5, visT = 0, fMsgT = 0;
     function vis() {
       const x = f * window.innerWidth;
       for (const b of od.querySelectorAll('.hs')) {
@@ -518,13 +422,61 @@ html, body { overflow: hidden; background: transparent; }
         b.style.visibility = (r.left + r.width / 2) >= x ? 'visible' : 'hidden';
       }
     }
-    window.zaSplit = function (v) { f = v; apply(); };
-    apply();
+    let gline = null, gknob = null;
+    function apply() {
+      if (!od) return;
+      oldWrap.style.width = (f * 100) + '%';
+      gline.style.left = (f * 100) + '%';
+      gknob.style.left = (f * 100) + '%';
+      if (!visT) visT = setTimeout(function () { visT = 0; vis(); }, 90);
+      if (!fMsgT) fMsgT = setTimeout(function () { fMsgT = 0; ZoomCh.postMessage('f:' + f); }, 120);
+    }
+    let userTouched = false;
+    if (od) {
+      gline = document.createElement('div'); gline.id = 'gline';
+      gknob = document.createElement('div'); gknob.id = 'gknob';
+      gknob.innerHTML = '<div class="ring"></div><div class="dot"><svg width="40" height="20" viewBox="0 0 40 20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l-5 5 5 5"/><path d="M27 5l5 5-5 5"/></svg></div>';
+      document.body.append(gline, gknob);
+      let dragging = false;
+      gknob.addEventListener('pointerdown', function (e) {
+        dragging = true; userTouched = true; gknob.classList.add('on');
+        gknob.setPointerCapture(e.pointerId); ZoomCh.postMessage('haptic');
+      });
+      const end = function () { dragging = false; gknob.classList.remove('on'); };
+      gknob.addEventListener('pointerup', end);
+      gknob.addEventListener('pointercancel', end);
+      gknob.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        f = Math.min(1, Math.max(0, e.clientX / window.innerWidth));
+        apply();
+      });
+      document.addEventListener('pointerdown', function () { userTouched = true; }, true);
+      apply();
+      // Açılışta çizgi kendiliğinden iki yana gider (fotoğraf slider'ıyla aynı eğri)
+      const seg = [[0.5, 0.18, 0.35], [0.18, 0.82, 0.45], [0.82, 0.5, 0.20]];
+      const ease = function (t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
+      const DUR = 2200;
+      let t0 = 0;
+      function intro(now) {
+        if (userTouched) return;
+        if (!t0) t0 = now;
+        const p = Math.min(1, (now - t0) / DUR);
+        let acc = 0, v = 0.5;
+        for (const sgm of seg) {
+          if (p <= acc + sgm[2] || sgm === seg[2]) { v = sgm[0] + (sgm[1] - sgm[0]) * ease(Math.min(1, (p - acc) / sgm[2])); break; }
+          acc += sgm[2];
+        }
+        f = v; apply();
+        if (p < 1) requestAnimationFrame(intro);
+      }
+      let loaded = 0;
+      function go() { if (++loaded === 2) setTimeout(function () { requestAnimationFrame(intro); }, 500); }
+      nw.addEventListener('load', go); od.addEventListener('load', go);
+    }
     window.zaAR = function () { try { nw.activateAR(); } catch (e) {} };
     if (nw.canActivateAR) ZoomCh.postMessage('ar');
     nw.addEventListener('ar-status', function () { if (nw.canActivateAR) ZoomCh.postMessage('ar'); });
     nw.addEventListener('load', function () { if (nw.canActivateAR) ZoomCh.postMessage('ar'); });
-    ZoomCh.postMessage('ready');
 
     // --- Kamerayı iki modelde birlikte hareket ettir
     let active = null, until = 0, lastZ = 0;

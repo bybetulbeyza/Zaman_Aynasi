@@ -123,10 +123,8 @@ class _SliderScreenState extends State<SliderScreen>
   }
 
   Hotspot? _selectedHotspot;
-  bool _showHint = false;
   bool _view3d = false;
   final TourController _tour = TourController();
-  Timer? _hintTimer;
 
   HeritagePlace get _place => widget.place;
 
@@ -164,18 +162,11 @@ class _SliderScreenState extends State<SliderScreen>
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) => _fitPhotoArea());
-    // Hotspot'ların varlığını ilk bakışta anlatan kısa ipucu
-    if (_place.hotspots.isNotEmpty) {
-      _showHint = true;
-      _hintTimer = Timer(const Duration(seconds: 6), () {
-        if (mounted) setState(() => _showHint = false);
-      });
-    }
+  }
   }
 
   @override
   void dispose() {
-    _hintTimer?.cancel();
     _extentAnim.dispose();
     _tour.dispose();
     super.dispose();
@@ -292,55 +283,9 @@ class _SliderScreenState extends State<SliderScreen>
                       for (final c in _children) c.id: c.category,
                     },
                     bottomInset: _underlap,
-                    onHotspotSelected: (h) => setState(() {
-                      _selectedHotspot = h;
-                      _showHint = false;
-                    }),
+                    onHotspotSelected: (h) =>
+                        setState(() => _selectedHotspot = h),
                   ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: size.height * _photoFraction - size.height * 0.1,
-                  child: IgnorePointer(
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 400),
-                      opacity: _showHint && _selectedHotspot == null && !_view3d
-                          ? 1
-                          : 0,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 9,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.62),
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.touch_app_outlined,
-                                size: 18,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                context.t('hotspot_hint'),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
                 if (_place.has3dModel)
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 12,
