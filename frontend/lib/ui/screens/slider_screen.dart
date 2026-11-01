@@ -630,6 +630,7 @@ class _SliderScreenState extends State<SliderScreen>
           const LangToggle(),
         ],
       ),
+      if (_parent != null) ...[const SizedBox(height: 8), _buildParentLink(en)],
       const SizedBox(height: 16),
 
       // Dönem / Mimar / Bani
@@ -655,10 +656,6 @@ class _SliderScreenState extends State<SliderScreen>
       ),
 
       // Külliye ise alt yapıları, alt eser ise bağlı olduğu yapı
-      if (_parent != null) ...[
-        _buildParentLink(en),
-        const SizedBox(height: 18),
-      ],
       if (_children.isNotEmpty) ...[
         _buildChildren(en),
         const SizedBox(height: 24),
@@ -722,39 +719,55 @@ class _SliderScreenState extends State<SliderScreen>
   }
 
   /// Alt eserde: "… yapısının bir parçası" bağlantısı.
+  /// Başlığın altında küçük bir etiket: dokununca bağlı olduğu yapıya (külliyeye) gider.
   Widget _buildParentLink(bool en) {
     final parent = _parent!;
-    return GestureDetector(
-      onTap: () => _openPlace(parent),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.primaryTealLight,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.account_tree_outlined,
-              size: 20,
-              color: AppColors.primaryTeal,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                context.t('part_of').replaceAll('{name}', parent.nameFor(en)),
-                style: const TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryTealDark,
-                ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Semantics(
+        button: true,
+        label: context.t('part_of').replaceAll('{name}', parent.nameFor(en)),
+        excludeSemantics: true,
+        child: GestureDetector(
+          onTap: () => _openPlace(parent),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(9, 5, 6, 5),
+            decoration: BoxDecoration(
+              color: AppColors.primaryTealLight,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppColors.primaryTeal.withValues(alpha: 0.3),
               ),
             ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.primaryTeal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.account_tree_outlined,
+                  size: 14,
+                  color: AppColors.primaryTeal,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    parent.nameFor(en),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryTealDark,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                  color: AppColors.primaryTeal,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
