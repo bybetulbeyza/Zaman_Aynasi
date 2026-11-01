@@ -266,6 +266,7 @@ class _SliderScreenState extends State<SliderScreen>
                   afterLabel: context.t('period_label'),
                   beforeLabel: context.t('today_label'),
                   hotspots: _place.hotspots,
+                  selectedHotspot: _selectedHotspot,
                   navCategories: {for (final c in _children) c.id: c.category},
                   bottomInset: _underlap,
                   onHotspotSelected: (h) => setState(() {

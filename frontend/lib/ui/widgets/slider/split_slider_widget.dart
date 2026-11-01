@@ -21,6 +21,9 @@ class SplitSliderWidget extends StatefulWidget {
   final List<Hotspot> hotspots;
   final ValueChanged<Hotspot?>? onHotspotSelected;
 
+  /// Şu an bilgi kartı açık olan hotspot. Kart kapanınca kamera eski haline döner.
+  final Hotspot? selectedHotspot;
+
   /// Yönlendirme hotspot'unun gideceği yapının kategorisi (id -> kategori). Nokta bu renkte ve
   /// bu kategorinin simgesiyle çizilir.
   final Map<String, PlaceCategory> navCategories;
@@ -36,6 +39,7 @@ class SplitSliderWidget extends StatefulWidget {
     this.afterLabel = 'Dönem',
     this.hotspots = const [],
     this.onHotspotSelected,
+    this.selectedHotspot,
     this.navCategories = const {},
     this.bottomInset = 0,
   });
@@ -168,6 +172,18 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
     }
     final dh = w / a; // fotoğraf genişliğe sığar, alt/üst taşar
     return Offset(ix * w, iy * dh - (dh - h) / 2);
+  }
+
+  @override
+  void didUpdateWidget(SplitSliderWidget old) {
+    super.didUpdateWidget(old);
+    // Bilgi kartı kapandıysa (çarpı ya da başka yere dokunma) yakınlaştırma yumuşakça geri alınır
+    if (old.selectedHotspot != null &&
+        widget.selectedHotspot == null &&
+        !_touring &&
+        _zoom > 1.05) {
+      _resetZoom();
+    }
   }
 
   @override
@@ -474,6 +490,12 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   onScaleUpdate: (d) =>
                       _onScaleUpdate(d, totalWidth, totalHeight),
                   onScaleEnd: _onScaleEnd,
+                  // Açık bir bilgi kartı varken fotoğrafın başka bir yerine dokunmak kartı kapatır
+                  onTap: () {
+                    if (widget.selectedHotspot != null && !_touring) {
+                      widget.onHotspotSelected?.call(null);
+                    }
+                  },
                   onDoubleTapDown: (d) => _doubleTapPos = d.localPosition,
                   onDoubleTap: () => _onDoubleTap(totalWidth, totalHeight),
                   onLongPressStart: (d) {
