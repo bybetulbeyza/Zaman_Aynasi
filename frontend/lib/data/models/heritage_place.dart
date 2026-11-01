@@ -60,6 +60,10 @@ class Hotspot {
   final String?
   targetPlaceId; // Külliyeden alt yapıya (Türbe, Hamam vb.) geçiş ID'si
 
+  /// Supabase: model_pos / model_normal — 3B model üzerindeki konum ("x y z" metre) ve yüzey yönü.
+  final String? modelPos;
+  final String? modelNormal;
+
   Hotspot({
     required this.id,
     required this.placeId,
@@ -73,6 +77,8 @@ class Hotspot {
     this.aiVideoEnUrl,
     this.aiVideoUrl,
     this.targetPlaceId,
+    this.modelPos,
+    this.modelNormal,
   });
 
   String titleFor(bool en) => en && titleEn.isNotEmpty ? titleEn : title;
@@ -88,6 +94,8 @@ class Hotspot {
   }
 
   bool get hasAiVideo => aiVideoUrl != null && aiVideoUrl!.trim().isNotEmpty;
+
+  bool get isModelHotspot => modelPos != null && modelPos!.trim().isNotEmpty;
 
   bool get hasSubPlaceNavigation =>
       targetPlaceId != null && targetPlaceId!.isNotEmpty;
@@ -106,6 +114,8 @@ class Hotspot {
       aiVideoEnUrl: (json['ai_video_en'] as String?)?.trim(),
       aiVideoUrl: (json['ai_video'] as String?)?.trim(),
       targetPlaceId: json['target_place_id']?.toString(),
+      modelPos: (json['model_pos'] as String?)?.trim(),
+      modelNormal: (json['model_normal'] as String?)?.trim(),
     );
   }
 }
@@ -149,6 +159,9 @@ class HeritagePlace {
   final String modelNewUrl;
   final String modelOldUrl;
 
+  /// 3B model üzerindeki hotspot'lar (fotoğraf hotspot'larından ayrı tutulur).
+  final List<Hotspot> modelHotspots;
+
   /// Supabase: old_photos — eski fotoğraf adresleri (liste ya da boşluk/virgülle ayrılmış metin).
   final List<String> oldPhotos;
   final double? distanceMeters;
@@ -183,6 +196,7 @@ class HeritagePlace {
     this.hotspots = const [],
     this.modelNewUrl = '',
     this.modelOldUrl = '',
+    this.modelHotspots = const [],
     this.distanceMeters,
   });
 
@@ -260,6 +274,7 @@ class HeritagePlace {
       hotspots: hotspots,
       modelNewUrl: modelNewUrl,
       modelOldUrl: modelOldUrl,
+      modelHotspots: modelHotspots,
       distanceMeters: distance,
     );
   }
@@ -267,11 +282,14 @@ class HeritagePlace {
   factory HeritagePlace.fromJson(Map<String, dynamic> json) {
     final rawHotspots = json['Hotspots'] ?? json['hotspots'];
     List<Hotspot> parsedHotspots = [];
+    List<Hotspot> parsedModelHotspots = [];
 
     if (rawHotspots is List) {
-      parsedHotspots = rawHotspots
+      final all = rawHotspots
           .map((item) => Hotspot.fromJson(item as Map<String, dynamic>))
           .toList();
+      parsedHotspots = all.where((h) => !h.isModelHotspot).toList();
+      parsedModelHotspots = all.where((h) => h.isModelHotspot).toList();
     }
 
     return HeritagePlace(
@@ -312,6 +330,7 @@ class HeritagePlace {
       hotspots: parsedHotspots,
       modelNewUrl: (json['model_new_url'] as String? ?? '').trim(),
       modelOldUrl: (json['model_old_url'] as String? ?? '').trim(),
+      modelHotspots: parsedModelHotspots,
     );
   }
 

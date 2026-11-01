@@ -267,6 +267,8 @@ class _SliderScreenState extends State<SliderScreen>
                     newUrl: _place.modelNewUrl,
                     oldUrl: _place.modelOldUrl,
                     name: _place.nameFor(en),
+                    hotspots: _place.modelHotspots,
+                    onHotspot: (h) => setState(() => _selectedHotspot = h),
                     bottomInset: _underlap,
                   )
                 else

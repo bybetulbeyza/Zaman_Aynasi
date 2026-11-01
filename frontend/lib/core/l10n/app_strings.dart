@@ -141,7 +141,8 @@ const Map<String, String> appStringsTr = {
   'today_label': 'Günümüz',
   'view_2d': '2B',
   'view_3d': '3B',
-  'model_hint': 'Döndürmek için sürükle, yakınlaştırmak için kıstır',
+  'model_hint':
+      'Sürükle: döndür · Kıstır: yakınlaş · Çizgiyi kaydır: tarihî ↔ günümüz',
   'model_old': 'Tarihî',
   'period': 'Yapım',
   'architect': 'Mimar',
@@ -372,7 +373,8 @@ const Map<String, String> appStringsEn = {
   'today_label': 'Present',
   'view_2d': '2D',
   'view_3d': '3D',
-  'model_hint': 'Drag to rotate, pinch to zoom',
+  'model_hint':
+      'Drag to rotate · Pinch to zoom · Slide the line: historic ↔ present',
   'model_old': 'Historic',
   'period': 'Built',
   'architect': 'Architect',
