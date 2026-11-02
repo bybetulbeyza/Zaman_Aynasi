@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/constants/app_colors.dart';
@@ -22,6 +23,8 @@ class _AccountScreenState extends State<AccountScreen> {
     text: AuthService.displayName,
   );
   bool _saving = false;
+  bool _photoBusy = false;
+  bool _deleting = false;
 
   @override
   void dispose() {
@@ -50,6 +53,126 @@ class _AccountScreenState extends State<AccountScreen> {
       );
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _photoMenu() async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.bgCanvas,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(ctx.t('acc_photo_gallery')),
+                onTap: () => Navigator.pop(ctx, 'gallery'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: Text(ctx.t('acc_photo_camera')),
+                onTap: () => Navigator.pop(ctx, 'camera'),
+              ),
+              if (AuthService.hasCustomAvatar)
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppColors.ciniBordeaux,
+                  ),
+                  title: Text(
+                    ctx.t('acc_photo_remove'),
+                    style: const TextStyle(color: AppColors.ciniBordeaux),
+                  ),
+                  onTap: () => Navigator.pop(ctx, 'remove'),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (action == null || !mounted) return;
+    setState(() => _photoBusy = true);
+    try {
+      if (action == 'remove') {
+        await AuthService.removeAvatar();
+      } else {
+        final picked = await ImagePicker().pickImage(
+          source: action == 'camera' ? ImageSource.camera : ImageSource.gallery,
+          maxWidth: 512,
+          maxHeight: 512,
+          imageQuality: 80,
+        );
+        if (picked != null) {
+          await AuthService.uploadAvatar(await picked.readAsBytes());
+        }
+      }
+    } catch (e) {
+      debugPrint('avatar: $e');
+      if (mounted) {
+        AppToast.show(
+          context,
+          context.t('acc_photo_failed'),
+          icon: Icons.error_outline_rounded,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _photoBusy = false);
+    }
+  }
+
+  Future<void> _confirmDelete() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.bgCanvas,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: Text(ctx.t('acc_delete_q')),
+        content: Text(ctx.t('acc_delete_body')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.t('acc_cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.ciniBordeaux,
+            ),
+            child: Text(ctx.t('acc_delete_confirm')),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _deleting = true);
+    final nav = Navigator.of(context);
+    final toastCtx = nav.context;
+    try {
+      await AuthService.deleteAccount();
+      if (!mounted) return;
+      nav.pop();
+      if (toastCtx.mounted) {
+        AppToast.show(
+          toastCtx,
+          toastCtx.t('acc_deleted'),
+          icon: Icons.delete_outline_rounded,
+        );
+      }
+    } catch (e) {
+      debugPrint('delete account: $e');
+      if (!mounted) return;
+      setState(() => _deleting = false);
+      AppToast.show(
+        context,
+        context.t('acc_delete_failed'),
+        icon: Icons.error_outline_rounded,
+      );
     }
   }
 
@@ -126,25 +249,76 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                     const SizedBox(height: 24),
                     Center(
-                      child: CircleAvatar(
-                        radius: 44,
-                        backgroundColor: AppColors.primaryTeal,
-                        backgroundImage: avatar != null
-                            ? NetworkImage(avatar)
-                            : null,
-                        onBackgroundImageError: avatar != null
-                            ? (_, _) {}
-                            : null,
-                        child: avatar == null
-                            ? Text(
-                                name.isEmpty ? '?' : name[0].toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                      child: Semantics(
+                        button: true,
+                        label: context.t('acc_photo'),
+                        excludeSemantics: true,
+                        child: GestureDetector(
+                          onTap: _photoBusy ? null : _photoMenu,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              CircleAvatar(
+                                radius: 46,
+                                backgroundColor: AppColors.primaryTeal,
+                                backgroundImage: avatar != null
+                                    ? NetworkImage(avatar)
+                                    : null,
+                                onBackgroundImageError: avatar != null
+                                    ? (_, _) {}
+                                    : null,
+                                child: _photoBusy
+                                    ? const SizedBox(
+                                        width: 28,
+                                        height: 28,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 3,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : (avatar == null
+                                          ? Text(
+                                              name.isEmpty
+                                                  ? '?'
+                                                  : name[0].toUpperCase(),
+                                              style: const TextStyle(
+                                                fontSize: 38,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : null),
+                              ),
+                              Positioned(
+                                right: -2,
+                                bottom: -2,
+                                child: Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: AppColors.chipBorder,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        blurRadius: 6,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.photo_camera_outlined,
+                                    size: 18,
+                                    color: AppColors.primaryTeal,
+                                  ),
                                 ),
-                              )
-                            : null,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -199,6 +373,22 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                     ),
                   ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: TextButton(
+                  onPressed: _deleting ? null : _confirmDelete,
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textMuted,
+                  ),
+                  child: _deleting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(context.t('acc_delete')),
                 ),
               ),
             ],

@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/app_theme.dart';
 import 'core/analytics/analytics.dart';
+import 'core/auth/auth_service.dart';
 import 'core/l10n/app_lang.dart';
 import 'core/state/app_accessibility.dart';
 import 'core/state/passport.dart';
+import 'ui/screens/reset_password_screen.dart';
 import 'ui/screens/splash_screen.dart';
 import 'ui/widgets/common/dark_cancel.dart';
+
+/// E-postadaki şifre sıfırlama bağlantısı gibi dışarıdan gelen olaylarda ekran açabilmek için.
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+final DateTime _appStarted = DateTime.now();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +28,19 @@ Future<void> main() async {
   await Analytics.instance.init();
   Analytics.track('app_open');
 
+  // Şifre sıfırlama bağlantısından dönüldüğünde yeni şifre ekranını aç
+  AuthService.changes.listen((s) async {
+    if (s.event != AuthChangeEvent.passwordRecovery) return;
+    // Açılış ekranı bitmeden açılırsa onunla birlikte kapanabilir; kısa süre bekle
+    final wait =
+        const Duration(milliseconds: 3800) -
+        DateTime.now().difference(_appStarted);
+    if (!wait.isNegative) await Future<void>.delayed(wait);
+    rootNavigatorKey.currentState?.push(
+      MaterialPageRoute<void>(builder: (_) => const ResetPasswordScreen()),
+    );
+  });
+
   runApp(const ZamanAynasiApp());
 }
 
@@ -33,6 +52,7 @@ class ZamanAynasiApp extends StatelessWidget {
     return AppLangScope(
       lang: AppLang.instance,
       child: MaterialApp(
+        navigatorKey: rootNavigatorKey,
         title: 'Zaman Aynası',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,

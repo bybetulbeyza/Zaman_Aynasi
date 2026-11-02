@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/auth/auth_service.dart';
+import 'auth_screen.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_toast.dart';
 import '../../core/state/passport.dart';
@@ -53,6 +56,31 @@ class _MainScreenState extends State<MainScreen> {
       onOpenPassport: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const PassportScreen()),
+      ),
+    ).then((_) => _nudgeGuest());
+  }
+
+  /// Misafir ilk (ve üçüncü) mührünü kazanınca, kaybolmaması için hesaba kaydetmesini önerir.
+  Future<void> _nudgeGuest() async {
+    if (!mounted || AuthService.isSignedIn) return;
+    final n = Passport.instance.stampCount;
+    if (n != 1 && n != 3) return;
+    try {
+      final p = await SharedPreferences.getInstance();
+      final shown = p.getInt('guest_nudge_shown') ?? 0;
+      if (shown >= 2) return;
+      await p.setInt('guest_nudge_shown', shown + 1);
+    } catch (_) {}
+    if (!mounted) return;
+    AppToast.show(
+      context,
+      context.t('nudge_text'),
+      icon: Icons.bookmark_added_outlined,
+      actionLabel: context.t('auth_login'),
+      duration: const Duration(seconds: 8),
+      onAction: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const AuthScreen(popOnDone: true)),
       ),
     );
   }

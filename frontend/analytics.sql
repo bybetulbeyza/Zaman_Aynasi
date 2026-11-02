@@ -38,6 +38,21 @@ create or replace view public.analytics_gunluk as
 
 revoke all on public.analytics_gunluk from anon, authenticated;
 
+-- Pasaport etkisi (yalnızca giriş yapan kullanıcılar; kimlik içermez, sadece sayılar):
+-- her eser için kaç farklı kişi mühür kazandı, kaç kişi o eserin görevlerinden en az birini yaptı.
+create or replace view public.analytics_muhurler as
+  select p.id as eser_id,
+         p.name as eser,
+         (select count(distinct up.user_id) from public.user_progress up
+           where up.kind = 'stamp' and up.ref_id = p.id) as muhur_kazanan,
+         (select count(distinct up.user_id) from public.user_progress up
+           join public.place_activities a on a.id = up.ref_id
+           where up.kind = 'activity' and a.place_id = p.id) as gorev_yapan
+  from public.heritage_places p
+  order by muhur_kazanan desc, gorev_yapan desc, p.id;
+
+revoke all on public.analytics_muhurler from anon, authenticated;
+
 -- Önceki sürümleri çalıştırdıysanız eski görünümleri kaldırın (tablo ve veri kalır):
 drop view if exists public.analytics_inventory_clicks, public.analytics_app_opens,
                     public.analytics_summary, public.analytics_top_places, public.analytics_daily_active;

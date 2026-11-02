@@ -76,7 +76,9 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Tabeladaki karekodu okuyup eserin sayfasını açmak için kamera gerekir.</string>
+	<string>Tabeladaki karekodu okumak ve profil fotoğrafı çekmek için kamera gerekir.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Profil fotoğrafı seçmek için galeriye erişilir.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Yakınınızdaki vakıf eserlerini ve rotaları göstermek için konumunuz kullanılır.</string>
 </dict>

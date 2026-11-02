@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/app_lang.dart';
@@ -43,11 +45,19 @@ class AuthService {
     return (u.email ?? '').split('@').first;
   }
 
+  /// Önce kullanıcının yüklediği fotoğraf, yoksa Google profil fotoğrafı.
   static String? get avatarUrl {
-    final v =
-        user?.userMetadata?['avatar_url'] ?? user?.userMetadata?['picture'];
-    return v?.toString();
+    final m = user?.userMetadata;
+    for (final k in ['custom_avatar_url', 'avatar_url', 'picture']) {
+      final v = m?[k]?.toString();
+      if (v != null && v.isNotEmpty) return v;
+    }
+    return null;
   }
+
+  /// Yüklenmiş özel fotoğraf var mı (kaldır düğmesi için)?
+  static bool get hasCustomAvatar =>
+      (user?.userMetadata?['custom_avatar_url']?.toString() ?? '').isNotEmpty;
 
   static Future<void> signIn(String email, String password) async {
     await _c.auth.signInWithPassword(email: email.trim(), password: password);
@@ -73,6 +83,58 @@ class AuthService {
       _c.auth.signInWithOAuth(OAuthProvider.google, redirectTo: redirectUrl);
 
   static Future<void> signOut() => _c.auth.signOut();
+
+  /// Şifre sıfırlama bağlantısı gönderir (hesap var ya da yok, aynı yanıt döner).
+  static Future<void> sendPasswordReset(String email) =>
+      _c.auth.resetPasswordForEmail(email.trim(), redirectTo: redirectUrl);
+
+  /// Sıfırlama bağlantısından açılan oturumda yeni şifreyi kaydeder.
+  static Future<void> updatePassword(String password) async {
+    await _c.auth.updateUser(UserAttributes(password: password));
+  }
+
+  /// Hesabı ve ona bağlı profil/ilerleme satırlarını kalıcı olarak siler.
+  /// Sunucuda `delete_my_account()` fonksiyonu gerekir (account_setup.sql).
+  static Future<void> deleteAccount() async {
+    final u = user;
+    if (u == null) return;
+    try {
+      await _c.storage.from('avatars').remove(['${u.id}/avatar.jpg']);
+    } catch (_) {}
+    await _c.rpc('delete_my_account');
+    try {
+      await _c.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {}
+  }
+
+  /// Profil fotoğrafı yükler (`avatars` kovası, kullanıcının kendi klasörü).
+  static Future<void> uploadAvatar(Uint8List bytes) async {
+    final u = user;
+    if (u == null) return;
+    final path = '${u.id}/avatar.jpg';
+    final bucket = _c.storage.from('avatars');
+    await bucket.uploadBinary(
+      path,
+      bytes,
+      fileOptions: const FileOptions(upsert: true, contentType: 'image/jpeg'),
+    );
+    // Sonuna sürüm eklenir; aksi hâlde eski fotoğraf önbellekten görünür
+    final url =
+        '${bucket.getPublicUrl(path)}?v=${DateTime.now().millisecondsSinceEpoch}';
+    await _c.auth.updateUser(UserAttributes(data: {'custom_avatar_url': url}));
+    await syncProfile();
+  }
+
+  /// Yüklenen fotoğrafı kaldırır (varsa Google fotoğrafına döner).
+  static Future<void> removeAvatar() async {
+    final u = user;
+    if (u == null) return;
+    try {
+      await _c.storage.from('avatars').remove(['${u.id}/avatar.jpg']);
+    } catch (_) {}
+    await _c.auth.updateUser(UserAttributes(data: {'custom_avatar_url': ''}));
+    await syncProfile();
+  }
 
   /// Giriş yöntemi: 'google' ya da 'email'.
   static String get provider =>

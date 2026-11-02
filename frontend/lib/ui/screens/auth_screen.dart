@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../widgets/common/app_toast.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_back_button.dart';
 import '../../core/auth/auth_service.dart';
@@ -38,6 +40,8 @@ class _AuthScreenState extends State<AuthScreen> {
     super.initState();
     // Google dönüşü gibi dışarıdan açılan oturumları yakalar
     _sub = AuthService.changes.listen((s) {
+      // Şifre sıfırlama bağlantısı oturum açar ama giriş sayılmaz; yeni şifre ekranı ayrıca açılır
+      if (s.event == AuthChangeEvent.passwordRecovery) return;
       if (s.session != null) {
         AuthService.syncProfile();
         _done();
@@ -109,6 +113,63 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) setState(() => _error = AuthService.friendlyError(e, en));
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _forgot() async {
+    final ctrl = TextEditingController(text: _email.text.trim());
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.bgCanvas,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: Text(ctx.t('forgot_title')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(ctx.t('forgot_sub')),
+            const SizedBox(height: 12),
+            TextField(
+              controller: ctrl,
+              keyboardType: TextInputType.emailAddress,
+              autofocus: true,
+              decoration: _dec(ctx.t('auth_email'), Icons.mail_outline),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.t('acc_cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(ctx.t('forgot_send')),
+          ),
+        ],
+      ),
+    );
+    final email = ctrl.text.trim();
+    ctrl.dispose();
+    if (ok != true || !mounted) return;
+    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
+      setState(() => _error = context.t('auth_err_email'));
+      return;
+    }
+    try {
+      await AuthService.sendPasswordReset(email);
+      if (!mounted) return;
+      setState(() => _error = null);
+      AppToast.show(
+        context,
+        context.t('forgot_sent'),
+        icon: Icons.mail_outline,
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _error = AuthService.friendlyError(e, context.isEn));
+      }
     }
   }
 
@@ -232,10 +293,23 @@ class _AuthScreenState extends State<AuthScreen> {
                                 setState(() => _obscure = !_obscure),
                           ),
                         ),
-                    validator: (v) => (v == null || v.length < 6)
+                    validator: (v) =>
+                        (v == null || v.length < (_register ? 8 : 1))
                         ? context.t('auth_err_password')
                         : null,
                   ),
+                  if (!_register)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _forgot,
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primaryTeal,
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                        ),
+                        child: Text(context.t('forgot_pw')),
+                      ),
+                    ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
                     Text(
