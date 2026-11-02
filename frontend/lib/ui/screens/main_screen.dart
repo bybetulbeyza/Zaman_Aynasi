@@ -148,84 +148,80 @@ class _MainScreenState extends State<MainScreen> {
       const ProfileScreen(),
     ];
 
-    return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: screens),
-      bottomNavigationBar: _buildBottomBar(),
+    // QR düğmesi çubuğun üstüne taşar; çubuğun üstünde beyaz boşluk kalmaması için
+    // düğme Scaffold'un üstünde ayrı çizilir, çubuk yalnızca bordo çizgiden başlar.
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+    return Stack(
+      children: [
+        Scaffold(
+          body: IndexedStack(index: _currentIndex, children: screens),
+          bottomNavigationBar: _buildBottomBar(),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: safeBottom + _barHeight - (_qrSize + 12 - _qrRise),
+          child: Center(child: _buildQrButton()),
+        ),
+      ],
     );
   }
 
   static const double _qrSize = 62;
   static const double _barHeight = 66;
 
+  /// QR düğmesinin bordo çizginin ne kadar üstüne çıktığı
+  static const double _qrRise = 23;
+
   Widget _buildBottomBar() {
     return Container(
-      color: AppColors.cardBg,
+      decoration: const BoxDecoration(
+        color: AppColors.cardBg,
+        border: Border(
+          top: BorderSide(color: AppColors.dividerLine, width: 1.2),
+        ),
+      ),
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: _barHeight + _qrSize / 2 - 8,
-          child: Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              // Bordo çizgili bar zemini
-              Positioned(
-                left: 0,
-                right: 0,
-                top: _qrSize / 2 - 8,
-                bottom: 0,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: AppColors.cardBg,
-                    border: Border(
-                      top: BorderSide(color: AppColors.dividerLine, width: 1.2),
-                    ),
+          height: _barHeight,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: _buildNavItem(
+                    icon: 'home',
+                    label: context.t('nav_home'),
+                    index: 0,
                   ),
                 ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: _barHeight - 4,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: _buildNavItem(
-                        icon: 'home',
-                        label: context.t('nav_home'),
-                        index: 0,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildNavItem(
-                        icon: 'map',
-                        label: context.t('nav_map'),
-                        index: 1,
-                      ),
-                    ),
-                    Expanded(child: _buildQrLabel()),
-                    Expanded(
-                      child: _buildNavItem(
-                        icon: 'routes',
-                        label: context.t('nav_routes'),
-                        index: 3,
-                        showRouteBadge: true,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildNavItem(
-                        icon: 'profile',
-                        label: context.t('nav_profile'),
-                        index: 4,
-                      ),
-                    ),
-                  ],
+                Expanded(
+                  child: _buildNavItem(
+                    icon: 'map',
+                    label: context.t('nav_map'),
+                    index: 1,
+                  ),
                 ),
-              ),
-              // Çubuğun üstüne taşan QR butonu (krem halkalı)
-              Positioned(top: 0, child: _buildQrButton()),
-            ],
+                Expanded(child: _buildQrLabel()),
+                Expanded(
+                  child: _buildNavItem(
+                    icon: 'routes',
+                    label: context.t('nav_routes'),
+                    index: 3,
+                    showRouteBadge: true,
+                  ),
+                ),
+                Expanded(
+                  child: _buildNavItem(
+                    icon: 'profile',
+                    label: context.t('nav_profile'),
+                    index: 4,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
