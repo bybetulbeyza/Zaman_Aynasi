@@ -385,7 +385,7 @@ html, body { overflow: hidden; background: transparent; }
     els.forEach(function (e) { e.setAttribute('interpolation-decay', '90'); });
 
     // --- Kamera sınırları: zemin altına inilmez, çok uzaklaşılmaz
-    let base = 60, home = null, homeT = null;
+    let base = 60, home = null, homeT = null, limXZ = 20, limY = 20;
     function limits() {
       const r = nw.getCameraOrbit().radius;
       if (r > 0) base = r;
@@ -397,13 +397,17 @@ html, body { overflow: hidden; background: transparent; }
     }
     nw.addEventListener('load', function () {
       limits();
+      // Kaydırma sınırları modelin boyutuna göre (büyük yapılarda hotspot'a gidilebilsin)
+      const dm = nw.getDimensions();
+      limXZ = Math.max(20, 0.5 * Math.max(dm.x, dm.z));
+      limY = Math.max(20, dm.y * 1.2);
       const o = nw.getCameraOrbit(), t = nw.getCameraTarget();
       home = { th: o.theta, ph: Math.min(o.phi, 84 * DEG), r: o.radius };
       homeT = { x: t.x, y: t.y, z: t.z };
     });
     function clampTarget(e) {
       const t = e.getCameraTarget();
-      const x = Math.min(20, Math.max(-20, t.x)), y = Math.min(20, Math.max(2, t.y)), z = Math.min(20, Math.max(-20, t.z));
+      const x = Math.min(limXZ, Math.max(-limXZ, t.x)), y = Math.min(limY, Math.max(2, t.y)), z = Math.min(limXZ, Math.max(-limXZ, t.z));
       if (x !== t.x || y !== t.y || z !== t.z) {
         e.cameraTarget = x + 'm ' + y + 'm ' + z + 'm';
         e.jumpCameraToGoal();

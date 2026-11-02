@@ -408,25 +408,32 @@ class _HomeScreenState extends State<HomeScreen> {
             final w = (box.maxWidth - 13) * (large ? 0.5 : 0.46);
             return Padding(
               padding: const EdgeInsets.only(left: 13),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < 3; i++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 12,
-                      ),
-                      child: SizedBox(
-                        width: w - 14,
-                        height: height,
-                        child: const SquircleFrame(
-                          radius: 40,
-                          child: ShimmerBox(),
+              // Kartlar ekran dışına taşabilir (karusel gibi); taşma uyarısı çıkmasın diye kırpılır
+              child: ClipRect(
+                child: OverflowBox(
+                  alignment: Alignment.centerLeft,
+                  maxWidth: double.infinity,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var i = 0; i < 3; i++)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 12,
+                          ),
+                          child: SizedBox(
+                            width: w - 14,
+                            height: height,
+                            child: const SquircleFrame(
+                              radius: 40,
+                              child: ShimmerBox(),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                ],
+                    ],
+                  ),
+                ),
               ),
             );
           },
