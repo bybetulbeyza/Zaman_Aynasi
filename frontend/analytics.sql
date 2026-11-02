@@ -21,12 +21,7 @@ drop policy if exists "analytics insert only" on public.analytics_events;
 create policy "analytics insert only" on public.analytics_events
   for insert to anon, authenticated with check (true);
 
--- Rapor görünümleri: SQL Editor / Table Editor'dan sizin görmeniz için. Herkese kapalı.
-create or replace view public.analytics_summary as
-  select event, count(*) as toplam, count(distinct device_id) as farkli_cihaz
-  from public.analytics_events group by event order by toplam desc;
-
--- Envanter yayınlarına (cilt sitesi) tıklama: günlük, nereden (eser kartı / hakkında)
+-- Rapor: envanter yayınlarına (cilt sitesi) uygulamadan tıklama — günlük, nereden (eser kartı / hakkında)
 create or replace view public.analytics_inventory_clicks as
   select (created_at at time zone 'Europe/Istanbul')::date as gun,
          meta->>'from' as kaynak,
@@ -35,22 +30,15 @@ create or replace view public.analytics_inventory_clicks as
   from public.analytics_events where event = 'inventory_click'
   group by 1, 2 order by 1 desc, 3 desc;
 
--- En çok bakılan eserler
-create or replace view public.analytics_top_places as
-  select e.place_id, p.name as eser, count(*) as goruntuleme, count(distinct e.device_id) as farkli_cihaz
-  from public.analytics_events e
-  left join public.heritage_places p on p.id::text = e.place_id
-  where e.event = 'place_view'
-  group by e.place_id, p.name order by goruntuleme desc;
-
--- Günlük aktif cihaz
-create or replace view public.analytics_daily_active as
+-- Karşılaştırma için: uygulamayı açan farklı cihaz sayısı (tıklayan / açan = tıklama oranı)
+create or replace view public.analytics_app_opens as
   select (created_at at time zone 'Europe/Istanbul')::date as gun,
-         count(distinct device_id) as aktif_cihaz,
-         count(*) as olay
-  from public.analytics_events group by 1 order by 1 desc;
+         count(distinct device_id) as acan_cihaz
+  from public.analytics_events where event = 'app_open'
+  group by 1 order by 1 desc;
 
--- Görünümler API üzerinden açık olmasın
-revoke all on public.analytics_summary, public.analytics_inventory_clicks,
-              public.analytics_top_places, public.analytics_daily_active
+revoke all on public.analytics_inventory_clicks, public.analytics_app_opens
   from anon, authenticated;
+
+-- (Önceki sürümü çalıştırdıysanız artık gereksiz görünümleri kaldırabilirsiniz:)
+-- drop view if exists public.analytics_summary, public.analytics_top_places, public.analytics_daily_active;

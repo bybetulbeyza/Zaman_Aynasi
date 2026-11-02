@@ -6,8 +6,7 @@ import '../analytics/analytics.dart';
 
 class LauncherUtil {
   /// Harita uygulamasında yürüyüş yol tarifi açar.
-  static Future<bool> openDirections(LatLng destination, {String? placeId}) {
-    Analytics.track('directions_click', placeId: placeId);
+  static Future<bool> openDirections(LatLng destination) {
     final uri = Uri.parse(
       'https://www.google.com/maps/dir/?api=1'
       '&destination=${destination.latitude},${destination.longitude}'
@@ -18,14 +17,24 @@ class LauncherUtil {
 
   /// [source]: tıklamanın geldiği yer (örn. 'place_card', 'about'); varsa sayılır.
   static Future<bool> openUrl(String url, {String? source, String? placeId}) {
+    var uri = Uri.parse(url);
     if (source != null) {
       Analytics.track(
         'inventory_click',
         placeId: placeId,
         meta: {'from': source},
       );
+      // Hedef sitenin kendi istatistiğinde "uygulamadan gelen ziyaret" görünsün diye
+      uri = uri.replace(
+        queryParameters: {
+          ...uri.queryParameters,
+          'utm_source': 'zaman_aynasi',
+          'utm_medium': 'mobil_uygulama',
+          'utm_content': source,
+        },
+      );
     }
-    return _open(Uri.parse(url));
+    return _open(uri);
   }
 
   static Future<bool> _open(Uri uri) async {

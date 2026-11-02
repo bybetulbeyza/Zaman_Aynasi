@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/common/app_toast.dart';
+import '../widgets/common/feedback_sheet.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
@@ -16,12 +16,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
-
-  void _soon(BuildContext context) => AppToast.show(
-    context,
-    context.t('coming_soon'),
-    icon: Icons.hourglass_top_rounded,
-  );
 
   void _showAccessibility(BuildContext context) {
     showModalBottomSheet<void>(
@@ -264,7 +258,10 @@ class ProfileScreen extends StatelessWidget {
                   context.t('font_row'),
                   onTap: () => _showAccessibility(context),
                 ),
-                _row(context.t('feedback_row'), onTap: () => _soon(context)),
+                _row(
+                  context.t('feedback_row'),
+                  onTap: () => FeedbackSheet.show(context),
+                ),
                 const SizedBox(height: 14),
                 Center(
                   child: Text(

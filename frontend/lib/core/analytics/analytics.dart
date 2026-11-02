@@ -17,6 +17,9 @@ class Analytics {
   String? _deviceId;
   final String _sessionId = _rand(12);
 
+  /// Rastgele, cihaza özel kimlik (init'ten sonra dolu).
+  String? get deviceId => _deviceId;
+
   static String _rand(int n) {
     final r = Random.secure();
     return List.generate(n, (_) => r.nextInt(16).toRadixString(16)).join();

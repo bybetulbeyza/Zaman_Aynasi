@@ -14,7 +14,6 @@ import '../../core/constants/app_links.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
-import '../../core/analytics/analytics.dart';
 import '../../core/utils/launcher_util.dart';
 import '../../data/models/heritage_place.dart';
 import '../../core/constants/category_style.dart';
@@ -30,6 +29,7 @@ import '../widgets/detail/activities_section.dart';
 import '../widgets/detail/guide_card.dart';
 import '../widgets/detail/guide_section.dart';
 import '../widgets/detail/swipe_hint_arrow.dart';
+import '../widgets/common/feedback_sheet.dart';
 import '../widgets/slider/model_3d_view.dart';
 import '../widgets/slider/slider_parts.dart';
 import 'reels_screen.dart';
@@ -154,7 +154,6 @@ class _SliderScreenState extends State<SliderScreen>
   @override
   void initState() {
     super.initState();
-    Analytics.track('place_view', placeId: _place.id);
     _loadRelated();
     _extentAnim.addListener(() {
       final t = _extentTween;
@@ -464,7 +463,6 @@ class _SliderScreenState extends State<SliderScreen>
             }),
           ),
           seg(Icons.view_in_ar_rounded, context.t('view_3d'), _view3d, () {
-            Analytics.track('view_3d', placeId: _place.id);
             setState(() {
               _view3d = true;
               _selectedHotspot = null;
@@ -485,7 +483,6 @@ class _SliderScreenState extends State<SliderScreen>
         final n = _tour.stops;
         void toggle() {
           // Turun görünmesi için kart aşağı iner
-          if (!on) Analytics.track('tour_start', placeId: _place.id);
           if (!on && _sheetRaised) _animateExtentTo(_sheetMin);
           _tour.toggle();
         }
@@ -640,6 +637,21 @@ class _SliderScreenState extends State<SliderScreen>
 
       // Keşif görevleri (görev yoksa görünmez)
       ActivitiesSection(place: _place),
+
+      // Bu eserle ilgili geri bildirim
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: () => FeedbackSheet.show(
+            context,
+            placeId: _place.id,
+            placeName: _place.nameFor(en),
+          ),
+          icon: const Icon(Icons.rate_review_outlined, size: 18),
+          label: Text(context.t('fb_place_link')),
+          style: TextButton.styleFrom(foregroundColor: AppColors.primaryTeal),
+        ),
+      ),
 
       // Eski fotoğraf envanteri (fotoğraf yoksa hiç görünmez)
       if (_place.oldPhotos.isNotEmpty) ...[
@@ -914,13 +926,6 @@ class _SliderScreenState extends State<SliderScreen>
   );
 
   void _selectHotspot(Hotspot? h) {
-    if (h != null && h.id != _selectedHotspot?.id) {
-      Analytics.track(
-        'hotspot_open',
-        placeId: _place.id,
-        meta: {'hotspot': h.id.toString()},
-      );
-    }
     setState(() => _selectedHotspot = h);
   }
 
@@ -1019,10 +1024,7 @@ class _SliderScreenState extends State<SliderScreen>
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => LauncherUtil.openDirections(
-                _place.location,
-                placeId: _place.id,
-              ),
+              onPressed: () => LauncherUtil.openDirections(_place.location),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primaryTeal,
                 side: const BorderSide(
