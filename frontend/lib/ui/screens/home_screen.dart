@@ -43,13 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<HeritagePlace> _nearbyPlaces = [];
   bool _isLoading = true;
   bool _locationOff = false;
-  final PageController _featuredPc = PageController(viewportFraction: 0.5);
-  final PageController _nearPc = PageController(viewportFraction: 0.46);
 
   @override
   void dispose() {
-    _featuredPc.dispose();
-    _nearPc.dispose();
     super.dispose();
   }
 
@@ -418,38 +414,79 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }
-    final pc = large ? _featuredPc : _nearPc;
     return SizedBox(
       height: height + 24,
       child: Padding(
         padding: const EdgeInsets.only(left: 13),
-        child: PageView.builder(
-          controller: pc,
-          padEnds: false,
-          clipBehavior: Clip.none,
-          itemCount: places.length,
-          itemBuilder: (_, i) => AnimatedBuilder(
-            animation: pc,
-            builder: (_, child) {
-              var page = 0.0;
-              if (pc.hasClients && pc.position.haveDimensions) {
-                page = pc.page ?? 0;
-              }
-              // Ortadaki kart büyük ve canlı, yanlardakiler küçük ve silik
-              final d = (page - i).abs().clamp(0.0, 1.0);
-              return Transform.scale(scale: 1 - 0.1 * d, child: child);
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 12),
-              child: _PlaceCard(
-                place: places[i],
-                city: places[i].city,
-                distanceLabel: (!large && !_locationOff)
-                    ? LocationService.formatDistance(places[i].distanceMeters)
-                    : '',
-                onTap: () => _openSlider(places[i]),
-              ),
-            ),
+        child: _PlaceCarousel(
+          places: places,
+          large: large,
+          showDistance: !large && !_locationOff,
+          onOpen: _openSlider,
+        ),
+      ),
+    );
+  }
+}
+
+/// Yatay kart şeridi. Her şerit kendi PageController'ını taşır; böylece denetleyici
+/// birden fazla kaydırma görünümüne bağlanıp "attached to multiple scroll views" hatası vermez.
+class _PlaceCarousel extends StatefulWidget {
+  final List<HeritagePlace> places;
+  final bool large;
+  final bool showDistance;
+  final ValueChanged<HeritagePlace> onOpen;
+
+  const _PlaceCarousel({
+    required this.places,
+    required this.large,
+    required this.showDistance,
+    required this.onOpen,
+  });
+
+  @override
+  State<_PlaceCarousel> createState() => _PlaceCarouselState();
+}
+
+class _PlaceCarouselState extends State<_PlaceCarousel> {
+  late final PageController _pc = PageController(
+    viewportFraction: widget.large ? 0.5 : 0.46,
+  );
+
+  @override
+  void dispose() {
+    _pc.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final places = widget.places;
+    return PageView.builder(
+      controller: _pc,
+      padEnds: false,
+      clipBehavior: Clip.none,
+      itemCount: places.length,
+      itemBuilder: (_, i) => AnimatedBuilder(
+        animation: _pc,
+        builder: (_, child) {
+          var page = 0.0;
+          if (_pc.positions.length == 1 && _pc.position.haveDimensions) {
+            page = _pc.page ?? 0;
+          }
+          // Ortadaki kart büyük ve canlı, yanlardakiler küçük ve silik
+          final d = (page - i).abs().clamp(0.0, 1.0);
+          return Transform.scale(scale: 1 - 0.1 * d, child: child);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 12),
+          child: _PlaceCard(
+            place: places[i],
+            city: places[i].city,
+            distanceLabel: widget.showDistance
+                ? LocationService.formatDistance(places[i].distanceMeters)
+                : '',
+            onTap: () => widget.onOpen(places[i]),
           ),
         ),
       ),
