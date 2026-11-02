@@ -26,6 +26,10 @@ class _PassportScreenState extends State<PassportScreen> {
   @override
   void initState() {
     super.initState();
+    _load();
+  }
+
+  void _load() {
     HeritageRepository().getPlacesCached().then((p) {
       if (mounted) {
         setState(() {
@@ -115,7 +119,7 @@ class _PassportScreenState extends State<PassportScreen> {
                   if (_loading)
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.45,
-                      child: const Center(child: LogoLoader()),
+                      child: Center(child: LogoLoader(onRetry: _load)),
                     )
                   else
                     ..._grouped(context, cityPlaces, en),

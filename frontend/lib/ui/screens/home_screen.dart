@@ -57,7 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadPlaces() async {
     try {
-      final all = await _repository.getPlaces();
+      final all = await _repository.getPlaces().timeout(
+        const Duration(seconds: 15),
+      );
       if (!mounted) return;
       setState(() {
         final featured = all.where((p) => p.isFeatured).toList();
@@ -432,13 +434,24 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     if (places.isEmpty) {
+      // Liste boşsa (çoğunlukla bağlantı sorunu) yeniden deneme önerilir
       return SizedBox(
-        height: 80,
-        child: Center(
-          child: Text(
-            context.t('no_places'),
-            style: const TextStyle(color: AppColors.textMuted),
-          ),
+        height: 110,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              context.t('no_places'),
+              style: const TextStyle(color: AppColors.textMuted),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() => _isLoading = true);
+                _loadPlaces();
+              },
+              child: Text(context.t('retry')),
+            ),
+          ],
         ),
       );
     }

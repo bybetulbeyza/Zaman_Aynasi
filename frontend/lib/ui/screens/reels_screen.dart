@@ -95,7 +95,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
         body: Stack(
           children: [
             if (_loading)
-              const Center(child: const LogoLoader())
+              const Center(child: LogoLoader(textColor: Colors.white70))
             else if (_reels.isEmpty)
               Center(
                 child: Padding(
@@ -221,7 +221,7 @@ class _ReelPageState extends State<_ReelPage> {
               ),
             )
           else if (!_c.value.isInitialized)
-            const Center(child: const LogoLoader())
+            const Center(child: LogoLoader(textColor: Colors.white70))
           else
             FittedBox(
               fit: BoxFit.cover,

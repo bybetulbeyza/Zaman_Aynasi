@@ -70,6 +70,10 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
   @override
   void initState() {
     super.initState();
+    _loadRoutes();
+  }
+
+  void _loadRoutes() {
     _repository
         .getPlaces()
         .then((p) {
@@ -206,7 +210,9 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                         if (_isLoading)
                           SizedBox(
                             height: carouselH,
-                            child: const Center(child: LogoLoader()),
+                            child: Center(
+                              child: LogoLoader(onRetry: _loadRoutes),
+                            ),
                           )
                         else if (visible.isEmpty)
                           Padding(
