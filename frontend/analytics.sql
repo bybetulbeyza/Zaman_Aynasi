@@ -21,24 +21,23 @@ drop policy if exists "analytics insert only" on public.analytics_events;
 create policy "analytics insert only" on public.analytics_events
   for insert to anon, authenticated with check (true);
 
--- Rapor: envanter yayınlarına (cilt sitesi) uygulamadan tıklama — günlük, nereden (eser kartı / hakkında)
-create or replace view public.analytics_inventory_clicks as
+-- TEK rapor görünümü: gün gün uygulama açılışı ve envanter yayınlarına tıklama.
+-- Supabase > Table Editor > analytics_gunluk (ya da SQL Editor: select * from analytics_gunluk;)
+create or replace view public.analytics_gunluk as
   select (created_at at time zone 'Europe/Istanbul')::date as gun,
-         meta->>'from' as kaynak,
-         count(*) as tiklama,
-         count(distinct device_id) as farkli_cihaz
-  from public.analytics_events where event = 'inventory_click'
-  group by 1, 2 order by 1 desc, 3 desc;
+         count(distinct device_id) filter (where event = 'app_open')                          as acan_cihaz,
+         count(*)                  filter (where event = 'inventory_click')                    as tiklama,
+         count(distinct device_id) filter (where event = 'inventory_click')                    as tiklayan_cihaz,
+         round(100.0 * count(distinct device_id) filter (where event = 'inventory_click')
+               / nullif(count(distinct device_id) filter (where event = 'app_open'), 0), 1)   as tiklama_orani_yuzde,
+         count(*) filter (where event = 'inventory_click' and meta->>'from' = 'place_card')    as eser_kartindan,
+         count(*) filter (where event = 'inventory_click' and meta->>'from' = 'about')         as hakkindan
+  from public.analytics_events
+  group by 1
+  order by 1 desc;
 
--- Karşılaştırma için: uygulamayı açan farklı cihaz sayısı (tıklayan / açan = tıklama oranı)
-create or replace view public.analytics_app_opens as
-  select (created_at at time zone 'Europe/Istanbul')::date as gun,
-         count(distinct device_id) as acan_cihaz
-  from public.analytics_events where event = 'app_open'
-  group by 1 order by 1 desc;
+revoke all on public.analytics_gunluk from anon, authenticated;
 
-revoke all on public.analytics_inventory_clicks, public.analytics_app_opens
-  from anon, authenticated;
-
--- (Önceki sürümü çalıştırdıysanız artık gereksiz görünümleri kaldırabilirsiniz:)
--- drop view if exists public.analytics_summary, public.analytics_top_places, public.analytics_daily_active;
+-- Önceki sürümleri çalıştırdıysanız eski görünümleri kaldırın (tablo ve veri kalır):
+drop view if exists public.analytics_inventory_clicks, public.analytics_app_opens,
+                    public.analytics_summary, public.analytics_top_places, public.analytics_daily_active;
