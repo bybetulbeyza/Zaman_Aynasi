@@ -74,6 +74,18 @@ class AuthService {
 
   static Future<void> signOut() => _c.auth.signOut();
 
+  /// Giriş yöntemi: 'google' ya da 'email'.
+  static String get provider =>
+      (user?.appMetadata['provider'] ?? 'email').toString();
+
+  static DateTime? get createdAt => DateTime.tryParse(user?.createdAt ?? '');
+
+  /// Görünen adı günceller (hesap meta verisi + `profiles` satırı).
+  static Future<void> updateName(String name) async {
+    await _c.auth.updateUser(UserAttributes(data: {'full_name': name.trim()}));
+    await syncProfile();
+  }
+
   /// `profiles` tablosuna kullanıcının bilgilerini yazar (hata olursa uygulama etkilenmez).
   static Future<void> syncProfile() async {
     final u = user;

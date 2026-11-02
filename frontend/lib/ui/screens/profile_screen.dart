@@ -10,6 +10,7 @@ import '../../core/state/app_accessibility.dart';
 import 'about_screen.dart';
 import 'passport_screen.dart';
 import '../../core/state/passport.dart';
+import 'account_screen.dart';
 import 'auth_screen.dart';
 import '../../core/auth/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -286,23 +287,42 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _accountCard(BuildContext context) {
     final signedIn = AuthService.isSignedIn;
-    return Container(
+    final avatar = AuthService.avatarUrl;
+    final name = AuthService.displayName;
+    final body = Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(22, 14, 14, 14),
+      padding: EdgeInsets.fromLTRB(signedIn ? 16 : 22, 14, 14, 14),
       decoration: BoxDecoration(
         color: AppColors.primaryTeal,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         children: [
+          if (signedIn) ...[
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: Colors.white24,
+              backgroundImage: avatar != null ? NetworkImage(avatar) : null,
+              onBackgroundImageError: avatar != null ? (_, _) {} : null,
+              child: avatar == null
+                  ? Text(
+                      name.isEmpty ? '?' : name[0].toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 14),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  signedIn
-                      ? AuthService.displayName
-                      : context.t('auth_signin_card'),
+                  signedIn ? name : context.t('auth_signin_card'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -326,31 +346,51 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          OutlinedButton(
-            onPressed: signedIn
-                ? () => AuthService.signOut()
-                : () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AuthScreen(popOnDone: true),
-                    ),
-                  ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.transparent,
-              side: const BorderSide(color: Colors.white70),
-              shape: const StadiumBorder(),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              textStyle: const TextStyle(
-                fontSize: 14.5,
-                fontWeight: FontWeight.w700,
+          if (signedIn)
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.white,
+              size: 28,
+            )
+          else
+            OutlinedButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AuthScreen(popOnDone: true),
+                ),
               ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.transparent,
+                side: const BorderSide(color: Colors.white70),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              child: Text(context.t('auth_login')),
             ),
-            child: Text(
-              signedIn ? context.t('auth_signout') : context.t('auth_login'),
-            ),
-          ),
         ],
+      ),
+    );
+    if (!signedIn) return body;
+    // Giriş yapılmışsa kartın tamamı hesap sayfasını açar
+    return Semantics(
+      button: true,
+      label: '${context.t('acc_title')}: $name',
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AccountScreen()),
+        ),
+        child: body,
       ),
     );
   }
