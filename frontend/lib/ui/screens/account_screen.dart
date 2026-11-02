@@ -6,7 +6,6 @@ import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../widgets/common/app_back_button.dart';
 import '../widgets/common/app_toast.dart';
-import '../widgets/common/lang_toggle.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/pill_button.dart';
 
@@ -177,28 +176,6 @@ class _AccountScreenState extends State<AccountScreen> {
                           : context.t('acc_method_email'),
                     ),
                     _info(context.t('acc_since'), _date(AuthService.createdAt)),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 22,
-                        vertical: 11,
-                      ),
-                      decoration: _card(),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              context.t('acc_lang'),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: AppColors.textDark,
-                              ),
-                            ),
-                          ),
-                          const LangToggle(),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),

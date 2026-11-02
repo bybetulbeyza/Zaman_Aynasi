@@ -34,9 +34,22 @@ class Passport extends ChangeNotifier {
       _stamps.addAll(p.getStringList(_kStamps) ?? []);
     } catch (_) {}
     AuthService.changes.listen((s) {
-      if (s.session != null) _syncFromServer();
+      if (s.event == AuthChangeEvent.signedOut) {
+        // Çıkışta bu cihazdaki ilerleme temizlenir (hesapta saklı kalır); sonraki kullanıcıya geçmez.
+        _clearLocal();
+      } else if (s.session != null) {
+        _syncFromServer();
+      }
     });
     if (AuthService.isSignedIn) _syncFromServer();
+  }
+
+  Future<void> _clearLocal() async {
+    _activities.clear();
+    _stamps.clear();
+    ceremony.value = null;
+    notifyListeners();
+    await _save();
   }
 
   Future<void> _save() async {

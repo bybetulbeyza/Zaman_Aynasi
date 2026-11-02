@@ -236,7 +236,7 @@ const Map<String, String> appStringsTr = {
   'acc_lang': 'Tercih edilen dil',
   'acc_signout_q': 'Çıkış yapmak istiyor musun?',
   'acc_signout_body':
-      'Misafir olarak devam edebilirsin. Pasaportun ve görevlerin hesabında saklı kalır.',
+      'Bu cihazdaki pasaportun ve görevlerin temizlenir. Hesabında saklı kalır, tekrar giriş yapınca geri gelir.',
   'acc_cancel': 'Vazgeç',
   'acc_signed_out': 'Çıkış yapıldı',
   'auth_signin_card': 'Giriş yap',
@@ -502,7 +502,7 @@ const Map<String, String> appStringsEn = {
   'acc_lang': 'Preferred language',
   'acc_signout_q': 'Do you want to sign out?',
   'acc_signout_body':
-      'You can continue as a guest. Your passport and tasks stay saved in your account.',
+      'The passport and tasks on this device will be cleared. They stay saved in your account and come back when you sign in again.',
   'acc_cancel': 'Cancel',
   'acc_signed_out': 'Signed out',
   'auth_signin_card': 'Sign in',
