@@ -153,7 +153,6 @@ class _SliderScreenState extends State<SliderScreen>
   @override
   void initState() {
     super.initState();
-    _view3d = _place.has3dModel; // 3B varsa önce 3B açılır
     _loadRelated();
     _extentAnim.addListener(() {
       final t = _extentTween;

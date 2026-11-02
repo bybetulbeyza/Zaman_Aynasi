@@ -693,7 +693,13 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
 
               // 6. Dinamik hotspot'lar (fotoğrafla birlikte hareket eder, boyutu sabit kalır)
               if (_showHotspots)
-                ...widget.hotspots.map((hotspot) {
+                // Yapı yönlendirme noktaları hem eski hem güncel fotoğrafta durur
+                ...[
+                  for (final h in widget.hotspots) ...[
+                    h,
+                    if (h.hasSubPlaceNavigation) h.otherSide(),
+                  ],
+                ].map((hotspot) {
                   final isBeforeSide =
                       hotspot.targetSide.trim().toLowerCase() == 'before';
                   // 'after' hotspot'ları sol (eski) fotoğrafa, 'before' olanlar sağ (güncel) fotoğrafa aittir

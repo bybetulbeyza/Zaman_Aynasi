@@ -62,6 +62,11 @@ class Hotspot {
 
   /// Supabase: model_pos / model_normal — 3B model üzerindeki konum ("x y z" metre) ve yüzey yönü.
   final String? modelPos;
+
+  /// Supabase: alt_x_percent / alt_y_percent — yapı (alt eser) hotspot'unun DİĞER fotoğraftaki konumu.
+  /// Boşsa aynı koordinat kullanılır.
+  final double? altX;
+  final double? altY;
   final String? modelNormal;
 
   Hotspot({
@@ -79,6 +84,8 @@ class Hotspot {
     this.targetPlaceId,
     this.modelPos,
     this.modelNormal,
+    this.altX,
+    this.altY,
   });
 
   String titleFor(bool en) => en && titleEn.isNotEmpty ? titleEn : title;
@@ -94,6 +101,28 @@ class Hotspot {
   }
 
   bool get hasAiVideo => aiVideoUrl != null && aiVideoUrl!.trim().isNotEmpty;
+
+  /// Aynı hotspot'un karşı fotoğraftaki (eski ↔ güncel) kopyası; yapı yönlendirme noktaları iki tarafta da durur.
+  Hotspot otherSide() => Hotspot(
+    id: id,
+    placeId: placeId,
+    title: title,
+    description: description,
+    targetSide: targetSide.trim().toLowerCase() == 'before'
+        ? 'after'
+        : 'before',
+    xPercent: altX ?? xPercent,
+    yPercent: altY ?? yPercent,
+    titleEn: titleEn,
+    descriptionEn: descriptionEn,
+    aiVideoEnUrl: aiVideoEnUrl,
+    aiVideoUrl: aiVideoUrl,
+    targetPlaceId: targetPlaceId,
+    modelPos: modelPos,
+    modelNormal: modelNormal,
+    altX: xPercent,
+    altY: yPercent,
+  );
 
   bool get isModelHotspot => modelPos != null && modelPos!.trim().isNotEmpty;
 
@@ -116,6 +145,8 @@ class Hotspot {
       targetPlaceId: json['target_place_id']?.toString(),
       modelPos: (json['model_pos'] as String?)?.trim(),
       modelNormal: (json['model_normal'] as String?)?.trim(),
+      altX: (json['alt_x_percent'] as num?)?.toDouble(),
+      altY: (json['alt_y_percent'] as num?)?.toDouble(),
     );
   }
 }
