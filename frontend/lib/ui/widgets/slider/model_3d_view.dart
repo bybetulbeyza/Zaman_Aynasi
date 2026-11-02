@@ -147,24 +147,27 @@ class _Model3DViewState extends State<Model3DView> {
     super.dispose();
   }
 
-  String _hotspotHtml() {
-    final b = StringBuffer()
-      ..writeln('<button slot="ar-button" style="display:none"></button>');
-    var n = 0;
-    for (final h in _valid) {
+  /// Verilen hotspot'lar için model-viewer düğmeleri. [ar] true ise varsayılan AR düğmesi gizlenir.
+  String _hotspotHtml(Iterable<Hotspot> list, {bool ar = false}) {
+    final b = StringBuffer();
+    if (ar)
+      b.writeln('<button slot="ar-button" style="display:none"></button>');
+    for (final h in list) {
       final normal = Model3DView._num.hasMatch(h.modelNormal ?? '')
           ? h.modelNormal!
           : '0 1 0';
-      n++;
       b.writeln(
-        '<button class="hs" slot="hotspot-$n" data-position="${h.modelPos}" '
+        '<button class="hs" slot="hotspot-${h.id}" data-position="${h.modelPos}" '
         'data-normal="$normal" data-visibility-attribute="visible" '
         'aria-label="${Model3DView.htmlEscapeAttr(h.title)}" '
-        'onclick="HotspotTap.postMessage(\'${h.id}\')">$n</button>',
+        'onclick="HotspotTap.postMessage(\'${h.id}\')"></button>',
       );
     }
     return b.toString();
   }
+
+  static bool _isOldSide(Hotspot h) =>
+      h.targetSide.trim().toLowerCase() == 'after';
 
   @override
   Widget build(BuildContext context) {
@@ -172,13 +175,19 @@ class _Model3DViewState extends State<Model3DView> {
     final oldUrl = widget.oldUrl;
     final both = newUrl.isNotEmpty && oldUrl.isNotEmpty;
     final src = newUrl.isNotEmpty ? newUrl : oldUrl;
+    // İki model varken her model kendi hotspot'larını taşır: 'after' (tarihî) eski modelde,
+    // 'before' (günümüz) yeni modelde. Tek model varsa hepsi onda görünür.
+    final forOld = both ? _valid.where(_isOldSide).toList() : <Hotspot>[];
+    final forNew = both ? _valid.where((h) => !_isOldSide(h)).toList() : _valid;
     final cfg = jsonEncode({
       'oldSrc': both ? oldUrl : '',
       'single': both ? '' : (newUrl.isNotEmpty ? 'new' : 'old'),
+      'oldHtml': _hotspotHtml(forOld),
       'hs': [
         for (final h in _valid)
           {
             'id': h.id.toString(),
+            'side': _isOldSide(h) ? 'after' : 'before',
             'p': Model3DView._nums(h.modelPos, [0, 10, 0]),
             'n': Model3DView._nums(h.modelNormal, [0, 0, -1]),
           },
@@ -206,7 +215,7 @@ class _Model3DViewState extends State<Model3DView> {
                 shadowIntensity: 1,
                 exposure: 1.05,
                 cameraOrbit: '35deg 70deg auto',
-                innerModelViewerHtml: _hotspotHtml(),
+                innerModelViewerHtml: _hotspotHtml(forNew, ar: true),
                 relatedCss: _css,
                 relatedJs: _js_.replaceFirst('__CFG__', cfg),
                 onWebViewCreated: (c) => _web = c,
@@ -372,7 +381,7 @@ html, body { overflow: hidden; background: transparent; }
         }
       }
       od.setAttribute('src', CFG.oldSrc);
-      od.innerHTML = nw.innerHTML;
+      od.innerHTML = CFG.oldHtml || '';
       od.style.cssText = 'position:absolute;left:0;top:0;height:100%;background:' + OLD_BG + ';';
       oldWrap = document.createElement('div');
       oldWrap.style.cssText = 'position:absolute;left:0;top:0;height:100%;width:50%;overflow:hidden;will-change:width;';
@@ -415,26 +424,26 @@ html, body { overflow: hidden; background: transparent; }
     }
 
     // --- Tarihî / günümüz ayırıcı: çizgi, tutamaç ve geçiş aynı sayfada çizilir (gecikme olmaz)
-    let f = 0.5, visT = 0, fMsgT = 0;
-    function vis() {
-      const x = f * window.innerWidth;
-      for (const b of od.querySelectorAll('.hs')) {
-        const r = b.getBoundingClientRect();
-        b.style.visibility = (r.left + r.width / 2) < x ? 'visible' : 'hidden';
-      }
-      for (const b of nw.querySelectorAll('.hs')) {
-        const r = b.getBoundingClientRect();
-        b.style.visibility = (r.left + r.width / 2) >= x ? 'visible' : 'hidden';
-      }
-    }
+    let f = 0.5, fMsgT = 0, fAnim = 0;
     let gline = null, gknob = null;
     function apply() {
       if (!od) return;
       oldWrap.style.width = (f * 100) + '%';
       gline.style.left = (f * 100) + '%';
       gknob.style.left = (f * 100) + '%';
-      if (!visT) visT = setTimeout(function () { visT = 0; vis(); }, 90);
       if (!fMsgT) fMsgT = setTimeout(function () { fMsgT = 0; ZoomCh.postMessage('f:' + f); }, 120);
+    }
+    // Ayırıcıyı yumuşakça verilen konuma kaydırır (hotspot'un bulunduğu model görünsün diye)
+    function slideTo(to) {
+      cancelAnimationFrame(fAnim);
+      const from = f, t0 = performance.now();
+      (function step(now) {
+        const p = Math.min(1, (now - t0) / 550);
+        const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        f = from + (to - from) * e;
+        apply();
+        if (p < 1) fAnim = requestAnimationFrame(step);
+      })(t0);
     }
     let userTouched = false;
     if (od) {
@@ -523,12 +532,15 @@ html, body { overflow: hidden; background: transparent; }
     }
     window.zaReset = function () {
       if (!home) return;
+      if (od) { userTouched = true; slideTo(0.5); }
       fly(home.th, home.ph, home.r, homeT.x, homeT.y, homeT.z);
     };
     window.zaFocus = function (id) {
       let h = null;
       for (const x of CFG.hs) if (x.id === id) h = x;
       if (!h || !home) return;
+      // Hotspot hangi dönemin modelindeyse ayırıcı o tarafı açar
+      if (od) { userTouched = true; slideTo(h.side === 'after' ? 0.92 : 0.08); }
       const n = h.n, th = Math.atan2(n[0], n[2]);
       const ph = Math.min(84 * DEG, Math.max(55 * DEG, Math.acos(Math.max(-1, Math.min(1, n[1])))));
       fly(th, ph, Math.max(10, home.r * 0.38), h.p[0], Math.max(2, h.p[1]), h.p[2]);

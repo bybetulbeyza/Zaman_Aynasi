@@ -2,8 +2,8 @@
 -- (Her eserin içindeki sıra eski id sırasıdır.) Eser id'leri zaten 1-23 art arda.
 --
 -- ÖNCE: Table Editor > Hotspots > Export to CSV ile yedek alın.
--- SIRA: Bu dosyayı, diğer hotspot dosyaları (db_cleanup, hotspots_2d_3d, koza_han_hotspots, model_hotspots)
---       çalıştırıldıktan SONRA ve en son çalıştırın. Bu dosya tek seferliktir.
+-- SIRA: Bu dosyayı, diğer hotspot dosyaları (db_cleanup, hotspots_2d_3d, koza_han_hotspots, model_hotspots, hotspots_sides_fix)
+--       çalıştırıldıktan SONRA çalıştırın. Boşlukları kapatmak için istediğiniz kadar tekrar çalıştırılabilir.
 begin;
 
 -- 1) Çakışmayı önlemek için hepsini uzağa taşı
