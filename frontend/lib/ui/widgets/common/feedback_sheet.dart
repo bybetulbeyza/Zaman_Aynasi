@@ -149,7 +149,9 @@ class _FeedbackFormState extends State<_FeedbackForm> {
           onTap: () => setState(() => _cat = c),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+            height: 78,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: on ? AppColors.primaryTealLight : Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -167,15 +169,20 @@ class _FeedbackFormState extends State<_FeedbackForm> {
                   color: on ? AppColors.primaryTeal : AppColors.textMuted,
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  context.t('fb_$c'),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.15,
-                    fontWeight: on ? FontWeight.w800 : FontWeight.w600,
-                    color: on ? AppColors.primaryTealDark : AppColors.textDark,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    context.t('fb_$c'),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.15,
+                      fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+                      color: on
+                          ? AppColors.primaryTealDark
+                          : AppColors.textDark,
+                    ),
                   ),
                 ),
               ],
