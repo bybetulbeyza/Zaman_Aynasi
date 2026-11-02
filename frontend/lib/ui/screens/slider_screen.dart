@@ -607,10 +607,23 @@ class _SliderScreenState extends State<SliderScreen>
 
       // Sesli rehber
       // Kayıtlı ses varsa onu çalar; yoksa sayfayı cihazın sesiyle okur
-      if (audioUrl.isNotEmpty && _place.hasAudioTranscript)
+      // İngilizce kayıtlı ses yoksa ama İngilizce metin varsa metni cihazın İngilizce sesiyle okuruz;
+      // aksi hâlde Türkçe kayıt ile Türkçe metin birlikte gösterilir (ses ile metin hep aynı dilde kalır).
+      if (en && _place.audioGuideEnUrl.isEmpty && _place.audioTextEn.isNotEmpty)
+        GuideSection(
+          player: TtsGuidePlayer(
+            key: const ValueKey('tts-audio-en'),
+            english: true,
+            text: _place.audioTranscript(true).join(' '),
+          ),
+          transcript: _place.audioTranscript(true),
+        )
+      else if (audioUrl.isNotEmpty && _place.hasAudioTranscript)
         GuideSection(
           player: AudioGuidePlayer(key: ValueKey(audioUrl), url: audioUrl),
-          transcript: _place.audioTranscript(en),
+          transcript: _place.audioTranscript(
+            en && _place.audioGuideEnUrl.isNotEmpty,
+          ),
         )
       else if (audioUrl.isNotEmpty)
         AudioGuidePlayer(key: ValueKey(audioUrl), url: audioUrl)

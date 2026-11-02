@@ -9,11 +9,11 @@ alter table public."Hotspots"
 
 -- 1) Var olan Yeşil Türbe hotspot'larına 3B konumu ver (yeni satır açılmaz). Cephe -Z yönünde.
 update public."Hotspots" set model_pos = '0 8.4 -12.7',  model_normal = '0 0 -1'
-  where place_id = 11 and id = 48;  -- Mukarnaslı Taç Kapı Kavsarası
+  where place_id = 11 and title like 'Mukarnaslı Taç Kapı%';  -- Mukarnaslı Taç Kapı Kavsarası
 update public."Hotspots" set model_pos = '0 5.9 -12.7',  model_normal = '0 0 -1'
-  where place_id = 11 and id = 49;  -- Giriş Kapısı Üzerindeki Kitabe
+  where place_id = 11 and title like 'Giriş Kapısı Üzerindeki Kitabe%';  -- Giriş Kapısı Üzerindeki Kitabe
 update public."Hotspots" set model_pos = '6.9 7.8 -7.6', model_normal = '0.7 0 -0.7'
-  where place_id = 11 and id = 46;  -- Pencereler
+  where place_id = 11 and title like 'Firuze Çini Yüzeyde%';  -- Pencereler
 
 -- 2) Envanterde karşılığı olmayan, yalnızca 3B'de anlamlı iki yeni nokta (id elle verilir).
 insert into public."Hotspots"
