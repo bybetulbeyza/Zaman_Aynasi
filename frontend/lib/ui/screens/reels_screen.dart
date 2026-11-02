@@ -189,7 +189,7 @@ class _ReelPageState extends State<_ReelPage> {
   /// Yalnızca ekranda tam görünen sayfa oynar.
   void _syncPlayback() {
     if (!_c.value.isInitialized) return;
-    final page = widget.pageController.hasClients
+    final page = widget.pageController.positions.length == 1
         ? widget.pageController.page
         : 0.0;
     final visible = ((page ?? 0) - widget.index).abs() < 0.5;

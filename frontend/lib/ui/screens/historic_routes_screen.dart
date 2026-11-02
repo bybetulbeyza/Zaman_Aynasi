@@ -301,7 +301,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
               animation: _pc,
               builder: (_, child) {
                 var page = _page.toDouble();
-                if (_pc.hasClients && _pc.position.haveDimensions) {
+                if (_pc.positions.length == 1 && _pc.position.haveDimensions) {
                   page = _pc.page ?? page;
                 }
                 final d = (page - i).abs().clamp(0.0, 1.0);
