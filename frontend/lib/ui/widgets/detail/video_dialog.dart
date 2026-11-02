@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../common/logo_loader.dart';
 import '../common/dark_cancel.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/constants/app_colors.dart';
@@ -63,7 +64,7 @@ class _VideoDialogState extends State<_VideoDialog> {
                   style: const TextStyle(color: Colors.white70),
                 )
               else if (!ready)
-                const CircularProgressIndicator(color: AppColors.primaryTeal)
+                const LogoLoader(size: 48)
               else
                 GestureDetector(
                   onTap: () => setState(() {

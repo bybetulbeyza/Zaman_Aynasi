@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dark_cancel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
+import 'app_logo.dart';
+import 'shimmer_box.dart';
 
 class AppNetworkImage extends StatelessWidget {
   final String imageUrl;
@@ -30,20 +32,28 @@ class AppNetworkImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
-      placeholder: (context, url) => Container(
-        width: width,
-        height: height,
-        color: AppColors.borderSubtle,
-        alignment: Alignment.center,
-        child: const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: AppColors.primaryTeal,
+      placeholder: (context, url) {
+        // Işık süzülen iskelet + silik logo; boyut belliyse logo ona göre ölçeklenir
+        final side = (width != null && height != null)
+            ? (width! < height! ? width! : height!) * 0.3
+            : 36.0;
+        return SizedBox(
+          width: width,
+          height: height,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const ShimmerBox(),
+              Center(
+                child: Opacity(
+                  opacity: 0.3,
+                  child: AppLogo(size: side.clamp(20.0, 48.0)),
+                ),
+              ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
       errorWidget: (context, url, error) => Container(
         width: width,
         height: height,

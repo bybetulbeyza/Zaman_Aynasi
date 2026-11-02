@@ -113,9 +113,9 @@ class _PassportScreenState extends State<PassportScreen> {
                   ),
                   const SizedBox(height: 22),
                   if (_loading)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 40),
-                      child: Center(child: const LogoLoader()),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.45,
+                      child: const Center(child: LogoLoader()),
                     )
                   else
                     ..._grouped(context, cityPlaces, en),

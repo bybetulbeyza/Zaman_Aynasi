@@ -204,9 +204,9 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                           ],
                         ),
                         if (_isLoading)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 40),
-                            child: LogoLoader(),
+                          SizedBox(
+                            height: carouselH,
+                            child: const Center(child: LogoLoader()),
                           )
                         else if (visible.isEmpty)
                           Padding(

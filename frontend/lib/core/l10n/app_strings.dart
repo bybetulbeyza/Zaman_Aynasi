@@ -196,9 +196,12 @@ const Map<String, String> appStringsTr = {
   'fb_content': 'Yanlış bilgi',
   'fb_thanks': 'Teşekkür',
   'fb_hint': 'Mesajınız',
-  'fb_hint_bug': 'Karşılaştığın aksaklığı bizimle paylaş; birlikte güzelleştirelim.',
-  'fb_hint_idea': 'Aklındaki düşünceyi bizimle paylaş; mirasımızı birlikte büyütelim.',
-  'fb_hint_content': 'Gördüğün eksik ya da yanlışı paylaş; kaynağıyla birlikte düzeltelim.',
+  'fb_hint_bug':
+      'Karşılaştığın aksaklığı bizimle paylaş; birlikte güzelleştirelim.',
+  'fb_hint_idea':
+      'Aklındaki düşünceyi bizimle paylaş; mirasımızı birlikte büyütelim.',
+  'fb_hint_content':
+      'Gördüğün eksik ya da yanlışı paylaş; kaynağıyla birlikte düzeltelim.',
   'fb_hint_thanks': 'Gönlündekini bizimle paylaş.',
   'fb_contact': 'E-posta (isteğe bağlı, yanıt için)',
   'fb_send': 'Gönder',
@@ -491,8 +494,10 @@ const Map<String, String> appStringsEn = {
   'fb_thanks': 'Thanks',
   'fb_hint': 'Your message',
   'fb_hint_bug': 'Tell us what went wrong; let us improve it together.',
-  'fb_hint_idea': 'Share the thought on your mind; let us grow our heritage together.',
-  'fb_hint_content': 'Share what is wrong or missing; we will correct it with its source.',
+  'fb_hint_idea':
+      'Share the thought on your mind; let us grow our heritage together.',
+  'fb_hint_content':
+      'Share what is wrong or missing; we will correct it with its source.',
   'fb_hint_thanks': 'Share what is on your heart.',
   'fb_contact': 'E-mail (optional, for a reply)',
   'fb_send': 'Send',

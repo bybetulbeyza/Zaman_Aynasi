@@ -1,8 +1,8 @@
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/shimmer_box.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/squircle_frame.dart';
-import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
@@ -398,9 +398,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final height = large ? 232.0 : 168.0;
     if (_isLoading) {
+      // Yükleme sırasında kartların yerinde ışık süzülen iskeletler görünür
       return SizedBox(
-        height: height,
-        child: const Center(child: const LogoLoader()),
+        height: height + 24,
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final w = (box.maxWidth - 13) * (large ? 0.5 : 0.46);
+            return Padding(
+              padding: const EdgeInsets.only(left: 13),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < 3; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 12,
+                      ),
+                      child: SizedBox(
+                        width: w - 14,
+                        height: height,
+                        child: const SquircleFrame(
+                          radius: 40,
+                          child: ShimmerBox(),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
       );
     }
     if (places.isEmpty) {
