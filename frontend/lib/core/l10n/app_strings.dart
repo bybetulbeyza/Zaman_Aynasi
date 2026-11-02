@@ -225,6 +225,9 @@ const Map<String, String> appStringsTr = {
   'about_sources_body':
       'İçerikler Vakıf Katılım envanter kitaplarından alınmıştır. Her eserin sayfasında, kitaptaki cilt ve sayfa numarası belirtilir.',
   'about_open_inventory': 'Envanter yayınlarını aç',
+  'about_privacy_title': 'Gizlilik',
+  'about_privacy_body':
+      'Hangi eserlerin ilgi gördüğünü anlamak için ad, e-posta ya da konum içermeyen anonim kullanım sayıları tutulur.',
   'source_ai_note': 'Tarihî görsel yapay zekâ ile canlandırılmıştır.',
   'about_ai_title': 'Canlandırmalar nasıl üretildi?',
   'about_ai_body':
@@ -458,6 +461,9 @@ const Map<String, String> appStringsEn = {
   'about_sources_body':
       'Content is taken from the Vakıf Katılım inventory books. Each landmark page lists the volume and page number in the book.',
   'about_open_inventory': 'Open inventory publications',
+  'about_privacy_title': 'Privacy',
+  'about_privacy_body':
+      'To understand which works are of interest, anonymous usage counts are kept; they contain no name, e-mail or location.',
   'source_ai_note': 'The historic image is an AI reconstruction.',
   'about_ai_title': 'How were the reconstructions made?',
   'about_ai_body':

@@ -580,6 +580,7 @@ class MapScreenState extends State<MapScreen> {
                               customBorder: const CircleBorder(),
                               onTap: () => LauncherUtil.openDirections(
                                 currentPlace.location,
+                                placeId: currentPlace.id,
                               ),
                               child: const Padding(
                                 padding: EdgeInsets.all(11),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/app_theme.dart';
+import 'core/analytics/analytics.dart';
 import 'core/l10n/app_lang.dart';
 import 'core/state/app_accessibility.dart';
 import 'core/state/passport.dart';
@@ -18,6 +19,8 @@ Future<void> main() async {
 
   await Passport.instance.init();
   await AppAccessibility.instance.init();
+  await Analytics.instance.init();
+  Analytics.track('app_open');
 
   runApp(const ZamanAynasiApp());
 }

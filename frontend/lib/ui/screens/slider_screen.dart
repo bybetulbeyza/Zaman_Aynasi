@@ -14,6 +14,7 @@ import '../../core/constants/app_links.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
+import '../../core/analytics/analytics.dart';
 import '../../core/utils/launcher_util.dart';
 import '../../data/models/heritage_place.dart';
 import '../../core/constants/category_style.dart';
@@ -153,6 +154,7 @@ class _SliderScreenState extends State<SliderScreen>
   @override
   void initState() {
     super.initState();
+    Analytics.track('place_view', placeId: _place.id);
     _loadRelated();
     _extentAnim.addListener(() {
       final t = _extentTween;
@@ -264,7 +266,7 @@ class _SliderScreenState extends State<SliderScreen>
                     hotspots: _place.modelHotspots,
                     selected: _selectedHotspot,
                     tourController: _tour,
-                    onHotspot: (h) => setState(() => _selectedHotspot = h),
+                    onHotspot: _selectHotspot,
                     bottomInset: _underlap,
                   )
                 else
@@ -281,8 +283,7 @@ class _SliderScreenState extends State<SliderScreen>
                       for (final c in _children) c.id: c.category,
                     },
                     bottomInset: _underlap,
-                    onHotspotSelected: (h) =>
-                        setState(() => _selectedHotspot = h),
+                    onHotspotSelected: _selectHotspot,
                   ),
                 if (_place.has3dModel)
                   Positioned(
@@ -462,15 +463,13 @@ class _SliderScreenState extends State<SliderScreen>
               _selectedHotspot = null;
             }),
           ),
-          seg(
-            Icons.view_in_ar_rounded,
-            context.t('view_3d'),
-            _view3d,
-            () => setState(() {
+          seg(Icons.view_in_ar_rounded, context.t('view_3d'), _view3d, () {
+            Analytics.track('view_3d', placeId: _place.id);
+            setState(() {
               _view3d = true;
               _selectedHotspot = null;
-            }),
-          ),
+            });
+          }),
         ],
       ),
     );
@@ -486,6 +485,7 @@ class _SliderScreenState extends State<SliderScreen>
         final n = _tour.stops;
         void toggle() {
           // Turun görünmesi için kart aşağı iner
+          if (!on) Analytics.track('tour_start', placeId: _place.id);
           if (!on && _sheetRaised) _animateExtentTo(_sheetMin);
           _tour.toggle();
         }
@@ -907,6 +907,23 @@ class _SliderScreenState extends State<SliderScreen>
     );
   }
 
+  void _openInventory() => LauncherUtil.openUrl(
+    AppLinks.inventoryBooks,
+    source: 'place_card',
+    placeId: _place.id,
+  );
+
+  void _selectHotspot(Hotspot? h) {
+    if (h != null && h.id != _selectedHotspot?.id) {
+      Analytics.track(
+        'hotspot_open',
+        placeId: _place.id,
+        meta: {'hotspot': h.id.toString()},
+      );
+    }
+    setState(() => _selectedHotspot = h);
+  }
+
   Widget _buildSourceCard(bool en) {
     final inventory = _inventoryLabel(en);
     return Semantics(
@@ -915,9 +932,9 @@ class _SliderScreenState extends State<SliderScreen>
           '${context.t('source_book')}. ${inventory.isNotEmpty ? inventory : context.t('source_label')}',
       hint: context.t('source_open'),
       excludeSemantics: true,
-      onTap: () => LauncherUtil.openUrl(AppLinks.inventoryBooks),
+      onTap: _openInventory,
       child: GestureDetector(
-        onTap: () => LauncherUtil.openUrl(AppLinks.inventoryBooks),
+        onTap: _openInventory,
         child: Container(
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           decoration: BoxDecoration(
@@ -1002,7 +1019,10 @@ class _SliderScreenState extends State<SliderScreen>
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => LauncherUtil.openDirections(_place.location),
+              onPressed: () => LauncherUtil.openDirections(
+                _place.location,
+                placeId: _place.id,
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primaryTeal,
                 side: const BorderSide(
