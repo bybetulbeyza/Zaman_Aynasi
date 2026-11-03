@@ -61,40 +61,44 @@ class _AccountScreenState extends State<AccountScreen> {
     final action = await showModalBottomSheet<String>(
       context: context,
       constraints: kSheetConstraints,
+      clipBehavior: Clip.antiAlias,
       backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SheetHandle(),
-              ListTile(
-                leading: const Icon(Icons.photo_library_outlined),
-                title: Text(ctx.t('acc_photo_gallery')),
-                onTap: () => Navigator.pop(ctx, 'gallery'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera_outlined),
-                title: Text(ctx.t('acc_photo_camera')),
-                onTap: () => Navigator.pop(ctx, 'camera'),
-              ),
-              if (AuthService.hasCustomAvatar)
+      builder: (ctx) => PatternBackground(
+        lineOpacity: 0.07,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SheetHandle(),
                 ListTile(
-                  leading: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: AppColors.ciniBordeaux,
-                  ),
-                  title: Text(
-                    ctx.t('acc_photo_remove'),
-                    style: const TextStyle(color: AppColors.ciniBordeaux),
-                  ),
-                  onTap: () => Navigator.pop(ctx, 'remove'),
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: Text(ctx.t('acc_photo_gallery')),
+                  onTap: () => Navigator.pop(ctx, 'gallery'),
                 ),
-            ],
+                ListTile(
+                  leading: const Icon(Icons.photo_camera_outlined),
+                  title: Text(ctx.t('acc_photo_camera')),
+                  onTap: () => Navigator.pop(ctx, 'camera'),
+                ),
+                if (AuthService.hasCustomAvatar)
+                  ListTile(
+                    leading: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: AppColors.ciniBordeaux,
+                    ),
+                    title: Text(
+                      ctx.t('acc_photo_remove'),
+                      style: const TextStyle(color: AppColors.ciniBordeaux),
+                    ),
+                    onTap: () => Navigator.pop(ctx, 'remove'),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

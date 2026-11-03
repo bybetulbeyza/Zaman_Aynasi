@@ -1,3 +1,4 @@
+import 'pattern_background.dart';
 import 'sheet_handle.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -22,6 +23,7 @@ class FeedbackSheet {
     return showModalBottomSheet<void>(
       context: context,
       constraints: kSheetConstraints,
+      clipBehavior: Clip.antiAlias,
       isScrollControlled: true,
       backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
@@ -199,99 +201,106 @@ class _FeedbackFormState extends State<_FeedbackForm> {
   Widget build(BuildContext context) {
     final inset = MediaQuery.of(context).viewInsets.bottom;
     final canSend = _msg.text.trim().length >= 3 && !_sending;
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(22, 0, 22, 18 + inset),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SheetHandle(),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.t('feedback_row'),
-                      style: AppTheme.titleLarge,
+    return PatternBackground(
+      lineOpacity: 0.07,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(22, 0, 22, 18 + inset),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SheetHandle(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.t('feedback_row'),
+                        style: AppTheme.titleLarge,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded),
-                    tooltip: context.t('acc_cancel'),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                      tooltip: context.t('acc_cancel'),
+                      color: AppColors.textMuted,
+                    ),
+                  ],
+                ),
+                Text(
+                  widget.placeName != null
+                      ? context
+                            .t('fb_about_place')
+                            .replaceAll('{name}', widget.placeName!)
+                      : context.t('fb_sub'),
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    height: 1.4,
                     color: AppColors.textMuted,
                   ),
-                ],
-              ),
-              Text(
-                widget.placeName != null
-                    ? context
-                          .t('fb_about_place')
-                          .replaceAll('{name}', widget.placeName!)
-                    : context.t('fb_sub'),
-                style: const TextStyle(
-                  fontSize: 14.5,
-                  height: 1.4,
-                  color: AppColors.textMuted,
                 ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  for (var i = 0; i < _cats.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 8),
-                    _category(_cats[i]),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    for (var i = 0; i < _cats.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 8),
+                      _category(_cats[i]),
+                    ],
                   ],
-                ],
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _msg,
-                minLines: 4,
-                maxLines: 6,
-                maxLength: 600,
-                cursorColor: AppColors.primaryTeal,
-                textInputAction: TextInputAction.newline,
-                textCapitalization: TextCapitalization.sentences,
-                onChanged: (_) => setState(() {}),
-                decoration: _decoration(context.t('fb_hint_$_cat')),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4, right: 4, bottom: 10),
-                  child: Text(
-                    '${_msg.text.length}/600',
-                    style: const TextStyle(
-                      fontSize: 12,
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _msg,
+                  minLines: 4,
+                  maxLines: 6,
+                  maxLength: 600,
+                  cursorColor: AppColors.primaryTeal,
+                  textInputAction: TextInputAction.newline,
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: (_) => setState(() {}),
+                  decoration: _decoration(context.t('fb_hint_$_cat')),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 4,
+                      right: 4,
+                      bottom: 10,
+                    ),
+                    child: Text(
+                      '${_msg.text.length}/600',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: _contact,
+                  keyboardType: TextInputType.emailAddress,
+                  maxLength: 120,
+                  cursorColor: AppColors.primaryTeal,
+                  decoration: _decoration(
+                    context.t('fb_contact'),
+                    prefix: const Icon(
+                      Icons.mail_outline_rounded,
                       color: AppColors.textMuted,
                     ),
                   ),
                 ),
-              ),
-              TextField(
-                controller: _contact,
-                keyboardType: TextInputType.emailAddress,
-                maxLength: 120,
-                cursorColor: AppColors.primaryTeal,
-                decoration: _decoration(
-                  context.t('fb_contact'),
-                  prefix: const Icon(
-                    Icons.mail_outline_rounded,
-                    color: AppColors.textMuted,
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: PillButton(
+                    _sending ? context.t('fb_sending') : context.t('fb_send'),
+                    onPressed: canSend ? _send : null,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: PillButton(
-                  _sending ? context.t('fb_sending') : context.t('fb_send'),
-                  onPressed: canSend ? _send : null,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

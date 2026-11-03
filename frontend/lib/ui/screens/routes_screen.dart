@@ -138,6 +138,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
     await showModalBottomSheet<void>(
       context: context,
       constraints: kSheetConstraints,
+      clipBehavior: Clip.antiAlias,
       isScrollControlled: true,
       backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
@@ -147,46 +148,52 @@ class _RoutesScreenState extends State<RoutesScreen> {
         expand: false,
         initialChildSize: 0.7,
         maxChildSize: 0.92,
-        builder: (_, controller) => ListView(
-          controller: controller,
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-          children: [
-            const SheetHandle(),
-            Text(context.t('rc_start'), style: AppTheme.titleLarge),
-            const SizedBox(height: 14),
-            _startTile(
-              icon: const Icon(
-                Icons.my_location_rounded,
-                color: AppColors.primaryTeal,
-              ),
-              label: context.t('rc_my_location'),
-              selected: _startPlace == null,
-              onTap: () {
-                setState(() => _startPlace = null);
-                Navigator.pop(sheetContext);
-              },
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.t('rc_start_from_place'),
-              style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-            ),
-            const SizedBox(height: 8),
-            for (final p in places)
+        builder: (_, controller) => PatternBackground(
+          lineOpacity: 0.07,
+          child: ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            children: [
+              const SheetHandle(),
+              Text(context.t('rc_start'), style: AppTheme.titleLarge),
+              const SizedBox(height: 14),
               _startTile(
-                icon: AppIcon(
-                  CategoryStyle.of(p.category).icon,
-                  size: 22,
-                  color: CategoryStyle.of(p.category).color,
+                icon: const Icon(
+                  Icons.my_location_rounded,
+                  color: AppColors.primaryTeal,
                 ),
-                label: p.nameFor(en),
-                selected: _startPlace?.id == p.id,
+                label: context.t('rc_my_location'),
+                selected: _startPlace == null,
                 onTap: () {
-                  setState(() => _startPlace = p);
+                  setState(() => _startPlace = null);
                   Navigator.pop(sheetContext);
                 },
               ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                context.t('rc_start_from_place'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textMuted,
+                ),
+              ),
+              const SizedBox(height: 8),
+              for (final p in places)
+                _startTile(
+                  icon: AppIcon(
+                    CategoryStyle.of(p.category).icon,
+                    size: 22,
+                    color: CategoryStyle.of(p.category).color,
+                  ),
+                  label: p.nameFor(en),
+                  selected: _startPlace?.id == p.id,
+                  onTap: () {
+                    setState(() => _startPlace = p);
+                    Navigator.pop(sheetContext);
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );

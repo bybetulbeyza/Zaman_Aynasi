@@ -1,3 +1,4 @@
+import '../common/pattern_background.dart';
 import '../common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -23,6 +24,7 @@ Future<void> showRouteStopsSheet(
   return showModalBottomSheet<void>(
     context: context,
     constraints: kSheetConstraints,
+    clipBehavior: Clip.antiAlias,
     isScrollControlled: true,
     backgroundColor: AppColors.bgCanvas,
     shape: const RoundedRectangleBorder(
@@ -33,17 +35,20 @@ Future<void> showRouteStopsSheet(
       initialChildSize: 0.82,
       minChildSize: 0.5,
       maxChildSize: 0.95,
-      builder: (_, controller) => _RouteStopsContent(
-        route: route,
-        controller: controller,
-        onStopTap: (i) {
-          Navigator.pop(sheetContext);
-          onStopTap(i);
-        },
-        onStart: () {
-          Navigator.pop(sheetContext);
-          onStart();
-        },
+      builder: (_, controller) => PatternBackground(
+        lineOpacity: 0.07,
+        child: _RouteStopsContent(
+          route: route,
+          controller: controller,
+          onStopTap: (i) {
+            Navigator.pop(sheetContext);
+            onStopTap(i);
+          },
+          onStart: () {
+            Navigator.pop(sheetContext);
+            onStart();
+          },
+        ),
       ),
     ),
   );
