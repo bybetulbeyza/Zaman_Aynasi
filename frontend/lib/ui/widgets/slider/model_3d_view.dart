@@ -109,8 +109,8 @@ class _Model3DViewState extends State<Model3DView> {
     if (sel != null) {
       _js("window.zaFocus('${sel.id}')");
     } else {
+      // Kapatınca kamera yerinde kalır; kullanıcı o bölümü incelemeye devam edebilir
       if (_touring) _stopTour(notify: false);
-      _js('window.zaReset()');
     }
   }
 
@@ -127,6 +127,7 @@ class _Model3DViewState extends State<Model3DView> {
       _tourIdx++;
       if (_tourIdx >= stops.length) {
         _stopTour();
+        _js('window.zaReset()'); // tur bitince genel görünüme dön
       } else {
         widget.onHotspot(stops[_tourIdx]);
       }
@@ -215,6 +216,7 @@ class _Model3DViewState extends State<Model3DView> {
                 shadowIntensity: 1,
                 exposure: 1.05,
                 cameraOrbit: '35deg 70deg auto',
+                fieldOfView: '45deg',
                 innerModelViewerHtml: _hotspotHtml(forNew, ar: true),
                 relatedCss: _css,
                 relatedJs: _js_.replaceFirst('__CFG__', cfg),
