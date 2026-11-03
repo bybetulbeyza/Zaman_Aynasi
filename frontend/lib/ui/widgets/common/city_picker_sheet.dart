@@ -1,3 +1,4 @@
+import 'sheet_handle.dart';
 import 'package:flutter/material.dart';
 import 'dark_cancel.dart';
 import '../../../core/constants/app_cities.dart';
@@ -8,17 +9,19 @@ import '../../../core/constants/app_theme.dart';
 Future<void> showCityPickerSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
+    constraints: kSheetConstraints,
     backgroundColor: AppColors.bgCanvas,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
     builder: (_) => SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SheetHandle(),
             const Text('Şehirler', style: AppTheme.titleLarge),
             const SizedBox(height: 14),
             for (final city in AppCities.all)

@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/sheet_handle.dart';
 import '../widgets/common/ai_label.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_back_button.dart';
@@ -393,19 +394,7 @@ class _SliderScreenState extends State<SliderScreen>
             ? context.t('a11y_sheet_down')
             : context.t('a11y_sheet_up'),
         excludeSemantics: true,
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.fromLTRB(0, 12 + topSafe, 0, 16),
-          alignment: Alignment.topCenter,
-          child: Container(
-            width: 44,
-            height: 5,
-            decoration: BoxDecoration(
-              color: const Color(0xFFCFC5B3), // sıcak, kremsi gri-bej
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-        ),
+        child: SheetHandle(extraTop: topSafe),
       ),
     );
   }

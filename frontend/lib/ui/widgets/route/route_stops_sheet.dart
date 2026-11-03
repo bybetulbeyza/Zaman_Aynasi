@@ -1,5 +1,5 @@
+import '../common/sheet_handle.dart';
 import 'package:flutter/material.dart';
-import '../common/dark_cancel.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_theme.dart';
@@ -22,6 +22,7 @@ Future<void> showRouteStopsSheet(
 }) {
   return showModalBottomSheet<void>(
     context: context,
+    constraints: kSheetConstraints,
     isScrollControlled: true,
     backgroundColor: AppColors.bgCanvas,
     shape: const RoundedRectangleBorder(
@@ -73,19 +74,9 @@ class _RouteStopsContent extends StatelessWidget {
         Expanded(
           child: ListView(
             controller: controller,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             children: [
-              Center(
-                child: Container(
-                  width: 52,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: bordeauxOf(context),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
+              const SheetHandle(),
               Text(route.nameFor(en), style: AppTheme.titleLarge),
               const SizedBox(height: 4),
               Text(

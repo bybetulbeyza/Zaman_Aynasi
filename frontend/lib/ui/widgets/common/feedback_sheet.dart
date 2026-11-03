@@ -1,3 +1,4 @@
+import 'sheet_handle.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -20,6 +21,7 @@ class FeedbackSheet {
   }) {
     return showModalBottomSheet<void>(
       context: context,
+      constraints: kSheetConstraints,
       isScrollControlled: true,
       backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
@@ -200,22 +202,12 @@ class _FeedbackFormState extends State<_FeedbackForm> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(22, 10, 22, 18 + inset),
+          padding: EdgeInsets.fromLTRB(22, 0, 22, 18 + inset),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 14),
-                  decoration: BoxDecoration(
-                    color: AppColors.textMuted.withValues(alpha: 0.35),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              const SheetHandle(),
               Row(
                 children: [
                   Expanded(

@@ -1,3 +1,4 @@
+import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -59,16 +60,18 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> _photoMenu() async {
     final action = await showModalBottomSheet<String>(
       context: context,
+      constraints: kSheetConstraints,
       backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const SheetHandle(),
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
                 title: Text(ctx.t('acc_photo_gallery')),

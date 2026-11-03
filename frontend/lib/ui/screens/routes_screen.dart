@@ -1,3 +1,4 @@
+import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_back_button.dart';
@@ -136,6 +137,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
       ..sort((a, b) => a.nameFor(en).compareTo(b.nameFor(en)));
     await showModalBottomSheet<void>(
       context: context,
+      constraints: kSheetConstraints,
       isScrollControlled: true,
       backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
@@ -147,8 +149,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
         maxChildSize: 0.92,
         builder: (_, controller) => ListView(
           controller: controller,
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
           children: [
+            const SheetHandle(),
             Text(context.t('rc_start'), style: AppTheme.titleLarge),
             const SizedBox(height: 14),
             _startTile(

@@ -1,3 +1,4 @@
+import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/feedback_sheet.dart';
 import '../../core/constants/app_colors.dart';
@@ -21,6 +22,7 @@ class ProfileScreen extends StatelessWidget {
   void _showAccessibility(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
+      constraints: kSheetConstraints,
       isScrollControlled: true,
       backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
@@ -38,11 +40,12 @@ class ProfileScreen extends StatelessWidget {
           return SafeArea(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+                padding: const EdgeInsets.fromLTRB(22, 0, 22, 18),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SheetHandle(),
                     Text(context.t('font_row'), style: AppTheme.titleLarge),
                     const SizedBox(height: 18),
                     Text(
