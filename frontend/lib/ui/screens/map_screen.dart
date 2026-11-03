@@ -8,6 +8,7 @@ import '../widgets/common/app_toast.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/category_style.dart';
 import '../../../core/constants/map_config.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/state/active_route.dart';
@@ -467,6 +468,22 @@ class MapScreenState extends State<MapScreen> {
                     ),
                   ],
                 ),
+
+              // Yapıların taban çizgileri: kategori renginde dolgu (varsa)
+              PolygonLayer(
+                polygons: [
+                  for (final p in _filteredPlaces)
+                    if (p.footprint.isNotEmpty)
+                      Polygon(
+                        points: p.footprint,
+                        color: CategoryStyle.of(
+                          p.category,
+                        ).color.withValues(alpha: 0.55),
+                        borderColor: CategoryStyle.of(p.category).color,
+                        borderStrokeWidth: 2,
+                      ),
+                ],
+              ),
 
               // Kullanıcının konumu (gerçek konum varsa)
               if (_hasRealLocation)

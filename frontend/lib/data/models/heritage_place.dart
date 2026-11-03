@@ -190,6 +190,9 @@ class HeritagePlace {
   final String modelNewUrl;
   final String modelOldUrl;
 
+  /// Supabase: footprint — yapının harita üzerindeki taban çizgisi ([[enlem, boylam], ...]).
+  final List<LatLng> footprint;
+
   /// 3B model üzerindeki hotspot'lar (fotoğraf hotspot'larından ayrı tutulur).
   final List<Hotspot> modelHotspots;
 
@@ -227,6 +230,7 @@ class HeritagePlace {
     this.hotspots = const [],
     this.modelNewUrl = '',
     this.modelOldUrl = '',
+    this.footprint = const [],
     this.modelHotspots = const [],
     this.distanceMeters,
   });
@@ -305,9 +309,21 @@ class HeritagePlace {
       hotspots: hotspots,
       modelNewUrl: modelNewUrl,
       modelOldUrl: modelOldUrl,
+      footprint: footprint,
       modelHotspots: modelHotspots,
       distanceMeters: distance,
     );
+  }
+
+  static List<LatLng> _parseFootprint(dynamic raw) {
+    if (raw is! List) return const [];
+    final pts = <LatLng>[];
+    for (final p in raw) {
+      if (p is List && p.length >= 2 && p[0] is num && p[1] is num) {
+        pts.add(LatLng((p[0] as num).toDouble(), (p[1] as num).toDouble()));
+      }
+    }
+    return pts.length >= 3 ? pts : const [];
   }
 
   factory HeritagePlace.fromJson(Map<String, dynamic> json) {
@@ -365,6 +381,7 @@ class HeritagePlace {
       hotspots: parsedHotspots,
       modelNewUrl: (json['model_new_url'] as String? ?? '').trim(),
       modelOldUrl: (json['model_old_url'] as String? ?? '').trim(),
+      footprint: _parseFootprint(json['footprint']),
       modelHotspots: parsedModelHotspots,
     );
   }
