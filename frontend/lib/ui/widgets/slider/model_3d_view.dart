@@ -25,6 +25,9 @@ class Model3DView extends StatefulWidget {
   final double bottomInset;
   final TourController? tourController;
 
+  /// Koyu modda sahne zemini koyu olur (modellerin kendi renkleri değişmez).
+  final bool darkBackground;
+
   const Model3DView({
     super.key,
     required this.newUrl,
@@ -35,6 +38,7 @@ class Model3DView extends StatefulWidget {
     this.hotspots = const [],
     this.bottomInset = 0,
     this.tourController,
+    this.darkBackground = false,
   });
 
   static final _num = RegExp(r'^[-+0-9.eE\s]+$');
@@ -200,6 +204,7 @@ class _Model3DViewState extends State<Model3DView> {
     final cfg = jsonEncode({
       'oldSrc': both ? oldUrl : '',
       'single': both ? '' : (newUrl.isNotEmpty ? 'new' : 'old'),
+      'dark': widget.darkBackground,
       'oldHtml': _hotspotHtml(forOld),
       'hs': [
         for (final h in _valid)
@@ -221,7 +226,9 @@ class _Model3DViewState extends State<Model3DView> {
             Padding(
               padding: EdgeInsets.only(bottom: widget.bottomInset),
               child: ModelViewer(
-                key: ValueKey('$newUrl|$oldUrl|${widget.hotspots.length}'),
+                key: ValueKey(
+                  '$newUrl|$oldUrl|${widget.hotspots.length}|${widget.darkBackground}',
+                ),
                 src: src,
                 alt: widget.name,
                 backgroundColor: Colors.transparent,
@@ -382,8 +389,8 @@ html, body { overflow: hidden; background: transparent; }
   static const _js_ = r'''
 (function () {
   const CFG = __CFG__;
-  const OLD_BG = 'linear-gradient(#f1e3c8,#d9be92)';
-  const NEW_BG = 'linear-gradient(#ddebf2,#f3efe6)';
+  const OLD_BG = CFG.dark ? 'linear-gradient(#3a3025,#1d1710)' : 'linear-gradient(#f1e3c8,#d9be92)';
+  const NEW_BG = CFG.dark ? 'linear-gradient(#1b3b46,#0a1b21)' : 'linear-gradient(#ddebf2,#f3efe6)';
   const DEG = Math.PI / 180;
   customElements.whenDefined('model-viewer').then(function () {
     const nw = document.querySelector('model-viewer');

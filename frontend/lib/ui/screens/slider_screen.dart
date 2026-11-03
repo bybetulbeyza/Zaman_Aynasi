@@ -301,6 +301,7 @@ class _SliderScreenState extends State<SliderScreen>
                   // Modeller koyu modda da özgün renginde kalır (fotoğraflar gibi)
                   DarkCancel(
                     child: Model3DView(
+                      darkBackground: DarkScope.invertedOf(context),
                       newUrl: _place.modelNewUrl,
                       oldUrl: _place.modelOldUrl,
                       name: _place.nameFor(en),
@@ -571,7 +572,7 @@ class _SliderScreenState extends State<SliderScreen>
                         color: bordeauxOf(context),
                       ),
                     )
-                  : null,
+                  : const SizedBox.shrink(),
             ),
           ),
         );
