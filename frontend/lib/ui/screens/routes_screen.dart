@@ -1,4 +1,4 @@
-import '../widgets/common/app_card.dart';
+import '../widgets/common/action_card.dart';
 import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/dark_cancel.dart';
@@ -208,43 +208,13 @@ class _RoutesScreenState extends State<RoutesScreen> {
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.white,
-        shape: appCardBorder(round: 20),
-        child: InkWell(
-          customBorder: appCardBorder(round: 20),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: ShapeDecoration(
-              shape: appCardBorder(
-                round: 20,
-                side: selected ? AppColors.primaryTeal : AppColors.chipBorder,
-                width: selected ? 1.6 : 1.2,
-              ),
-            ),
-            child: Row(
-              children: [
-                SizedBox(width: 26, child: Center(child: icon)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if (selected)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: AppColors.primaryTeal,
-                  ),
-              ],
-            ),
-          ),
-        ),
+      child: ActionCard(
+        leading: SizedBox(width: 26, child: Center(child: icon)),
+        title: label,
+        selected: selected,
+        round: 22,
+        onTap: onTap,
+        trailing: selected ? null : const SizedBox.shrink(),
       ),
     );
   }

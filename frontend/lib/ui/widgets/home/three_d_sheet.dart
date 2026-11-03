@@ -1,4 +1,4 @@
-import '../common/app_card.dart';
+import '../common/action_card.dart';
 import '../common/pattern_background.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
@@ -49,55 +49,26 @@ Future<void> show3dPlacesSheet(
                 for (final p in list)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Material(
-                      color: Colors.white,
-                      shape: appCardBorder(round: 22),
-                      child: InkWell(
-                        customBorder: appCardBorder(round: 22),
-                        onTap: () {
-                          Navigator.pop(sheet);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  SliderScreen(place: p, start3d: true),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: ShapeDecoration(
-                            shape: appCardBorder(round: 22),
-                          ),
-                          child: Row(
-                            children: [
-                              AppNetworkImage(
-                                imageUrl: p.imageAfterUrl,
-                                width: 64,
-                                height: 64,
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Text(
-                                  p.nameFor(en),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 16.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textDark,
-                                  ),
-                                ),
-                              ),
-                              const Icon(
-                                Icons.chevron_right_rounded,
-                                color: AppColors.textMuted,
-                              ),
-                            ],
-                          ),
-                        ),
+                    child: ActionCard(
+                      leading: AppNetworkImage(
+                        imageUrl: p.imageAfterUrl,
+                        width: 56,
+                        height: 56,
+                        borderRadius: BorderRadius.circular(16),
                       ),
+                      title: p.nameFor(en),
+                      padding: const EdgeInsets.all(10),
+                      round: 26,
+                      onTap: () {
+                        Navigator.pop(sheet);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                SliderScreen(place: p, start3d: true),
+                          ),
+                        );
+                      },
                     ),
                   ),
               ],

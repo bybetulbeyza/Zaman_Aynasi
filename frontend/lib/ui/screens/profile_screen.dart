@@ -1,4 +1,5 @@
-import '../widgets/common/app_card.dart';
+import '../widgets/common/action_card.dart';
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/feedback_sheet.dart';
@@ -226,15 +227,15 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         Text(
                           '${Passport.instance.stampCount}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            color: AppColors.primaryTeal,
+                            color: bordeauxOf(context),
                             fontSize: 17,
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.chevron_right_rounded,
-                          color: AppColors.textMuted,
+                          color: bordeauxOf(context),
                         ),
                       ],
                     ),
@@ -393,30 +394,16 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _row(String title, {VoidCallback? onTap, Widget? trailing}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: ActionCard(
+        title: title,
+        trailing: trailing,
+        onTap: onTap,
+        round: 28,
         padding: EdgeInsets.symmetric(
-          horizontal: 22,
-          vertical: trailing != null ? 11 : 18,
-        ),
-        decoration: appCardDecoration(round: 26, shadow: false),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(fontSize: 17, color: AppColors.textDark),
-              ),
-            ),
-            trailing ??
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppColors.textMuted,
-                ),
-          ],
+          horizontal: 20,
+          vertical: trailing != null ? 9 : 15,
         ),
       ),
     );

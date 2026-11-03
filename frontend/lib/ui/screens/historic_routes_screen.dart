@@ -1,4 +1,4 @@
-import '../widgets/common/app_card.dart';
+import '../widgets/common/action_card.dart';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -246,47 +246,11 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
 
   /// Çiplerin altında, listeyi örtmeyen tam genişlikte "Rota oluştur" satırı.
   Widget _buildCreateRow() {
-    return GestureDetector(
+    return ActionCard(
+      leading: ActionCard.iconBubble(context, Icons.add_rounded, filled: true),
+      title: context.t('rc_create'),
       onTap: widget.onCreateRoute,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 9, 14, 9),
-        decoration: appCardDecoration(
-          round: 26,
-          side: AppColors.primaryTeal.withValues(alpha: 0.4),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryTeal,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                context.t('rc_create'),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryTealDark,
-                ),
-              ),
-            ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.primaryTeal,
-            ),
-          ],
-        ),
-      ),
+      shadow: true,
     );
   }
 
