@@ -269,20 +269,18 @@ class _ReelPageState extends State<_ReelPage>
                 color: Colors.white70,
               ),
             ),
-          // Üst sağ: yapay zekâ etiketi ve altyazı düğmesi
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
-            right: 14,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const AiLabel(compact: true),
-                if (hasScript) ...[
-                  const SizedBox(width: 8),
-                  const SubtitleToggle(),
-                ],
-              ],
+          // Üst sağ: altyazı düğmesi
+          if (hasScript)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              right: 14,
+              child: const SubtitleToggle(),
             ),
+          // "Hikâyeler" başlığının hemen altında yapay zekâ etiketi
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 66,
+            left: 62,
+            child: const AiLabel(compact: true),
           ),
           // Alt: altyazı ve tek satırlık "Detaylar için sağa kaydır »" ipucu
           Positioned(
