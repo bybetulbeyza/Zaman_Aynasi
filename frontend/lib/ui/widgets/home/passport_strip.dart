@@ -8,13 +8,16 @@ import '../../../data/models/heritage_place.dart';
 import '../common/app_network_image.dart';
 import '../common/dark_cancel.dart';
 
-/// Ana ekranda "sıradaki mühür" kartı: mührü henüz alınmamış en yakın eseri gösterir,
+/// Ana ekranda "sıradaki mühür" kartı: önce günün eserini (mührü alınmamışsa), yoksa mührü alınmamış en yakın eseri gösterir,
 /// dokununca o esere gider. Sağdaki "3/23" rozeti pasaportu açar. Hepsi toplanınca tebrik gösterir.
 /// Beyaz kart yüzeyi ve bordo vurgu: QR düğmesi ve "Hikâyeler" kısayoluyla aynı bordo, kartlarla aynı beyaz.
 class PassportStrip extends StatelessWidget {
   /// Yakınlığa göre sıralı eserler (konum yoksa sıra önemsizdir).
   final List<HeritagePlace> places;
   final bool showDistance;
+
+  /// Günün eseri: mührü alınmamışsa kart önce onu gösterir.
+  final HeritagePlace? featured;
   final ValueChanged<HeritagePlace> onOpenPlace;
   final VoidCallback onOpenPassport;
 
@@ -22,6 +25,7 @@ class PassportStrip extends StatelessWidget {
     super.key,
     required this.places,
     required this.showDistance,
+    this.featured,
     required this.onOpenPlace,
     required this.onOpenPassport,
   });
@@ -37,7 +41,10 @@ class PassportStrip extends StatelessWidget {
         final left = places
             .where((p) => !Passport.instance.hasStamp(p.id))
             .toList();
-        final next = left.isEmpty ? null : left.first;
+        final f = featured;
+        final next = (f != null && !Passport.instance.hasStamp(f.id))
+            ? f
+            : (left.isEmpty ? null : left.first);
         final done = next == null;
         final count = context
             .t('passport_count')
@@ -136,10 +143,11 @@ class PassportStrip extends StatelessWidget {
                               : distance.isEmpty
                               ? context.t('next_stamp_how')
                               : '$distance · ${context.t('next_stamp_how')}',
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontSize: 12.5,
+                            height: 1.3,
                             color: AppColors.textMuted,
                           ),
                         ),

@@ -158,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: PassportStrip(
                   places: _byDistance,
+                  featured: _daily,
                   showDistance: !_locationOff,
                   onOpenPlace: _openSlider,
                   onOpenPassport: () => Navigator.push(
