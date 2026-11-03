@@ -168,16 +168,13 @@ class _ReelPage extends StatefulWidget {
 
 class _ReelPageState extends State<_ReelPage>
     with SingleTickerProviderStateMixin {
-  /// Oturum boyunca ilk birkaç videoda "sağa kaydır" ipucu hareketli gösterilir, sonra hiç çıkmaz.
-  static int _hintsLeft = 3;
-
   late final VideoPlayerController _c;
   bool _error = false;
+  // "Sağa kaydır" okları: hafifçe sağa kayıp geri döner, sürekli tekrarlar
   late final AnimationController _hint = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 7),
-  );
-  late final bool _showHint = _hintsLeft-- > 0;
+    duration: const Duration(milliseconds: 1100),
+  )..repeat(reverse: true);
 
   @override
   void initState() {
@@ -189,10 +186,6 @@ class _ReelPageState extends State<_ReelPage>
             if (mounted) {
               setState(() {});
               _syncPlayback();
-              // İpucu, video gerçekten görününce başlar (yüklenirken bitmesin)
-              if (_showHint && !_hint.isAnimating && _hint.value == 0) {
-                _hint.forward();
-              }
             }
           })
           .catchError((_) {
@@ -299,16 +292,6 @@ class _ReelPageState extends State<_ReelPage>
                     ),
                   ),
                 const AiLabel(compact: true),
-                const SizedBox(height: 10),
-                Text(
-                  r.hotspot.titleFor(en),
-                  style: const TextStyle(
-                    fontFamily: AppTheme.headingFont,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
                 const SizedBox(height: 12),
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -316,71 +299,33 @@ class _ReelPageState extends State<_ReelPage>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.place_rounded,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          r.place.nameFor(en),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      Text(
+                        context.t('swipe_details'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
                         ),
                       ),
-                      if (_showHint)
-                        AnimatedBuilder(
-                          animation: _hint,
-                          builder: (context, _) {
-                            final t = _hint.value; // 0..1 (7 sn)
-                            // Son %12'de ipucu tamamen silinir
-                            final fade = t < 0.88
-                                ? 1.0
-                                : (1 - (t - 0.88) / 0.12);
-                            if (fade <= 0) return const SizedBox.shrink();
-                            return Opacity(
-                              opacity: fade.clamp(0.0, 1.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '  ·  ${context.t('swipe_details')} ',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  // Soldan sağa dalga gibi yanıp sönen ">>"
-                                  for (var i = 0; i < 2; i++)
-                                    Opacity(
-                                      opacity:
-                                          0.2 +
-                                          0.8 *
-                                              (0.5 +
-                                                  0.5 *
-                                                      math.sin(
-                                                        2 *
-                                                                math.pi *
-                                                                (t * 7 * 0.9 -
-                                                                    i * 0.22) -
-                                                            math.pi / 2,
-                                                      )),
-                                      child: const Icon(
-                                        Icons.chevron_right_rounded,
-                                        size: 20,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            );
-                          },
+                      const SizedBox(width: 4),
+                      AnimatedBuilder(
+                        animation: _hint,
+                        builder: (context, child) {
+                          final t = Curves.easeInOut.transform(_hint.value);
+                          return Transform.translate(
+                            offset: Offset(7 * t, 0),
+                            child: Opacity(
+                              opacity: 0.6 + 0.4 * t,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: const Icon(
+                          Icons.keyboard_double_arrow_right_rounded,
+                          size: 22,
+                          color: Colors.white,
                         ),
+                      ),
                     ],
                   ),
                 ),

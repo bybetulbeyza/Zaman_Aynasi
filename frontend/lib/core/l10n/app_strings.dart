@@ -98,7 +98,7 @@ const Map<String, String> appStringsTr = {
   'a11y_reader_note':
       'Uygulama ekran okuyucu desteği sunmaktadır. Cihazınızın Erişilebilirlik ayarlarından TalkBack (Android) veya VoiceOver (iOS) özelliğini açarak buton ve görsel açıklamalarını sesli olarak dinleyebilirsiniz.',
   'subtitles': 'Altyazı',
-  'swipe_details': 'detaylar için sağa kaydır',
+  'swipe_details': 'Detaylar için sağa kaydır',
   'share_btn': 'Paylaş',
   'share_stamp_hint': 'Başarını paylaş',
   'share_failed': 'Paylaşım açılamadı.',
@@ -430,7 +430,7 @@ const Map<String, String> appStringsEn = {
   'a11y_reader_note':
       'The app supports screen readers. Turn on TalkBack (Android) or VoiceOver (iOS) in your device\'s Accessibility settings to hear button and image descriptions read aloud.',
   'subtitles': 'Subtitles',
-  'swipe_details': 'swipe right for details',
+  'swipe_details': 'Swipe right for details',
   'share_btn': 'Share',
   'share_stamp_hint': 'Share your achievement',
   'share_failed': 'Could not open sharing.',
