@@ -45,7 +45,15 @@ class SliderScreen extends StatefulWidget {
   /// Eser doğrudan 3B görünümde açılsın (3B modeli varsa).
   final bool start3d;
 
-  const SliderScreen({super.key, required this.place, this.start3d = false});
+  /// Açılınca kart yukarı çıkıp "Keşif görevleri" bölümüne kayar (ana ekrandaki mühür kartından).
+  final bool focusTasks;
+
+  const SliderScreen({
+    super.key,
+    required this.place,
+    this.start3d = false,
+    this.focusTasks = false,
+  });
 
   @override
   State<SliderScreen> createState() => _SliderScreenState();
@@ -160,6 +168,7 @@ class _SliderScreenState extends State<SliderScreen>
   void initState() {
     super.initState();
     _loadRelated();
+    if (widget.focusTasks) _scheduleTaskFocus();
     _extentAnim.addListener(() {
       final t = _extentTween;
       if (t != null && mounted) {
@@ -171,12 +180,38 @@ class _SliderScreenState extends State<SliderScreen>
 
   @override
   void dispose() {
+    _sheetScroll.dispose();
+    _tasksPulse.dispose();
     _extentAnim.dispose();
     _tour.dispose();
     super.dispose();
   }
 
   void _expandSheet() => _animateExtentTo(_sheetMax);
+
+  final GlobalKey _tasksKey = GlobalKey();
+  final ScrollController _sheetScroll = ScrollController();
+  final ValueNotifier<int> _tasksPulse = ValueNotifier<int>(0);
+
+  /// Sayfa açılınca: kart tam yüksekliğe çıkar, görevler bölümüne kayar, başlık vurgulanır.
+  void _scheduleTaskFocus() {
+    Future<void>.delayed(const Duration(milliseconds: 700), () async {
+      if (!mounted) return;
+      _expandSheet();
+      await Future<void>.delayed(const Duration(milliseconds: 650));
+      if (!mounted) return;
+      final ctx = _tasksKey.currentContext;
+      if (ctx != null) {
+        await Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 900),
+          curve: Curves.easeInOutCubic,
+          alignment: 0.04,
+        );
+      }
+      if (mounted) _tasksPulse.value++;
+    });
+  }
 
   bool get _hasHotspotVideos =>
       _place.hotspots.any((h) => h.videoFor(context.isEn) != null);
@@ -337,6 +372,9 @@ class _SliderScreenState extends State<SliderScreen>
                       _buildDragHandle(size),
                       Expanded(
                         child: ListView(
+                          controller: _sheetScroll,
+                          // Görevler bölümüne kaydırabilmek için alt kısımlar da önceden kurulur
+                          cacheExtent: 4000,
                           padding: EdgeInsets.fromLTRB(
                             20,
                             0,
@@ -661,7 +699,7 @@ class _SliderScreenState extends State<SliderScreen>
       const SizedBox(height: 26),
 
       // Keşif görevleri (görev yoksa görünmez)
-      ActivitiesSection(place: _place),
+      ActivitiesSection(key: _tasksKey, place: _place, pulse: _tasksPulse),
 
       // Eski fotoğraf envanteri (fotoğraf yoksa hiç görünmez)
       if (_place.oldPhotos.isNotEmpty) ...[

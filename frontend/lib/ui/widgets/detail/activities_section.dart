@@ -1,4 +1,6 @@
 import '../common/app_card.dart';
+import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
@@ -14,18 +16,39 @@ import '../common/section_title.dart';
 /// Görev yoksa (tablo boş / yüklenemedi) hiç görünmez.
 class ActivitiesSection extends StatefulWidget {
   final HeritagePlace place;
-  const ActivitiesSection({super.key, required this.place});
+
+  /// Değeri her değiştiğinde bölüm başlığı ve kartlar kısa bir "buradayız" animasyonu yapar.
+  final ValueListenable<int>? pulse;
+  const ActivitiesSection({super.key, required this.place, this.pulse});
 
   @override
   State<ActivitiesSection> createState() => _ActivitiesSectionState();
 }
 
-class _ActivitiesSectionState extends State<ActivitiesSection> {
+class _ActivitiesSectionState extends State<ActivitiesSection>
+    with SingleTickerProviderStateMixin {
   List<PlaceActivity> _items = const [];
+
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1500),
+  );
+
+  void _onPulse() {
+    if (mounted) _pulse.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    widget.pulse?.removeListener(_onPulse);
+    _pulse.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    widget.pulse?.addListener(_onPulse);
     ActivityRepository.forPlace(widget.place.id).then((list) {
       if (mounted) setState(() => _items = list);
     });
@@ -63,9 +86,24 @@ class _ActivitiesSectionState extends State<ActivitiesSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SectionTitle(
-              context.t('act_title'),
-              actionLabel: '$done/${_items.length}',
+            // Mühür kartından gelinince başlık iki kez büyüyüp küçülür ve kartlar hafifçe parlar
+            AnimatedBuilder(
+              animation: _pulse,
+              builder: (_, child) {
+                final t = _pulse.value;
+                final wave = t == 0
+                    ? 0.0
+                    : (math.sin(t * math.pi * 4)).abs() * (1 - t);
+                return Transform.scale(
+                  scale: 1 + 0.14 * wave,
+                  alignment: Alignment.centerLeft,
+                  child: child,
+                );
+              },
+              child: SectionTitle(
+                context.t('act_title'),
+                actionLabel: '$done/${_items.length}',
+              ),
             ),
             const SizedBox(height: 12),
             SizedBox(

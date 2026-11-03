@@ -160,7 +160,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   places: _byDistance,
                   featured: _daily,
                   showDistance: !_locationOff,
-                  onOpenPlace: _openSlider,
+                  onOpenPlace: (p) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SliderScreen(place: p, focusTasks: true),
+                    ),
+                  ),
                   onOpenPassport: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const PassportScreen()),
