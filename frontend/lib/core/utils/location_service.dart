@@ -1,6 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../../data/models/heritage_place.dart';
+import '../l10n/app_lang.dart';
 
 class LocationService {
   // Varsayılan Merkez: Bursa Tarihi Kent Merkezi (Ulu Cami / Heykel civarı)
@@ -119,7 +120,7 @@ class LocationService {
       return '${meters.round()} m';
     } else {
       final km = meters / 1000;
-      return '${km.toStringAsFixed(1)} km';
+      return '${km.toStringAsFixed(1).replaceAll('.', AppLang.instance.isEnglish ? '.' : ',')} km';
     }
   }
 }

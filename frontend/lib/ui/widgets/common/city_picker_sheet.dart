@@ -1,3 +1,4 @@
+import '../../../core/l10n/app_lang.dart';
 import 'action_card.dart';
 import 'pattern_background.dart';
 import 'sheet_handle.dart';
@@ -27,7 +28,7 @@ Future<void> showCityPickerSheet(BuildContext context) {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SheetHandle(),
-              const Text('Şehirler', style: AppTheme.titleLarge),
+              Text(context.t('qa_cities'), style: AppTheme.titleLarge),
               const SizedBox(height: 14),
               for (final city in AppCities.all)
                 Padding(
@@ -44,7 +45,7 @@ Future<void> showCityPickerSheet(BuildContext context) {
                     trailing: AppCities.isAvailable(city)
                         ? null
                         : Text(
-                            'Yakında',
+                            context.t('soon'),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
