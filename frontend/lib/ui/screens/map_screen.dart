@@ -180,6 +180,26 @@ class MapScreenState extends State<MapScreen> {
     _loadWalkingRoute();
   }
 
+  /// Eser sayfasındaki "Haritada gör": filtre ve rota kapatılır, eser seçilip ortalanır, kart açılır.
+  Future<void> focusPlace(HeritagePlace place) async {
+    if (_allPlaces.isEmpty) {
+      _allPlaces = await _heritageRepository.getPlaces();
+      if (!mounted) return;
+    }
+    _routeChip = null;
+    _walk = null;
+    _selectedCategory = null;
+    _searchQuery = '';
+    _applyFilters();
+    final i = _filteredPlaces.indexWhere((p) => p.id == place.id);
+    if (i < 0) return;
+    setState(() {
+      _currentStopIndex = i;
+      _cardOpen = true;
+    });
+    _moveMap(_filteredPlaces[i].location, 17);
+  }
+
   /// Harita henüz çizilmediyse (ilk açılış) hareketi ilk çerçeveden sonraya bırakır.
   void _moveMap(LatLng target, double zoom) {
     try {

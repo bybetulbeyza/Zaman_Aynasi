@@ -1,6 +1,6 @@
 import '../widgets/common/app_card.dart';
 import '../widgets/common/app_icon.dart';
-import 'main_screen.dart' show mainTabRequest;
+import 'main_screen.dart' show mainTabRequest, mapFocusRequest;
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -588,6 +588,10 @@ class _SliderScreenState extends State<SliderScreen>
           runSpacing: 12,
           children: [for (final m in meta) _metaItem(m.key, m.value)],
         ),
+      const SizedBox(height: 14),
+
+      // Eseri uygulamanın haritasında göster
+      _buildShowOnMap(),
       const SizedBox(height: 18),
 
       // Tarihî tur (en az iki hotspot varsa)
@@ -693,6 +697,51 @@ class _SliderScreenState extends State<SliderScreen>
         ),
       ),
     ];
+  }
+
+  /// "Haritada gör": harita sekmesinde bu eseri seçili gösterir (yol tarifi Google Haritalar'a gider).
+  Widget _buildShowOnMap() {
+    void go() {
+      Navigator.of(context).popUntil((r) => r.isFirst);
+      mapFocusRequest.value = _place;
+    }
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Semantics(
+        button: true,
+        label: context.t('show_on_map'),
+        excludeSemantics: true,
+        child: GestureDetector(
+          onTap: go,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(12, 7, 12, 7),
+            decoration: BoxDecoration(
+              color: AppColors.ciniBordeauxLight,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: bordeauxOf(context).withValues(alpha: 0.4),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.map_outlined, size: 17, color: bordeauxOf(context)),
+                const SizedBox(width: 7),
+                Text(
+                  context.t('show_on_map'),
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: bordeauxOf(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /// Alt eserde: "… yapısının bir parçası" bağlantısı.

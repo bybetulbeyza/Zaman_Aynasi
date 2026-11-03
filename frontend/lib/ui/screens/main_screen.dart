@@ -29,6 +29,10 @@ class MainScreen extends StatefulWidget {
 /// Başka ekranlardan (örn. eser sayfası) ana ekrandaki bir sekmeye geçmek için.
 final ValueNotifier<int?> mainTabRequest = ValueNotifier<int?>(null);
 
+/// Eser sayfasından "Haritada gör": harita sekmesine geçip o eseri seçer.
+final ValueNotifier<HeritagePlace?> mapFocusRequest =
+    ValueNotifier<HeritagePlace?>(null);
+
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0; // Varsayılan olarak Ana Sayfa ile başlar
   final GlobalKey<MapScreenState> _mapKey = GlobalKey<MapScreenState>();
@@ -37,6 +41,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     mainTabRequest.addListener(_onTabRequest);
+    mapFocusRequest.addListener(_onMapFocus);
     Passport.instance.ceremony.addListener(_onCeremony);
   }
 
@@ -79,6 +84,16 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  void _onMapFocus() {
+    final place = mapFocusRequest.value;
+    if (place == null || !mounted) return;
+    mapFocusRequest.value = null;
+    setState(() => _currentIndex = 1);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mapKey.currentState?.focusPlace(place);
+    });
+  }
+
   void _onTabRequest() {
     final i = mainTabRequest.value;
     if (i == null || !mounted) return;
@@ -89,6 +104,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void dispose() {
     mainTabRequest.removeListener(_onTabRequest);
+    mapFocusRequest.removeListener(_onMapFocus);
     Passport.instance.ceremony.removeListener(_onCeremony);
     super.dispose();
   }
