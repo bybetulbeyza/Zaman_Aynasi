@@ -416,7 +416,7 @@ html, body { overflow: hidden; background: transparent; }
     nw.setAttribute('interpolation-decay', '90');
 
     // --- Kamera sınırları: zemin altına inilmez, çok uzaklaşılmaz
-    let base = 60, home = null, homeT = null, limXZ = 20, limY = 20;
+    let base = 60, home = null, homeT = null, limXZ = 20, limY = 20, halfX = 40, halfZ = 40;
     function limits() {
       const r = nw.getCameraOrbit().radius;
       if (r > 0) base = r;
@@ -430,6 +430,7 @@ html, body { overflow: hidden; background: transparent; }
       limits();
       // Kaydırma sınırları modelin boyutuna göre (büyük yapılarda hotspot'a gidilebilsin)
       const dm = nw.getDimensions();
+      halfX = dm.x / 2; halfZ = dm.z / 2;
       limXZ = Math.max(20, 0.5 * Math.max(dm.x, dm.z));
       limY = Math.max(20, dm.y * 1.2);
       const o = nw.getCameraOrbit(), t = nw.getCameraTarget();
@@ -571,6 +572,12 @@ html, body { overflow: hidden; background: transparent; }
       // Hotspot hangi dönemin modelindeyse ayırıcı o tarafı açar
       if (od) { userTouched = true; slideTo(h.side === 'after' ? 0.92 : 0.08); }
       const n = h.n, th = Math.atan2(n[0], n[2]);
+      // Avlunun içindeki noktalara yüksekten bakılır; böylece dış duvarlar ve kapı görüşü kapatmaz
+      const inner = Math.abs(h.p[0]) < 0.62 * halfX && Math.abs(h.p[2]) < 0.62 * halfZ;
+      if (inner) {
+        fly(th, 46 * DEG, Math.max(10, home.r * 0.24), h.p[0], Math.max(2, h.p[1]), h.p[2]);
+        return;
+      }
       const ph = Math.min(84 * DEG, Math.max(55 * DEG, Math.acos(Math.max(-1, Math.min(1, n[1])))));
       fly(th, ph, Math.max(10, home.r * 0.38), h.p[0], Math.max(2, h.p[1]), h.p[2]);
     };
