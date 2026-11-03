@@ -1,3 +1,4 @@
+import 'dark_cancel.dart';
 import 'pattern_background.dart';
 import 'sheet_handle.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class FeedbackSheet {
       constraints: kSheetConstraints,
       clipBehavior: Clip.antiAlias,
       isScrollControlled: true,
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: canvasOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),

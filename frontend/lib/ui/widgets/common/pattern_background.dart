@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import 'dark_cancel.dart';
 
 /// Çini desenli zemin. Desen, tek renkli (beyaz + saydamlık) `pattern_tile.png` parçasının
 /// istenen renge boyanıp döşenmesiyle çizilir; böylece krem ve petrol zeminde aynı dosya kullanılır.
@@ -7,7 +8,7 @@ class PatternBackground extends StatelessWidget {
   static const String asset = 'assets/images/pattern_tile.png';
 
   final Widget child;
-  final Color color;
+  final Color? color;
   final Color lineColor;
   final double lineOpacity;
 
@@ -17,7 +18,7 @@ class PatternBackground extends StatelessWidget {
   const PatternBackground({
     super.key,
     required this.child,
-    this.color = AppColors.bgCanvas,
+    this.color,
     this.lineColor = const Color(0xFF7A9296),
     this.lineOpacity = 0.08,
     this.scale = 3.2,
@@ -50,7 +51,7 @@ class PatternBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: color,
+        color: color ?? canvasOf(context),
         image: DecorationImage(
           image: const AssetImage(asset),
           repeat: ImageRepeat.repeat,

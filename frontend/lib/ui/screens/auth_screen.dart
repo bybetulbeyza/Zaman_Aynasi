@@ -121,7 +121,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bgCanvas,
+        backgroundColor: canvasOf(context),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         title: Text(ctx.t('forgot_title')),
         content: Column(

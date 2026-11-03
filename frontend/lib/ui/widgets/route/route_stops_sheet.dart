@@ -1,3 +1,4 @@
+import '../common/dark_cancel.dart';
 import '../common/app_card.dart';
 import '../common/pattern_background.dart';
 import '../common/sheet_handle.dart';
@@ -27,7 +28,7 @@ Future<void> showRouteStopsSheet(
     constraints: kSheetConstraints,
     clipBehavior: Clip.antiAlias,
     isScrollControlled: true,
-    backgroundColor: AppColors.bgCanvas,
+    backgroundColor: canvasOf(context),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
@@ -122,7 +123,7 @@ class _RouteStopsContent extends StatelessWidget {
             14 + MediaQuery.of(context).padding.bottom,
           ),
           decoration: BoxDecoration(
-            color: AppColors.bgCanvas,
+            color: canvasOf(context),
             border: Border(
               top: BorderSide(
                 color: AppColors.chipBorder.withValues(alpha: 0.9),

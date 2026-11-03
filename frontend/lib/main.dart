@@ -49,13 +49,26 @@ class ZamanAynasiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: AppAccessibility.instance,
+      builder: (context, _) => _app(),
+    );
+  }
+
+  Widget _app() {
     return AppLangScope(
       lang: AppLang.instance,
       child: MaterialApp(
         navigatorKey: rootNavigatorKey,
         title: 'Zaman Aynası',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.themeFor(dark: false),
+        darkTheme: AppTheme.themeFor(dark: true),
+        themeMode: switch (AppAccessibility.instance.themeMode) {
+          1 => ThemeMode.light,
+          2 => ThemeMode.dark,
+          _ => ThemeMode.system,
+        },
         builder: (context, child) => ListenableBuilder(
           listenable: AppAccessibility.instance,
           builder: (context, _) {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import 'dark_cancel.dart';
 
-/// Tasarımdaki hap butonlar: dolu teal ([PillButton]) ve çerçeveli ([PillButton.outlined]).
+/// Uygulamanın ortak düğmesi: açık bordo zemin, ince bordo çerçeve ve bordo yazı
+/// (eser kartlarındaki "Eseri keşfet" rozetiyle aynı dil). [color] verilirse vurgu rengi o olur.
 class PillButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -16,40 +18,19 @@ class PillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = color ?? AppColors.primaryTeal;
-    final shape = const StadiumBorder();
-    const pad = EdgeInsets.symmetric(horizontal: 24, vertical: 14);
-    final text = Text(label, maxLines: 1, overflow: TextOverflow.ellipsis);
-
-    return outlined
-        ? OutlinedButton(
-            onPressed: onPressed,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: base,
-              backgroundColor: Colors.white,
-              side: BorderSide(color: base, width: 1.2),
-              padding: pad,
-              shape: shape,
-              textStyle: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            child: text,
-          )
-        : ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: base,
-              foregroundColor: Colors.white,
-              padding: pad,
-              shape: shape,
-              textStyle: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            child: text,
-          );
+    final accent = color ?? bordeauxOf(context);
+    final fill = outlined ? Colors.white : AppColors.ciniBordeauxLight;
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: accent,
+        backgroundColor: fill,
+        side: BorderSide(color: accent.withValues(alpha: 0.5), width: 1.2),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: const StadiumBorder(),
+        textStyle: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800),
+      ),
+      child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+    );
   }
 }

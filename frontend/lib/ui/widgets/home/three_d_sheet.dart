@@ -1,3 +1,4 @@
+import '../common/dark_cancel.dart';
 import '../common/action_card.dart';
 import '../common/pattern_background.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ Future<void> show3dPlacesSheet(
     context: context,
     constraints: kSheetConstraints,
     clipBehavior: Clip.antiAlias,
-    backgroundColor: AppColors.bgCanvas,
+    backgroundColor: canvasOf(context),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),

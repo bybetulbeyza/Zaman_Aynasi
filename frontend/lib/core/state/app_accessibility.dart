@@ -68,15 +68,31 @@ class AppAccessibility extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Koyu mod: arayüz renklerini "akıllı tersine çevirir" (açık ↔ koyu, ton korunur).
-  /// Matris kendi tersidir; fotoğraf, video ve harita pinleri aynı filtreyle tekrar çevrilince
-  /// (bkz. DarkCancel) özgün renklerine döner.
+  /// Koyu mod: arayüz renklerini "akıllı tersine çevirir": parlaklık ters çevrilir, ton korunur
+  /// ve koyu uçlar derin petrol tonuna çekilir (beyaz kart → #08161C, koyu yazı → sıcak krem).
+  /// Matris kendi tersidir (parlaklık L → t-L, renk farkı aynen kalır); fotoğraf, video ve harita
+  /// pinleri aynı filtreyle tekrar çevrilince özgün renklerine döner (bkz. DarkCancel).
+  static const List<double> _m = <double>[
+    0.554118, -1.499975, -0.151424, 287.8064, //
+    -0.420609, -0.414956, -0.142841, 271.4934, //
+    -0.409778, -1.378519, 0.860837, 264.5022, //
+  ];
   static const ColorFilter darkFilter = ColorFilter.matrix(<double>[
-    0.574, -1.430, -0.144, 0, 255, //
-    -0.426, -0.430, -0.144, 0, 255, //
-    -0.426, -1.430, 0.856, 0, 255, //
+    0.554118, -1.499975, -0.151424, 0, 287.8064, //
+    -0.420609, -0.414956, -0.142841, 0, 271.4934, //
+    -0.409778, -1.378519, 0.860837, 0, 264.5022, //
     0, 0, 0, 1, 0,
   ]);
+
+  /// Koyu modda ekranda [desired] görünsün diye filtrenin ÖNÜNE konacak renk
+  /// (filtre kendi tersi olduğundan önce görüntü = filtre(istenen)).
+  static Color darkPre(Color desired) {
+    final r = desired.r * 255, g = desired.g * 255, b = desired.b * 255;
+    double ch(int i) =>
+        (_m[i * 4] * r + _m[i * 4 + 1] * g + _m[i * 4 + 2] * b + _m[i * 4 + 3])
+            .clamp(0.0, 255.0);
+    return Color.fromARGB(255, ch(0).round(), ch(1).round(), ch(2).round());
+  }
 
   /// Kontrastı artıran renk matrisi (yalnızca yüksek kontrast açıkken kullanılır).
   static const ColorFilter contrastFilter = ColorFilter.matrix(<double>[

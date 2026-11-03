@@ -16,9 +16,12 @@ class DarkScope extends InheritedWidget {
   bool updateShouldNotify(DarkScope old) => old.inverted != inverted;
 }
 
-/// Bordo, koyu mod filtresinden geçerken pembeye döner. Filtrenin kendi tersi olan bu ton,
-/// filtreden sonra canlı bir bordo olarak görünür. Filtre yoksa özgün bordo kullanılır.
-const Color _bordeauxPreImage = Color(0xFFFFA6B5);
+/// Koyu modda vurgu olarak görünecek yumuşak gül rengi ve sayfa zemini; filtreden sonra bu renkler
+/// görünsün diye önceden hesaplanmış (filtreye girmeden önceki) karşılıkları kullanılır.
+final Color _bordeauxPreImage = AppAccessibility.darkPre(
+  const Color(0xFFE5808F),
+);
+final Color _canvasPreImage = AppAccessibility.darkPre(const Color(0xFF16272E));
 
 Color bordeauxOf(BuildContext context, {double alpha = 1}) {
   final c = DarkScope.invertedOf(context)
@@ -26,6 +29,10 @@ Color bordeauxOf(BuildContext context, {double alpha = 1}) {
       : AppColors.ciniBordeaux;
   return alpha == 1 ? c : c.withValues(alpha: alpha);
 }
+
+/// Sayfa zemini: açıkta sıcak krem, koyuda derin petrol (kartlardan bir ton açık).
+Color canvasOf(BuildContext context) =>
+    DarkScope.invertedOf(context) ? _canvasPreImage : AppColors.bgCanvas;
 
 /// Koyu modda uygulamanın genel renk tersine çevirmesini bu alt ağaç için geri alır:
 /// fotoğraf, video, kamera, logo ve fotoğraf üstü yazılar gibi özgün kalması gerekenler için.

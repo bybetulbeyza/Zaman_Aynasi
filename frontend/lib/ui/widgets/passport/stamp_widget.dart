@@ -1,3 +1,5 @@
+import '../common/dark_cancel.dart';
+import '../common/pill_button.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -129,7 +131,7 @@ class _CeremonyDialogState extends State<_CeremonyDialog> {
   Widget build(BuildContext context) {
     final en = context.isEn;
     return Dialog(
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: canvasOf(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
@@ -165,16 +167,12 @@ class _CeremonyDialogState extends State<_CeremonyDialog> {
             const SizedBox(height: 22),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: PillButton(
+                context.t('stamp_open'),
                 onPressed: () {
                   Navigator.pop(context);
                   widget.onOpenPassport?.call();
                 },
-                style: ElevatedButton.styleFrom(
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: Text(context.t('stamp_open')),
               ),
             ),
             TextButton(

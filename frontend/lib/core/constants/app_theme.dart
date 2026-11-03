@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../state/app_accessibility.dart';
 import 'app_colors.dart';
 
 class AppTheme {
@@ -39,7 +40,17 @@ class AppTheme {
     labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
   );
 
-  static ThemeData get lightTheme {
+  static ThemeData get lightTheme => themeFor(dark: false);
+
+  /// Koyu modda arayüz renk filtresinden geçtiği için, filtre sonrası istenen renklerin
+  /// filtre öncesi karşılıkları kullanılır (bkz. AppAccessibility.darkPre).
+  static ThemeData themeFor({required bool dark}) {
+    final bordeaux = dark
+        ? AppAccessibility.darkPre(const Color(0xFFE5808F))
+        : AppColors.ciniBordeaux;
+    final canvas = dark
+        ? AppAccessibility.darkPre(const Color(0xFF16272E))
+        : AppColors.bgCanvas;
     return ThemeData(
       useMaterial3: true,
       fontFamily: bodyFont,
@@ -47,7 +58,7 @@ class AppTheme {
         bodyColor: AppColors.textDark,
         displayColor: AppColors.textDark,
       ),
-      scaffoldBackgroundColor: AppColors.bgCanvas,
+      scaffoldBackgroundColor: canvas,
       primaryColor: AppColors.primaryTeal,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primaryTeal,
@@ -68,15 +79,17 @@ class AppTheme {
       // Birincil butonlar
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryTeal,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.ciniBordeauxLight,
+          foregroundColor: bordeaux,
           elevation: 0,
+          side: BorderSide(color: bordeaux.withValues(alpha: 0.5), width: 1.2),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          shape: const StadiumBorder(),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
         ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: bordeaux),
       ),
 
       // İkincil / Gri butonlar
@@ -94,12 +107,12 @@ class AppTheme {
       ),
 
       // AppBar Stili
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.bgCanvas,
+      appBarTheme: AppBarTheme(
+        backgroundColor: canvas,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: AppColors.textDark),
-        titleTextStyle: TextStyle(
+        iconTheme: const IconThemeData(color: AppColors.textDark),
+        titleTextStyle: const TextStyle(
           fontFamily: headingFont,
           color: AppColors.textDark,
           fontSize: 18,

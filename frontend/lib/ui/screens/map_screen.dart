@@ -1,3 +1,4 @@
+import '../widgets/common/pill_button.dart';
 import 'dart:async';
 
 import '../widgets/common/app_icon.dart';
@@ -392,15 +393,15 @@ class MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: AppColors.bgCanvas,
-        body: LogoLoader(size: 64),
+      return Scaffold(
+        backgroundColor: canvasOf(context),
+        body: const LogoLoader(size: 64),
       );
     }
 
     if (_allPlaces.isEmpty) {
       return Scaffold(
-        backgroundColor: AppColors.bgCanvas,
+        backgroundColor: canvasOf(context),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -413,18 +414,12 @@ class MapScreenState extends State<MapScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              ElevatedButton(
+              PillButton(
+                context.t('retry'),
                 onPressed: () {
                   setState(() => _isLoading = true);
                   _initDataAndLocation();
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryTeal,
-                ),
-                child: Text(
-                  context.t('retry'),
-                  style: const TextStyle(color: Colors.white),
-                ),
               ),
             ],
           ),
@@ -440,7 +435,7 @@ class MapScreenState extends State<MapScreen> {
         .toList();
 
     return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: canvasOf(context),
       body: Stack(
         children: [
           // 1. Harita Katmanı
@@ -451,7 +446,7 @@ class MapScreenState extends State<MapScreen> {
                   ? _allPlaces.first.location
                   : _bursaCenter,
               initialZoom: 16.5,
-              backgroundColor: AppColors.bgCanvas,
+              backgroundColor: canvasOf(context),
               onTap: (_, __) {
                 if (_routeChip == null && _cardOpen) {
                   setState(() => _cardOpen = false);
@@ -547,9 +542,9 @@ class MapScreenState extends State<MapScreen> {
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 350),
                 opacity: _tilesReady ? 0 : 1,
-                child: const ColoredBox(
-                  color: AppColors.bgCanvas,
-                  child: LogoLoader(size: 64),
+                child: ColoredBox(
+                  color: canvasOf(context),
+                  child: const LogoLoader(size: 64),
                 ),
               ),
             ),

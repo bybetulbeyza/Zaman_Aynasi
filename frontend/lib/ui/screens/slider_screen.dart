@@ -251,7 +251,7 @@ class _SliderScreenState extends State<SliderScreen>
     final en = context.isEn;
 
     return Scaffold(
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: canvasOf(context),
       body: Stack(
         children: [
           // 1. Dönem / Bugün karşılaştırma alanı
@@ -314,7 +314,7 @@ class _SliderScreenState extends State<SliderScreen>
             height: size.height * _extent,
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.bgCanvas,
+                color: canvasOf(context),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(28),
                 ),

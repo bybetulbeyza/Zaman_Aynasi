@@ -299,8 +299,8 @@ class _MainScreenState extends State<MainScreen> {
           width: _qrSize + 12,
           height: _qrSize + 12,
           padding: const EdgeInsets.all(6),
-          decoration: const BoxDecoration(
-            color: AppColors.bgCanvas,
+          decoration: BoxDecoration(
+            color: canvasOf(context),
             shape: BoxShape.circle,
           ),
           child: Container(

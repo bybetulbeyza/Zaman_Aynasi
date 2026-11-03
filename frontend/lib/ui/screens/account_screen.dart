@@ -1,3 +1,4 @@
+import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -62,7 +63,7 @@ class _AccountScreenState extends State<AccountScreen> {
       context: context,
       constraints: kSheetConstraints,
       clipBehavior: Clip.antiAlias,
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: canvasOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -137,7 +138,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bgCanvas,
+        backgroundColor: canvasOf(context),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         title: Text(ctx.t('acc_delete_q')),
         content: Text(ctx.t('acc_delete_body')),
@@ -187,7 +188,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bgCanvas,
+        backgroundColor: canvasOf(context),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         title: Text(ctx.t('acc_signout_q')),
         content: Text(ctx.t('acc_signout_body')),

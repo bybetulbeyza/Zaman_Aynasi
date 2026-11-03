@@ -1,3 +1,4 @@
+import '../widgets/common/pill_button.dart';
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/dark_cancel.dart';
@@ -233,25 +234,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 SizedBox(
                   width: double.infinity,
                   height: 52,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() => _isScannerOpen = true);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryTeal,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(26),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      context.t('qr_open_camera'),
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                  child: PillButton(
+                    context.t('qr_open_camera'),
+                    onPressed: () => setState(() => _isScannerOpen = true),
                   ),
                 ),
 

@@ -5,7 +5,6 @@ import 'sheet_handle.dart';
 import 'package:flutter/material.dart';
 import 'dark_cancel.dart';
 import '../../../core/constants/app_cities.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_theme.dart';
 
 /// Şehir seçim sayfası. Henüz verisi olmayan şehirler "Yakında" olarak gösterilir.
@@ -14,7 +13,7 @@ Future<void> showCityPickerSheet(BuildContext context) {
     context: context,
     constraints: kSheetConstraints,
     clipBehavior: Clip.antiAlias,
-    backgroundColor: AppColors.bgCanvas,
+    backgroundColor: canvasOf(context),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),

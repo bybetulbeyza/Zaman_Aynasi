@@ -141,7 +141,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
       constraints: kSheetConstraints,
       clipBehavior: Clip.antiAlias,
       isScrollControlled: true,
-      backgroundColor: AppColors.bgCanvas,
+      backgroundColor: canvasOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
