@@ -966,7 +966,11 @@ class _SliderScreenState extends State<SliderScreen>
         onTap: !available
             ? null
             : (videoUrl.isNotEmpty
-                  ? () => showVideoDialog(context, videoUrl)
+                  ? () => showVideoDialog(
+                      context,
+                      videoUrl,
+                      script: _place.videoScriptFor(context.isEn),
+                    )
                   : () => _openReels(null)),
         child: AspectRatio(
           aspectRatio: 16 / 9,

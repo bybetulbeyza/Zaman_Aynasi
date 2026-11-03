@@ -9,6 +9,7 @@ import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import 'slider_screen.dart';
+import '../widgets/detail/video_subtitles.dart';
 
 class _Reel {
   final HeritagePlace place;
@@ -248,6 +249,22 @@ class _ReelPageState extends State<_ReelPage> {
                 size: 76,
                 color: Colors.white70,
               ),
+            ),
+          // Altyazı: alttaki bilgi bloğunun hemen üstünde
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 230,
+            child: VideoSubtitles(
+              controller: _c,
+              script: r.hotspot.videoScriptFor(en),
+            ),
+          ),
+          if (r.hotspot.videoScriptFor(en).trim().isNotEmpty)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              right: 14,
+              child: const SubtitleToggle(),
             ),
           Positioned(
             left: 20,

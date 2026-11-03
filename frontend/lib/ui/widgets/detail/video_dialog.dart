@@ -4,19 +4,25 @@ import '../common/dark_cancel.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
+import 'video_subtitles.dart';
 
 /// AI videosunu tam ekran bir pencerede oynatır.
-Future<void> showVideoDialog(BuildContext context, String url) {
+Future<void> showVideoDialog(
+  BuildContext context,
+  String url, {
+  String script = '',
+}) {
   return showDialog<void>(
     context: context,
     barrierColor: scrimOf(context, 0.87),
-    builder: (_) => _VideoDialog(url: url),
+    builder: (_) => _VideoDialog(url: url, script: script),
   );
 }
 
 class _VideoDialog extends StatefulWidget {
   final String url;
-  const _VideoDialog({required this.url});
+  final String script;
+  const _VideoDialog({required this.url, this.script = ''});
 
   @override
   State<_VideoDialog> createState() => _VideoDialogState();
@@ -78,6 +84,15 @@ class _VideoDialogState extends State<_VideoDialog> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         VideoPlayer(_controller),
+                        Positioned(
+                          left: 14,
+                          right: 14,
+                          bottom: 18,
+                          child: VideoSubtitles(
+                            controller: _controller,
+                            script: widget.script,
+                          ),
+                        ),
                         VideoProgressIndicator(
                           _controller,
                           allowScrubbing: true,
@@ -97,6 +112,8 @@ class _VideoDialogState extends State<_VideoDialog> {
                     ),
                   ),
                 ),
+              if (widget.script.trim().isNotEmpty)
+                const Positioned(top: 14, left: 14, child: SubtitleToggle()),
               Positioned(
                 top: 8,
                 right: 8,

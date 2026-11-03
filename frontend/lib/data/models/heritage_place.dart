@@ -84,6 +84,10 @@ class Hotspot {
   final String? aiVideoEnUrl;
   final String?
   aiVideoUrl; // Supabase: ai_video (boşsa 'AI hikâyesi' butonu gizlenir)
+
+  /// Supabase: video_script_tr / video_script_en — videonun anlatım metni (altyazı için).
+  final String videoScriptTr;
+  final String videoScriptEn;
   final String?
   targetPlaceId; // Külliyeden alt yapıya (Türbe, Hamam vb.) geçiş ID'si
 
@@ -108,6 +112,8 @@ class Hotspot {
     this.descriptionEn = '',
     this.aiVideoEnUrl,
     this.aiVideoUrl,
+    this.videoScriptTr = '',
+    this.videoScriptEn = '',
     this.targetPlaceId,
     this.modelPos,
     this.modelNormal,
@@ -129,6 +135,10 @@ class Hotspot {
 
   bool get hasAiVideo => aiVideoUrl != null && aiVideoUrl!.trim().isNotEmpty;
 
+  /// Altyazı metni: uygulama diline göre; İngilizce yoksa Türkçeye döner.
+  String videoScriptFor(bool en) =>
+      en && videoScriptEn.isNotEmpty ? videoScriptEn : videoScriptTr;
+
   /// Aynı hotspot'un karşı fotoğraftaki (eski ↔ güncel) kopyası; yapı yönlendirme noktaları iki tarafta da durur.
   Hotspot otherSide() => Hotspot(
     id: id,
@@ -144,6 +154,8 @@ class Hotspot {
     descriptionEn: descriptionEn,
     aiVideoEnUrl: aiVideoEnUrl,
     aiVideoUrl: aiVideoUrl,
+    videoScriptTr: videoScriptTr,
+    videoScriptEn: videoScriptEn,
     targetPlaceId: targetPlaceId,
     modelPos: modelPos,
     modelNormal: modelNormal,
@@ -169,6 +181,8 @@ class Hotspot {
       descriptionEn: (json['description_en'] as String? ?? '').trim(),
       aiVideoEnUrl: _lightVideo((json['ai_video_en'] as String?)?.trim()),
       aiVideoUrl: _lightVideo((json['ai_video'] as String?)?.trim()),
+      videoScriptTr: (json['video_script_tr'] as String? ?? '').trim(),
+      videoScriptEn: (json['video_script_en'] as String? ?? '').trim(),
       targetPlaceId: json['target_place_id']?.toString(),
       modelPos: (json['model_pos'] as String?)?.trim(),
       modelNormal: (json['model_normal'] as String?)?.trim(),
@@ -205,6 +219,10 @@ class HeritagePlace {
   /// Supabase: audio_text / audio_text_en — sesli rehberin yazılı metni (işitme engelliler için).
   final String audioText;
   final String audioTextEn;
+
+  /// Supabase: video_script_tr / video_script_en — eser videosunun anlatım metni (altyazı).
+  final String videoScriptTr;
+  final String videoScriptEn;
   final String aiVideoEnUrl;
   final String aiVideoUrl; // Supabase: ai_video (tarihî dönüşüm videosu)
   final String
@@ -246,6 +264,8 @@ class HeritagePlace {
     this.audioGuideEnUrl = '',
     this.audioText = '',
     this.audioTextEn = '',
+    this.videoScriptTr = '',
+    this.videoScriptEn = '',
     this.aiVideoEnUrl = '',
     this.aiVideoUrl = '',
     this.audioGuideUrl = '',
@@ -277,6 +297,10 @@ class HeritagePlace {
       en && aiVideoEnUrl.isNotEmpty ? aiVideoEnUrl : aiVideoUrl;
 
   bool get hasAiVideo => aiVideoUrl.isNotEmpty || aiVideoEnUrl.isNotEmpty;
+
+  /// Altyazı metni: uygulama diline göre; İngilizce yoksa Türkçeye döner.
+  String videoScriptFor(bool en) =>
+      en && videoScriptEn.isNotEmpty ? videoScriptEn : videoScriptTr;
   bool get has3dModel => modelNewUrl.isNotEmpty || modelOldUrl.isNotEmpty;
   bool get hasAudioGuide => audioGuideUrl.isNotEmpty;
 
@@ -324,6 +348,8 @@ class HeritagePlace {
       audioGuideEnUrl: audioGuideEnUrl,
       audioText: audioText,
       audioTextEn: audioTextEn,
+      videoScriptTr: videoScriptTr,
+      videoScriptEn: videoScriptEn,
       aiVideoEnUrl: aiVideoEnUrl,
       aiVideoUrl: aiVideoUrl,
       audioGuideUrl: audioGuideUrl,
@@ -384,6 +410,8 @@ class HeritagePlace {
       audioGuideEnUrl: (json['audio_guide_en'] as String? ?? '').trim(),
       audioText: (json['audio_text'] as String? ?? '').trim(),
       audioTextEn: (json['audio_text_en'] as String? ?? '').trim(),
+      videoScriptTr: (json['video_script_tr'] as String? ?? '').trim(),
+      videoScriptEn: (json['video_script_en'] as String? ?? '').trim(),
       aiVideoEnUrl: _lightVideo((json['ai_video_en'] as String? ?? '').trim())!,
       aiVideoUrl: _lightVideo((json['ai_video'] as String? ?? '').trim())!,
       audioGuideUrl: (json['audio_guide'] as String? ?? '').trim(),
