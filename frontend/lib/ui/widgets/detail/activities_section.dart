@@ -31,7 +31,7 @@ class _ActivitiesSectionState extends State<ActivitiesSection>
 
   late final AnimationController _pulse = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1500),
+    duration: const Duration(milliseconds: 900),
   );
 
   void _onPulse() {
@@ -90,12 +90,10 @@ class _ActivitiesSectionState extends State<ActivitiesSection>
             AnimatedBuilder(
               animation: _pulse,
               builder: (_, child) {
-                final t = _pulse.value;
-                final wave = t == 0
-                    ? 0.0
-                    : (math.sin(t * math.pi * 4)).abs() * (1 - t);
+                // Tek bir yumuşak büyüyüp küçülme (sinüs yarım dalgası)
+                final wave = math.sin(_pulse.value * math.pi);
                 return Transform.scale(
-                  scale: 1 + 0.14 * wave,
+                  scale: 1 + 0.12 * wave,
                   alignment: Alignment.centerLeft,
                   child: child,
                 );
