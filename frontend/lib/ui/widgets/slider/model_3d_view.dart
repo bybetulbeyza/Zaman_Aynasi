@@ -521,6 +521,11 @@ html, body { overflow: hidden; background: transparent; }
       const o = nw.getCameraOrbit(), t = nw.getCameraTarget();
       od.cameraOrbit = o.theta + 'rad ' + o.phi + 'rad ' + o.radius + 'm';
       od.cameraTarget = t.x + 'm ' + t.y + 'm ' + t.z + 'm';
+      // Zoom görüş açısıyla da yapılabildiği için o da kopyalanır; boyut da birebir aynı olur
+      od.fieldOfView = nw.getFieldOfView() + 'deg';
+      const r = nw.getBoundingClientRect();
+      if (od.style.width !== r.width + 'px') od.style.width = r.width + 'px';
+      if (od.style.height !== r.height + 'px') od.style.height = r.height + 'px';
       od.jumpCameraToGoal();
     }
     nw.addEventListener('camera-change', function () {
