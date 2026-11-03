@@ -254,7 +254,7 @@ class GlassPill extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.symmetric(
                 horizontal: text == null ? 10 : 12,
-                vertical: 8,
+                vertical: 7,
               ),
               decoration: BoxDecoration(
                 color: tint != null
@@ -269,7 +269,7 @@ class GlassPill extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: 18, color: Colors.white),
+                  Icon(icon, size: 16, color: Colors.white),
                   if (text != null) ...[
                     const SizedBox(width: 5),
                     Text(

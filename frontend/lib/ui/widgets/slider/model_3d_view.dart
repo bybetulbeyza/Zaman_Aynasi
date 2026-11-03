@@ -330,13 +330,17 @@ class _Model3DViewState extends State<Model3DView> {
   static const _css = r'''
 html, body { overflow: hidden; background: transparent; }
 .hs {
-  position: relative; width: 26px; height: 26px; border-radius: 50%; padding: 0;
-  border: 0; background: rgba(255,255,255,.96); cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,.4);
-  animation: hspulse 1.8s ease-out infinite;
+  position: relative; width: 22px; height: 22px; border-radius: 50%; padding: 0;
+  border: 0; background: #fff; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+}
+.hs::before {
+  content: ''; position: absolute; left: -6px; top: -6px; width: 34px; height: 34px;
+  border-radius: 50%; background: rgba(255,255,255,.35); pointer-events: none;
+  animation: hshalo 1.4s ease-in-out infinite alternate;
 }
 .hs::after {
-  content: ''; position: absolute; left: 7px; top: 7px; width: 12px; height: 12px;
+  content: ''; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px;
   border-radius: 50%; background: #17a2a4;
 }
 #gline { position: absolute; top: 0; bottom: 0; width: 2.5px; margin-left: -1.25px; z-index: 6;
@@ -355,11 +359,7 @@ html, body { overflow: hidden; background: transparent; }
   transition: transform .16s ease-out; pointer-events: none; }
 #gknob.on .dot { transform: scale(1.14); }
 @keyframes kring { from { transform: scale(1); opacity: 1; } to { transform: scale(1.28); opacity: .2; } }
-@keyframes hspulse {
-  0% { box-shadow: 0 0 0 0 rgba(255,255,255,.65), 0 2px 8px rgba(0,0,0,.4); }
-  70% { box-shadow: 0 0 0 11px rgba(255,255,255,0), 0 2px 8px rgba(0,0,0,.4); }
-  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0), 0 2px 8px rgba(0,0,0,.4); }
-}
+@keyframes hshalo { from { transform: scale(1); opacity: 1; } to { transform: scale(1.25); opacity: .43; } }
 ''';
 
   static const _js_ = r'''
@@ -451,7 +451,7 @@ html, body { overflow: hidden; background: transparent; }
     if (od) {
       gline = document.createElement('div'); gline.id = 'gline';
       gknob = document.createElement('div'); gknob.id = 'gknob';
-      gknob.innerHTML = '<div class="ring"></div><div class="dot"><svg width="40" height="20" viewBox="0 0 40 20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l-5 5 5 5"/><path d="M27 5l5 5-5 5"/></svg></div>';
+      gknob.innerHTML = '<div class="ring"></div><div class="dot"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>';
       document.body.append(gline, gknob);
       let dragging = false;
       gknob.addEventListener('pointerdown', function (e) {
