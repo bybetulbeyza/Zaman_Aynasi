@@ -189,13 +189,16 @@ class _ReelPageState extends State<_ReelPage>
             if (mounted) {
               setState(() {});
               _syncPlayback();
+              // İpucu, video gerçekten görününce başlar (yüklenirken bitmesin)
+              if (_showHint && !_hint.isAnimating && _hint.value == 0) {
+                _hint.forward();
+              }
             }
           })
           .catchError((_) {
             if (mounted) setState(() => _error = true);
           });
     widget.pageController.addListener(_syncPlayback);
-    if (_showHint) _hint.forward();
   }
 
   void _openDetails() => Navigator.push(
