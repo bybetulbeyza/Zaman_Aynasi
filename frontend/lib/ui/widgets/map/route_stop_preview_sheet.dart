@@ -64,7 +64,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
         ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.18),
+            color: shadowOf(context, 0.18),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),

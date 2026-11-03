@@ -606,6 +606,7 @@ class MapScreenState extends State<MapScreen> {
                             color: AppColors.primaryTeal,
                             shape: const CircleBorder(),
                             elevation: 4,
+                            shadowColor: shadowOf(context, 1),
                             child: InkWell(
                               customBorder: const CircleBorder(),
                               onTap: () => LauncherUtil.openDirections(
@@ -630,6 +631,7 @@ class MapScreenState extends State<MapScreen> {
                         child: Material(
                           color: Colors.white,
                           elevation: 3,
+                          shadowColor: shadowOf(context, 1),
                           borderRadius: BorderRadius.circular(24),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -665,6 +667,7 @@ class MapScreenState extends State<MapScreen> {
                           color: Colors.white,
                           shape: const CircleBorder(),
                           elevation: 3,
+                          shadowColor: shadowOf(context, 1),
                           child: InkWell(
                             customBorder: const CircleBorder(),
                             onTap: _recenter,

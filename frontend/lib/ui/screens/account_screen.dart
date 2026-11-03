@@ -310,9 +310,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.15,
-                                        ),
+                                        color: shadowOf(context, 0.15),
                                         blurRadius: 6,
                                       ),
                                     ],

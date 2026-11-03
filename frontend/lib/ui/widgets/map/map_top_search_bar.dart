@@ -1,3 +1,4 @@
+import '../common/dark_cancel.dart';
 import '../common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_categories.dart';
@@ -52,7 +53,7 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: shadowOf(context, 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -155,8 +156,9 @@ class _MapTopSearchBarState extends State<MapTopSearchBar> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(
-                                alpha: isSelected ? 0.12 : 0.03,
+                              color: shadowOf(
+                                context,
+                                isSelected ? 0.12 : 0.03,
                               ),
                               blurRadius: 6,
                               offset: const Offset(0, 2),

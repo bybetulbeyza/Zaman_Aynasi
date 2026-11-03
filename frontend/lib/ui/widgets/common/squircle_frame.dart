@@ -1,3 +1,4 @@
+import 'dark_cancel.dart';
 import 'package:flutter/material.dart';
 
 /// Eser kartlarının ortak şekli: iki çapraz köşe büyük ve akıcı, diğer iki çapraz köşe sivri
@@ -50,7 +51,7 @@ class SquircleFrame extends StatelessWidget {
         shadows: elevated
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.20),
+                  color: shadowOf(context, 0.20),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),

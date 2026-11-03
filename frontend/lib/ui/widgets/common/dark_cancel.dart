@@ -30,6 +30,13 @@ Color bordeauxOf(BuildContext context, {double alpha = 1}) {
   return alpha == 1 ? c : c.withValues(alpha: alpha);
 }
 
+/// Gölge rengi: koyu modda filtre siyahı beyaza çevirip "parlama" yaptığı için, filtreden sonra
+/// koyu gölge görünsün diye açık bir ön renk kullanılır (etkisi zayıf kalmasın diye biraz güçlendirilir).
+Color shadowOf(BuildContext context, double alpha) =>
+    DarkScope.invertedOf(context)
+    ? Colors.white.withValues(alpha: (alpha * 3).clamp(0.0, 0.9))
+    : Colors.black.withValues(alpha: alpha);
+
 /// Sayfa zemini: açıkta sıcak krem, koyuda derin petrol (kartlardan bir ton açık).
 Color canvasOf(BuildContext context) =>
     DarkScope.invertedOf(context) ? _canvasPreImage : AppColors.bgCanvas;

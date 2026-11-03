@@ -74,6 +74,7 @@ class PassportStrip extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
               decoration: appCardDecoration(
+                context: context,
                 round: 30,
                 side: bordeauxOf(context).withValues(alpha: 0.4),
               ),

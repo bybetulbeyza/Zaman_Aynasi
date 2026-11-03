@@ -311,6 +311,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(22),
                         decoration: appCardDecoration(
+                          context: context,
                           round: 40,
                           side: AppColors.chipBorder,
                         ),

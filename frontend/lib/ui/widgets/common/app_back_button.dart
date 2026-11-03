@@ -49,7 +49,7 @@ class AppBackButton extends StatelessWidget {
               border: Border.all(color: AppColors.chipBorder, width: 1.2),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.10),
+                  color: shadowOf(context, 0.10),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
