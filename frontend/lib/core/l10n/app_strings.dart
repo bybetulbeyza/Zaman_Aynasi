@@ -94,6 +94,9 @@ const Map<String, String> appStringsTr = {
   'undo': 'Geri al',
   'act_title': 'Keşif görevleri',
   'act_all_done': 'Tüm görevler tamam!',
+  'dark_mode_switch': 'Koyu mod',
+  'a11y_reader_note':
+      'Ekran okuyucu desteği (TalkBack, VoiceOver): düğmeler, görseller ve kaydırıcı etiketlenmiştir; cihazın erişilebilirlik ayarlarından açılır.',
   'share_btn': 'Paylaş',
   'share_stamp_hint': 'Başarını paylaş',
   'share_failed': 'Paylaşım açılamadı.',
@@ -421,6 +424,9 @@ const Map<String, String> appStringsEn = {
   'undo': 'Undo',
   'act_title': 'Discovery tasks',
   'act_all_done': 'All tasks done!',
+  'dark_mode_switch': 'Dark mode',
+  'a11y_reader_note':
+      'Screen reader support (TalkBack, VoiceOver): buttons, images and the slider are labelled; turn it on in your device accessibility settings.',
   'share_btn': 'Share',
   'share_stamp_hint': 'Share your achievement',
   'share_failed': 'Could not open sharing.',

@@ -23,6 +23,86 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  /// Seçilebilir kutucuk: seçiliyken açık bordo zemin ve bordo çerçeve (ortak kart şekli).
+  Widget _choiceTile(
+    BuildContext context,
+    String label,
+    bool selected,
+    VoidCallback onTap,
+  ) {
+    final accent = bordeauxOf(context);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          alignment: Alignment.center,
+          decoration: appCardDecoration(
+            round: 24,
+            shadow: false,
+            fill: selected ? AppColors.ciniBordeauxLight : Colors.white,
+            side: selected ? accent : AppColors.chipBorder,
+            width: selected ? 1.6 : 1.2,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: selected ? accent : AppColors.textDark,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Anahtarlı ayar satırı (ortak kart şekli, bordo anahtar).
+  Widget _switchRow(
+    BuildContext context,
+    String title,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
+    final accent = bordeauxOf(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 6, 12, 6),
+      decoration: appCardDecoration(
+        round: 26,
+        shadow: false,
+        side: accent.withValues(alpha: 0.4),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: Colors.white,
+            activeTrackColor: accent,
+            inactiveThumbColor: accent,
+            inactiveTrackColor: AppColors.ciniBordeauxLight,
+            trackOutlineColor: WidgetStatePropertyAll(
+              accent.withValues(alpha: 0.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAccessibility(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -79,41 +159,13 @@ class ProfileScreen extends StatelessWidget {
                                       ? 0
                                       : 10,
                                 ),
-                                child: GestureDetector(
-                                  onTap: () => a11y.setTextScale(
+                                child: _choiceTile(
+                                  context,
+                                  labels[i],
+                                  a11y.textScale ==
+                                      AppAccessibility.textScales[i],
+                                  () => a11y.setTextScale(
                                     AppAccessibility.textScales[i],
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color:
-                                          a11y.textScale ==
-                                              AppAccessibility.textScales[i]
-                                          ? AppColors.primaryTeal
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(22),
-                                      border: Border.all(
-                                        color:
-                                            a11y.textScale ==
-                                                AppAccessibility.textScales[i]
-                                            ? AppColors.primaryTeal
-                                            : AppColors.chipBorder,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      labels[i],
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        color:
-                                            a11y.textScale ==
-                                                AppAccessibility.textScales[i]
-                                            ? Colors.white
-                                            : AppColors.textDark,
-                                      ),
-                                    ),
                                   ),
                                 ),
                               ),
@@ -121,73 +173,39 @@ class ProfileScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        activeThumbColor: bordeauxOf(context),
-                        title: Text(
-                          context.t('high_contrast'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        value: a11y.highContrast,
-                        onChanged: a11y.setHighContrast,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        context.t('appearance'),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      _switchRow(
+                        context,
+                        context.t('high_contrast'),
+                        a11y.highContrast,
+                        a11y.setHighContrast,
                       ),
                       const SizedBox(height: 10),
+                      _switchRow(
+                        context,
+                        context.t('dark_mode_switch'),
+                        a11y.isDark(context),
+                        (v) => a11y.setThemeMode(v ? 2 : 1),
+                      ),
+                      const SizedBox(height: 16),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          for (final m in const [0, 1, 2])
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                  right: m == 2 ? 0 : 10,
-                                ),
-                                child: GestureDetector(
-                                  onTap: () => a11y.setThemeMode(m),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: a11y.themeMode == m
-                                          ? AppColors.primaryTeal
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(22),
-                                      border: Border.all(
-                                        color: a11y.themeMode == m
-                                            ? AppColors.primaryTeal
-                                            : AppColors.chipBorder,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      context.t(
-                                        m == 0
-                                            ? 'theme_system'
-                                            : m == 1
-                                            ? 'theme_light'
-                                            : 'theme_dark',
-                                      ),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        color: a11y.themeMode == m
-                                            ? Colors.white
-                                            : AppColors.textDark,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                          Icon(
+                            Icons.record_voice_over_outlined,
+                            size: 20,
+                            color: bordeauxOf(context),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              context.t('a11y_reader_note'),
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                height: 1.4,
+                                color: AppColors.textMuted,
                               ),
                             ),
+                          ),
                         ],
                       ),
                     ],
