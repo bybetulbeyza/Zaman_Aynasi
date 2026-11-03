@@ -279,7 +279,7 @@ class _ReelPageState extends State<_ReelPage>
           // "Hikâyeler" başlığının hemen altında yapay zekâ etiketi
           Positioned(
             top: MediaQuery.of(context).padding.top + 66,
-            left: 62,
+            left: 11,
             child: const AiLabel(compact: true),
           ),
           // Alt: altyazı ve tek satırlık "Detaylar için sağa kaydır »" ipucu
