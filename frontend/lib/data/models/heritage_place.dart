@@ -44,6 +44,20 @@ enum PlaceCategory {
   }
 }
 
+/// Cloudinary videolarını mobil için hafifletir (1280 px, otomatik kalite, H.264): 38-50 MB'lık
+/// dosyalar yaklaşık 7-18 MB olur. Başka adreslere ve zaten dönüştürülmüş adreslere dokunmaz.
+String? _lightVideo(String? url) {
+  if (url == null || url.isEmpty) return url;
+  const marker = '/video/upload/';
+  final i = url.indexOf(marker);
+  if (i < 0 || !url.contains('res.cloudinary.com')) return url;
+  final rest = url.substring(i + marker.length);
+  if (rest.startsWith('q_') || rest.startsWith('w_') || rest.startsWith('f_')) {
+    return url;
+  }
+  return '${url.substring(0, i + marker.length)}q_auto:good,w_1280,vc_h264/$rest';
+}
+
 class Hotspot {
   final dynamic id;
   final dynamic placeId;
@@ -140,8 +154,8 @@ class Hotspot {
       yPercent: (json['y_percent'] as num?)?.toDouble() ?? 0.0,
       titleEn: (json['title_en'] as String? ?? '').trim(),
       descriptionEn: (json['description_en'] as String? ?? '').trim(),
-      aiVideoEnUrl: (json['ai_video_en'] as String?)?.trim(),
-      aiVideoUrl: (json['ai_video'] as String?)?.trim(),
+      aiVideoEnUrl: _lightVideo((json['ai_video_en'] as String?)?.trim()),
+      aiVideoUrl: _lightVideo((json['ai_video'] as String?)?.trim()),
       targetPlaceId: json['target_place_id']?.toString(),
       modelPos: (json['model_pos'] as String?)?.trim(),
       modelNormal: (json['model_normal'] as String?)?.trim(),
@@ -357,8 +371,8 @@ class HeritagePlace {
       audioGuideEnUrl: (json['audio_guide_en'] as String? ?? '').trim(),
       audioText: (json['audio_text'] as String? ?? '').trim(),
       audioTextEn: (json['audio_text_en'] as String? ?? '').trim(),
-      aiVideoEnUrl: (json['ai_video_en'] as String? ?? '').trim(),
-      aiVideoUrl: (json['ai_video'] as String? ?? '').trim(),
+      aiVideoEnUrl: _lightVideo((json['ai_video_en'] as String? ?? '').trim())!,
+      aiVideoUrl: _lightVideo((json['ai_video'] as String? ?? '').trim())!,
       audioGuideUrl: (json['audio_guide'] as String? ?? '').trim(),
       qrUrl: json['qr_url'] as String? ?? '',
       oldPhotos: _parsePhotos(json['old_photos']),
