@@ -32,7 +32,7 @@ const Map<String, String> appStringsTr = {
   // Ana sayfa
   'hero_title': 'Vakıf mirasını\nhikâyeleriyle keşfet',
   'qa_nearby': 'Yakınımda',
-  'qa_create_route': 'Rota oluştur',
+  'qa_create_route': 'Yeni rota',
   'qa_scan_qr': 'QR okut',
   'qa_stories': 'Hikâyeler',
   'reels_title': 'Hikâyeler',
@@ -330,7 +330,7 @@ const Map<String, String> appStringsEn = {
   // Home
   'hero_title': 'Discover heritage\nthrough its stories',
   'qa_nearby': 'Nearby',
-  'qa_create_route': 'Create route',
+  'qa_create_route': 'New route',
   'qa_scan_qr': 'Scan QR',
   'qa_stories': 'Stories',
   'reels_title': 'Stories',
