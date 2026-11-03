@@ -35,6 +35,9 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // R8 kod küçültme shared_preferences'ın yerel köprüsünü bozuyor (uygulama açılışta takılıyor)
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
