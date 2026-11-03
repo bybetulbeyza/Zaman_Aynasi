@@ -598,9 +598,11 @@ class _SliderScreenState extends State<SliderScreen>
         const SizedBox(height: 24),
       ],
 
-      // AI videosu
-      _buildVideoCard(videoUrl),
-      const SizedBox(height: 16),
+      // AI videosu (video yoksa "yakında" kutusu gösterilmez)
+      if (videoUrl.isNotEmpty || _hasHotspotVideos) ...[
+        _buildVideoCard(videoUrl),
+        const SizedBox(height: 16),
+      ],
 
       // Sesli rehber
       // Kayıtlı ses varsa onu çalar; yoksa sayfayı cihazın sesiyle okur
@@ -850,7 +852,13 @@ class _SliderScreenState extends State<SliderScreen>
 
   Widget _buildVideoCard(String videoUrl) {
     final available = videoUrl.isNotEmpty || _hasHotspotVideos;
-    const radius = BorderRadius.all(Radius.circular(20));
+    // Sesli rehber ve tur kartlarıyla aynı köşe şekli: iki sivri, iki kıvrımlı
+    const radius = BorderRadius.only(
+      topLeft: Radius.circular(10),
+      bottomRight: Radius.circular(10),
+      topRight: Radius.circular(44),
+      bottomLeft: Radius.circular(44),
+    );
     return GestureDetector(
       onTap: !available
           ? null
