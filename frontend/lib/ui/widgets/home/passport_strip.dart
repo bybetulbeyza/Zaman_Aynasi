@@ -6,10 +6,11 @@ import '../../../core/state/passport.dart';
 import '../../../core/utils/location_service.dart';
 import '../../../data/models/heritage_place.dart';
 import '../common/app_network_image.dart';
+import '../common/dark_cancel.dart';
 
 /// Ana ekranda "sıradaki mühür" kartı: mührü henüz alınmamış en yakın eseri gösterir,
 /// dokununca o esere gider. Sağdaki "3/23" rozeti pasaportu açar. Hepsi toplanınca tebrik gösterir.
-/// Sıcak bej zemin ve altın çerçeve: uygulamanın krem zeminiyle uyumlu.
+/// Beyaz kart yüzeyi ve bordo vurgu: QR düğmesi ve "Hikâyeler" kısayoluyla aynı bordo, kartlarla aynı beyaz.
 class PassportStrip extends StatelessWidget {
   /// Yakınlığa göre sıralı eserler (konum yoksa sıra önemsizdir).
   final List<HeritagePlace> places;
@@ -65,12 +66,19 @@ class PassportStrip extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFF1E6D0),
+                color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: AppColors.ornamentGold.withValues(alpha: 0.55),
+                  color: bordeauxOf(context).withValues(alpha: 0.4),
                   width: 1.2,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
@@ -78,8 +86,8 @@ class PassportStrip extends StatelessWidget {
                     Container(
                       width: 56,
                       height: 56,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryTeal,
+                      decoration: BoxDecoration(
+                        color: bordeauxOf(context),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -102,11 +110,11 @@ class PassportStrip extends StatelessWidget {
                       children: [
                         Text(
                           label,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.2,
-                            color: AppColors.primaryTeal,
+                            color: bordeauxOf(context),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -118,7 +126,7 @@ class PassportStrip extends StatelessWidget {
                             fontFamily: AppTheme.headingFont,
                             fontSize: 17.5,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primaryTealDark,
+                            color: AppColors.textDark,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -146,10 +154,10 @@ class PassportStrip extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.fromLTRB(10, 6, 4, 6),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.ciniBordeauxLight,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppColors.ornamentGold.withValues(alpha: 0.55),
+                          color: bordeauxOf(context).withValues(alpha: 0.4),
                         ),
                       ),
                       child: Row(
@@ -157,15 +165,15 @@ class PassportStrip extends StatelessWidget {
                         children: [
                           Text(
                             '$n/$total',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13.5,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.primaryTealDark,
+                              color: bordeauxOf(context),
                             ),
                           ),
-                          const Icon(
+                          Icon(
                             Icons.chevron_right_rounded,
-                            color: AppColors.primaryTeal,
+                            color: bordeauxOf(context),
                             size: 20,
                           ),
                         ],
