@@ -1166,16 +1166,17 @@ class _SliderScreenState extends State<SliderScreen>
             child: OutlinedButton(
               onPressed: () => LauncherUtil.openDirections(_place.location),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primaryTeal,
-                side: const BorderSide(
-                  color: AppColors.primaryTeal,
+                foregroundColor: bordeauxOf(context),
+                backgroundColor: Colors.white,
+                side: BorderSide(
+                  color: bordeauxOf(context).withValues(alpha: 0.5),
                   width: 1.2,
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const StadiumBorder(),
                 textStyle: const TextStyle(
                   fontSize: 17,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               child: Text(context.t('directions')),
@@ -1187,25 +1188,29 @@ class _SliderScreenState extends State<SliderScreen>
               listenable: ActiveRoute.instance,
               builder: (context, _) {
                 final inRoute = ActiveRoute.instance.contains(_place);
-                return ElevatedButton.icon(
+                final accent = bordeauxOf(context);
+                return OutlinedButton.icon(
                   onPressed: _toggleRoute,
                   icon: inRoute
                       ? const Icon(Icons.check_rounded, size: 22)
-                      : const AppIcon('add', size: 24, color: Colors.white),
+                      : AppIcon('add', size: 24, color: accent),
                   label: Text(
                     inRoute ? context.t('in_route') : context.t('add_to_route'),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide.none,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: inRoute ? Colors.white : accent,
                     backgroundColor: inRoute
-                        ? AppColors.primaryTealDark
-                        : AppColors.primaryTeal,
+                        ? accent
+                        : AppColors.ciniBordeauxLight,
+                    side: BorderSide(
+                      color: accent.withValues(alpha: inRoute ? 1 : 0.5),
+                      width: 1.2,
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: const StadiumBorder(),
                     textStyle: const TextStyle(
                       fontSize: 17,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 );
