@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/action_card.dart';
 import '../widgets/common/sheet_handle.dart';
 import '../widgets/common/ai_label.dart';
 import '../widgets/common/dark_cancel.dart';
@@ -28,7 +29,6 @@ import '../widgets/detail/audio_guide_player.dart';
 import '../widgets/detail/tts_guide_player.dart';
 import '../widgets/detail/photo_collage.dart';
 import '../widgets/detail/activities_section.dart';
-import '../widgets/detail/guide_card.dart';
 import '../widgets/detail/guide_section.dart';
 import '../widgets/detail/swipe_hint_arrow.dart';
 import '../widgets/common/feedback_sheet.dart';
@@ -491,36 +491,27 @@ class _SliderScreenState extends State<SliderScreen>
             button: true,
             label: on ? context.t('tour_stop') : context.t('tour_start'),
             excludeSemantics: true,
-            child: GestureDetector(
-              onTap: toggle,
-              child: GuideCard(
-                compact: true,
-                playing: on,
-                activeIcon: Icons.stop_rounded,
-                onTap: toggle,
-                title: on ? context.t('tour_stop') : context.t('tour_start'),
-                trailing: on
-                    ? '${_tour.step + 1}/$n'
-                    : '$n ${context.t('tour_stops')}',
-                bottom: Row(
-                  children: [
-                    for (var i = 0; i < n; i++)
-                      Expanded(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          height: 5,
-                          margin: EdgeInsets.only(right: i == n - 1 ? 0 : 4),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(3),
-                            color: AppColors.primaryTeal.withValues(
-                              alpha: on && i <= _tour.step ? 0.9 : 0.25,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+            child: ActionCard(
+              leading: ActionCard.iconBubble(
+                context,
+                on ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                filled: true,
               ),
+              title: on ? context.t('tour_stop') : context.t('tour_start'),
+              subtitle: on ? null : '$n ${context.t('tour_stops')}',
+              onTap: toggle,
+              round: 28,
+              shadow: true,
+              trailing: on
+                  ? Text(
+                      '${_tour.step + 1}/$n',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: bordeauxOf(context),
+                      ),
+                    )
+                  : null,
             ),
           ),
         );

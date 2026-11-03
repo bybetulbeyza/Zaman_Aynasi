@@ -1,3 +1,4 @@
+import '../widgets/common/app_card.dart';
 import '../widgets/common/action_card.dart';
 import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
@@ -258,8 +259,6 @@ class _RoutesScreenState extends State<RoutesScreen> {
     }
   }
 
-  static const _fieldBg = Color(0xFFF6F0E3);
-
   Widget _label(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 10),
     child: Text(
@@ -276,10 +275,10 @@ class _RoutesScreenState extends State<RoutesScreen> {
     width: double.infinity,
     padding:
         padding ?? const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-    decoration: BoxDecoration(
-      color: _fieldBg,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: AppColors.chipBorder),
+    decoration: appCardDecoration(
+      round: 24,
+      shadow: false,
+      side: bordeauxOf(context).withValues(alpha: 0.4),
     ),
     child: child,
   );
@@ -312,10 +311,9 @@ class _RoutesScreenState extends State<RoutesScreen> {
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(22),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(color: AppColors.chipBorder),
+                        decoration: appCardDecoration(
+                          round: 40,
+                          side: AppColors.chipBorder,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,19 +422,16 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                           vertical: 14,
                                         ),
                                         alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: sel
-                                              ? AppColors.primaryTeal
+                                        decoration: appCardDecoration(
+                                          round: 24,
+                                          shadow: false,
+                                          fill: sel
+                                              ? AppColors.ciniBordeauxLight
                                               : Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            26,
-                                          ),
-                                          border: Border.all(
-                                            color: sel
-                                                ? AppColors.primaryTeal
-                                                : AppColors.chipBorder,
-                                            width: 1.2,
-                                          ),
+                                          side: sel
+                                              ? bordeauxOf(context)
+                                              : AppColors.chipBorder,
+                                          width: sel ? 1.6 : 1.2,
                                         ),
                                         child: Text(
                                           '$h ${context.t('rc_hour')}',
@@ -444,7 +439,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                             fontSize: 15,
                                             fontWeight: FontWeight.w700,
                                             color: sel
-                                                ? Colors.white
+                                                ? bordeauxOf(context)
                                                 : AppColors.textDark,
                                           ),
                                         ),
@@ -504,6 +499,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                               width: double.infinity,
                               child: PillButton(
                                 context.t('rc_create'),
+                                color: bordeauxOf(context),
                                 onPressed: _handleCreateRoute,
                               ),
                             ),
@@ -531,10 +527,10 @@ class _RoutesScreenState extends State<RoutesScreen> {
                                 ),
                                 child: Text(
                                   context.t('rc_browse'),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.primaryTeal,
+                                    color: bordeauxOf(context),
                                   ),
                                 ),
                               ),

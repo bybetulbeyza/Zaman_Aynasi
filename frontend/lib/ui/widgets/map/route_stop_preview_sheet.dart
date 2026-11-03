@@ -40,11 +40,11 @@ class RouteStopPreviewSheet extends StatelessWidget {
   });
 
   Widget _placeholder() => Container(
-    width: 84,
-    height: 84,
+    width: 116,
+    height: 116,
     decoration: BoxDecoration(
       color: AppColors.borderSubtle,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(22),
     ),
     alignment: Alignment.center,
     child: const Icon(Icons.image_outlined, color: AppColors.textMuted),
@@ -55,11 +55,11 @@ class RouteStopPreviewSheet extends StatelessWidget {
     final inRoute = routeTitle != null;
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: ShapeDecoration(
         color: AppColors.cardBg,
         shape: appCardBorder(
-          round: 30,
+          round: 36,
           side: bordeauxOf(context).withValues(alpha: 0.4),
         ),
         shadows: [
@@ -148,77 +148,90 @@ class RouteStopPreviewSheet extends StatelessWidget {
                 if (v < -250) onNextStopTap?.call();
                 if (v > 250) onPrevStopTap?.call();
               },
-              child: Row(
-                children: [
-                  (placeImageUrl != null && placeImageUrl!.isNotEmpty)
-                      ? AppNetworkImage(
-                          imageUrl: placeImageUrl!,
-                          width: 84,
-                          height: 84,
-                          borderRadius: BorderRadius.circular(18),
-                        )
-                      : _placeholder(),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (placeDistanceTime.isNotEmpty)
-                          Text(
-                            placeDistanceTime,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.2,
-                              color: bordeauxOf(context),
+              child: SizedBox(
+                height: 116,
+                child: Row(
+                  children: [
+                    (placeImageUrl != null && placeImageUrl!.isNotEmpty)
+                        ? AppNetworkImage(
+                            imageUrl: placeImageUrl!,
+                            width: 116,
+                            height: 116,
+                            borderRadius: BorderRadius.circular(22),
+                          )
+                        : _placeholder(),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (placeDistanceTime.isNotEmpty)
+                                Text(
+                                  placeDistanceTime,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.2,
+                                    color: bordeauxOf(context),
+                                  ),
+                                ),
+                              const SizedBox(height: 3),
+                              Text(
+                                placeName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTheme.titleMedium.copyWith(
+                                  fontSize: 22,
+                                  height: 1.15,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // "Eseri keşfet" rozeti: sıradaki mühür kartındaki rozetle aynı
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.ciniBordeauxLight,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: bordeauxOf(
+                                    context,
+                                  ).withValues(alpha: 0.4),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    context.t('explore_place'),
+                                    style: TextStyle(
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: bordeauxOf(context),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: bordeauxOf(context),
+                                    size: 22,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        const SizedBox(height: 2),
-                        Text(
-                          placeName,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTheme.titleMedium.copyWith(
-                            fontSize: 19,
-                            height: 1.15,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // "Eseri keşfet" rozeti: sıradaki mühür kartındaki rozetle aynı
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(12, 8, 6, 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.ciniBordeauxLight,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: bordeauxOf(context).withValues(alpha: 0.4),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          context.t('explore_place'),
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w800,
-                            color: bordeauxOf(context),
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: bordeauxOf(context),
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
