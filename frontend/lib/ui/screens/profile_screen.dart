@@ -1,3 +1,5 @@
+import '../widgets/common/pill_button.dart';
+import '../widgets/common/app_card.dart';
 import '../widgets/common/action_card.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/sheet_handle.dart';
@@ -121,7 +123,7 @@ class ProfileScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        activeThumbColor: AppColors.primaryTeal,
+                        activeThumbColor: bordeauxOf(context),
                         title: Text(
                           context.t('high_contrast'),
                           style: const TextStyle(
@@ -290,25 +292,25 @@ class ProfileScreen extends StatelessWidget {
     final body = Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(signedIn ? 16 : 22, 14, 14, 14),
-      decoration: BoxDecoration(
-        color: AppColors.primaryTeal,
-        borderRadius: BorderRadius.circular(22),
+      decoration: appCardDecoration(
+        round: 34,
+        side: bordeauxOf(context).withValues(alpha: 0.4),
       ),
       child: Row(
         children: [
           if (signedIn) ...[
             CircleAvatar(
               radius: 24,
-              backgroundColor: Colors.white24,
+              backgroundColor: AppColors.ciniBordeauxLight,
               backgroundImage: avatar != null ? NetworkImage(avatar) : null,
               onBackgroundImageError: avatar != null ? (_, _) {} : null,
               child: avatar == null
                   ? Text(
                       name.isEmpty ? '?' : name[0].toUpperCase(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        color: bordeauxOf(context),
                       ),
                     )
                   : null,
@@ -327,7 +329,7 @@ class ProfileScreen extends StatelessWidget {
                     fontFamily: AppTheme.headingFont,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.textDark,
                   ),
                 ),
                 if (signedIn)
@@ -337,7 +339,7 @@ class ProfileScreen extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 13.5,
-                      color: Colors.white70,
+                      color: AppColors.textMuted,
                     ),
                   ),
               ],
@@ -345,34 +347,20 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           if (signedIn)
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: Colors.white,
+              color: bordeauxOf(context),
               size: 28,
             )
           else
-            OutlinedButton(
+            PillButton(
+              context.t('auth_login'),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => const AuthScreen(popOnDone: true),
                 ),
               ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.transparent,
-                side: const BorderSide(color: Colors.white70),
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 10,
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              child: Text(context.t('auth_login')),
             ),
         ],
       ),

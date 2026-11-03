@@ -1152,6 +1152,8 @@ class _SliderScreenState extends State<SliderScreen>
                     inRoute ? context.t('in_route') : context.t('add_to_route'),
                   ),
                   style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide.none,
                     backgroundColor: inRoute
                         ? AppColors.primaryTealDark
                         : AppColors.primaryTeal,
@@ -1268,6 +1270,8 @@ class _SliderScreenState extends State<SliderScreen>
               child: ElevatedButton(
                 onPressed: () => _openPlace(target),
                 style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: BorderSide.none,
                   backgroundColor: AppColors.heroPetrol,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: const StadiumBorder(),
@@ -1289,6 +1293,8 @@ class _SliderScreenState extends State<SliderScreen>
                 icon: const Icon(Icons.play_arrow_rounded, size: 20),
                 label: Text(context.t('ai_story')),
                 style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: BorderSide.none,
                   backgroundColor: bordeauxOf(context),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: const StadiumBorder(),
