@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/common/app_back_button.dart';
+import '../widgets/common/dark_cancel.dart';
+import '../widgets/share/share_cards.dart';
+import '../../core/state/passport_titles.dart';
 import '../widgets/common/logo_loader.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_theme.dart';
@@ -112,6 +115,70 @@ class _PassportScreenState extends State<PassportScreen> {
                             color: Colors.white70,
                           ),
                         ),
+                        if (!_loading && total > 0) ...[
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${context.t('share_title_label')}: ${context.t(passportTitleKey(cityPlaces))}',
+                                  style: const TextStyle(
+                                    fontFamily: AppTheme.headingFont,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              GestureDetector(
+                                onTap: () => showShareCard(
+                                  context,
+                                  card: PassportShareCard(places: cityPlaces),
+                                  text: context
+                                      .t('share_passport_text')
+                                      .replaceAll('{n}', '$earned')
+                                      .replaceAll('{total}', '$total')
+                                      .replaceAll(
+                                        '{title}',
+                                        context.t(passportTitleKey(cityPlaces)),
+                                      ),
+                                  fileName: 'pasaport',
+                                  kind: 'passport',
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 9,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.ios_share_rounded,
+                                        size: 18,
+                                        color: bordeauxOf(context),
+                                      ),
+                                      const SizedBox(width: 7),
+                                      Text(
+                                        context.t('share_btn'),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: bordeauxOf(context),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),

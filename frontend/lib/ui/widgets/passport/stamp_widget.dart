@@ -9,6 +9,8 @@ import '../../../core/constants/category_style.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../data/models/heritage_place.dart';
 import '../common/app_icon.dart';
+import '../../../data/repositories/heritage_repository.dart';
+import '../share/share_cards.dart';
 
 /// Kategori renginde, çift halkalı mühür. [earned] false ise silik, boş bir yuva çizer.
 class StampWidget extends StatelessWidget {
@@ -168,6 +170,30 @@ class _CeremonyDialogState extends State<_CeremonyDialog> {
             SizedBox(
               width: double.infinity,
               child: PillButton(
+                context.t('share_btn'),
+                onPressed: () async {
+                  final places = await HeritageRepository().getPlacesCached();
+                  if (!context.mounted) return;
+                  showShareCard(
+                    context,
+                    card: StampShareCard(
+                      place: widget.place,
+                      total: places.length,
+                    ),
+                    text: context
+                        .t('share_stamp_text')
+                        .replaceAll('{name}', widget.place.nameFor(en)),
+                    fileName: 'muhur_${widget.place.id}',
+                    kind: 'stamp',
+                    placeId: widget.place.id,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: PillButton.outlined(
                 context.t('stamp_open'),
                 onPressed: () {
                   Navigator.pop(context);
