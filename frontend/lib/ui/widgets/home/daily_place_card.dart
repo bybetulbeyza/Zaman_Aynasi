@@ -5,6 +5,7 @@ import '../../../core/l10n/app_lang.dart';
 import '../../../data/models/heritage_place.dart';
 import '../common/app_network_image.dart';
 import '../common/dark_cancel.dart';
+import '../common/squircle_frame.dart';
 import '../slider/slider_parts.dart';
 
 /// Ana ekranda "Günün eseri": tarihî ve günümüz fotoğrafı kendiliğinden kayan mini karşılaştırma.
@@ -45,67 +46,11 @@ class _DailyPlaceCardState extends State<DailyPlaceCard>
       onTap: widget.onTap,
       child: GestureDetector(
         onTap: widget.onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.chipBorder),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.07),
-                blurRadius: 14,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
-                child: AspectRatio(
-                  aspectRatio: 16 / 10,
-                  child: DarkCancel(child: _compare(p, en)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 14, 14, 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            p.nameFor(en),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            p.descriptionFor(en),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              height: 1.4,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right_rounded,
-                      color: AppColors.primaryTeal,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        child: SquircleFrame(
+          radius: 40,
+          child: AspectRatio(
+            aspectRatio: 1.3,
+            child: DarkCancel(child: _compare(p, en)),
           ),
         ),
       ),
@@ -144,17 +89,56 @@ class _DailyPlaceCardState extends State<DailyPlaceCard>
                   top: h / 2 - 28,
                   child: const IgnorePointer(child: GlassKnob()),
                 ),
-                Positioned(
-                  left: 12,
-                  top: 12,
-                  child: GlassBadge(
-                    context.t('daily_title'),
-                    tint: AppColors.primaryTealDark,
+                // Alttaki ad yazısı okunsun diye koyu bir geçiş
+                const IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [0.5, 1.0],
+                        colors: [Colors.transparent, Color(0xCC0F2F3A)],
+                      ),
+                    ),
                   ),
                 ),
                 Positioned(
-                  left: 12,
-                  bottom: 12,
+                  left: 16,
+                  right: 16,
+                  bottom: 14,
+                  child: IgnorePointer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          p.nameFor(en),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: AppTheme.headingFont,
+                            fontSize: 22,
+                            height: 1.1,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          p.category.labelFor(en),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 14,
+                  top: 14,
                   child: Opacity(
                     opacity: d > 0.3 ? 1 : 0,
                     child: GlassBadge(
@@ -164,8 +148,8 @@ class _DailyPlaceCardState extends State<DailyPlaceCard>
                   ),
                 ),
                 Positioned(
-                  right: 12,
-                  bottom: 12,
+                  right: 18,
+                  top: 16,
                   child: Opacity(
                     opacity: d < 0.7 ? 1 : 0,
                     child: GlassBadge(

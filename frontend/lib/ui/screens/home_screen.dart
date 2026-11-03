@@ -138,6 +138,11 @@ class _HomeScreenState extends State<HomeScreen> {
             if (_daily != null) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SectionTitle(context.t('daily_title')),
+              ),
+              const SizedBox(height: 14),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: DailyPlaceCard(
                   place: _daily!,
                   onTap: () => _openSlider(_daily!),
