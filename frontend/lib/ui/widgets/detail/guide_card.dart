@@ -18,6 +18,9 @@ class GuideCard extends StatefulWidget {
   /// Çalarken düğmede gösterilecek simge (varsayılan: duraklat).
   final IconData activeIcon;
 
+  /// Çalmıyorken düğmede gösterilecek simge (varsayılan: oynat).
+  final IconData idleIcon;
+
   const GuideCard({
     super.key,
     required this.playing,
@@ -28,6 +31,7 @@ class GuideCard extends StatefulWidget {
     this.dimmed = false,
     this.compact = false,
     this.activeIcon = Icons.pause_rounded,
+    this.idleIcon = Icons.play_arrow_rounded,
   });
 
   @override
@@ -135,9 +139,7 @@ class _GuideCardState extends State<GuideCard>
                         ],
                       ),
                       child: Icon(
-                        widget.playing
-                            ? widget.activeIcon
-                            : Icons.play_arrow_rounded,
+                        widget.playing ? widget.activeIcon : widget.idleIcon,
                         color: Colors.white,
                         size: widget.compact ? 24 : 30,
                       ),

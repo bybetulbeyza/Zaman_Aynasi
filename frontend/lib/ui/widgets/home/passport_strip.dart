@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../core/auth/auth_service.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/state/passport.dart';
+import '../detail/guide_card.dart';
 
-/// Ana ekranda pasaport ilerlemesi: "3/25 mühür" ve ilerleme çubuğu. Dokununca pasaporta gider.
+/// Ana ekranda pasaport ilerlemesi; sesli rehber kartıyla aynı tasarım dilinde.
+/// Düğme bir mühür simgesi, ses dalgası yerine mühür sayısına göre dolan dalga çubuğu.
 class PassportStrip extends StatelessWidget {
   final int total;
   final VoidCallback onTap;
@@ -19,6 +20,7 @@ class PassportStrip extends StatelessWidget {
         final n = Passport.instance.stampCount;
         final invite = n == 0 && !AuthService.isSignedIn;
         final done = total > 0 && n >= total;
+        final progress = total == 0 ? 0.0 : (n / total).clamp(0.0, 1.0);
         return Semantics(
           button: true,
           label: context
@@ -28,63 +30,34 @@ class PassportStrip extends StatelessWidget {
           excludeSemantics: true,
           onTap: onTap,
           child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: onTap,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(18, 14, 12, 14),
-              decoration: BoxDecoration(
-                color: AppColors.primaryTeal,
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Row(
+            child: GuideCard(
+              playing: false,
+              onTap: onTap,
+              idleIcon: Icons.workspace_premium_rounded,
+              title: invite
+                  ? context.t('strip_invite_title')
+                  : context.t('passport_title'),
+              trailing: '$n/$total',
+              bottom: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          invite
-                              ? context.t('strip_invite_title')
-                              : context
-                                    .t('passport_count')
-                                    .replaceAll('{n}', '$n')
-                                    .replaceAll('{total}', '$total'),
-                          style: const TextStyle(
-                            fontFamily: AppTheme.headingFont,
-                            fontSize: 19,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: LinearProgressIndicator(
-                            value: total == 0 ? 0 : (n / total).clamp(0, 1),
-                            minHeight: 7,
-                            backgroundColor: Colors.white24,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          done
-                              ? context.t('strip_done')
-                              : invite
-                              ? context.t('strip_invite')
-                              : context.t('strip_keep'),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            height: 1.35,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
+                  Waveform(progress: progress, height: 24),
+                  const SizedBox(height: 6),
+                  Text(
+                    done
+                        ? context.t('strip_done')
+                        : invite
+                        ? context.t('strip_invite')
+                        : context.t('strip_keep'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      height: 1.3,
+                      color: AppColors.textMuted,
                     ),
-                  ),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: Colors.white,
-                    size: 28,
                   ),
                 ],
               ),
