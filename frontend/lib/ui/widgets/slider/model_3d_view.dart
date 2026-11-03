@@ -348,7 +348,7 @@ class _Model3DViewState extends State<Model3DView> {
   static const _css = r'''
 html, body { overflow: hidden; background: transparent; }
 .hs {
-  position: relative; width: 22px; height: 22px; border-radius: 50%; padding: 0;
+  pointer-events: auto; position: relative; width: 22px; height: 22px; border-radius: 50%; padding: 0;
   border: 0; background: #fff; cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,.3);
 }
@@ -401,17 +401,19 @@ html, body { overflow: hidden; background: transparent; }
         }
       }
       od.setAttribute('src', CFG.oldSrc);
+      od.removeAttribute('camera-controls');
+      od.removeAttribute('interpolation-decay');
       od.innerHTML = CFG.oldHtml || '';
-      od.style.cssText = 'position:absolute;left:0;top:0;height:100%;background:' + OLD_BG + ';';
+      od.style.cssText = 'position:absolute;left:0;top:0;height:100%;background:' + OLD_BG + ';pointer-events:none;';
       oldWrap = document.createElement('div');
-      oldWrap.style.cssText = 'position:absolute;left:0;top:0;height:100%;width:50%;overflow:hidden;will-change:width;';
+      oldWrap.style.cssText = 'position:absolute;left:0;top:0;height:100%;width:50%;overflow:hidden;will-change:width;pointer-events:none;';
       oldWrap.appendChild(od);
       nw.after(oldWrap);
       const fit = function () { od.style.width = window.innerWidth + 'px'; };
       fit(); window.addEventListener('resize', fit);
     }
     const els = od ? [nw, od] : [nw];
-    els.forEach(function (e) { e.setAttribute('interpolation-decay', '90'); });
+    nw.setAttribute('interpolation-decay', '90');
 
     // --- Kamera sınırları: zemin altına inilmez, çok uzaklaşılmaz
     let base = 60, home = null, homeT = null, limXZ = 20, limY = 20;
@@ -512,42 +514,44 @@ html, body { overflow: hidden; background: transparent; }
     nw.addEventListener('ar-status', function () { if (nw.canActivateAR) ZoomCh.postMessage('ar'); });
     nw.addEventListener('load', function () { if (nw.canActivateAR) ZoomCh.postMessage('ar'); });
 
-    // --- Kamerayı iki modelde birlikte hareket ettir
-    let active = null, until = 0, lastZ = 0;
-    function mark(el) { return function (e) {
-      if (e.detail && e.detail.source === 'user-interaction') { active = el; until = performance.now() + 1800; }
+    // --- Tek ana kamera: tüm dokunmalar yeni modele (nw) gider, eski model (od) her karede onu birebir kopyalar
+    let lastZ = 0;
+    function copy() {
+      if (!od) return;
+      const o = nw.getCameraOrbit(), t = nw.getCameraTarget();
+      od.cameraOrbit = o.theta + 'rad ' + o.phi + 'rad ' + o.radius + 'm';
+      od.cameraTarget = t.x + 'm ' + t.y + 'm ' + t.z + 'm';
+      od.jumpCameraToGoal();
+    }
+    nw.addEventListener('camera-change', function () {
+      clampTarget(nw);
+      copy();
       const now = performance.now();
       if (now - lastZ > 120) {
         lastZ = now;
-        const r = el.getCameraOrbit().radius;
+        const r = nw.getCameraOrbit().radius;
         if (r > 0 && home) ZoomCh.postMessage(String(Math.round(home.r / r * 10) / 10));
       }
-    }; }
-    els.forEach(function (e) { e.addEventListener('camera-change', mark(e)); });
-    function copy(a, b) {
-      const o = a.getCameraOrbit(), t = a.getCameraTarget();
-      b.cameraOrbit = o.theta + 'rad ' + o.phi + 'rad ' + o.radius + 'm';
-      b.cameraTarget = t.x + 'm ' + t.y + 'm ' + t.z + 'm';
-      b.jumpCameraToGoal();
-    }
-    function loop(now) {
-      if (active && now < until) {
-        clampTarget(active);
-        if (od) copy(active, active === nw ? od : nw);
-        apply();
+    });
+    // Sol (eski) tarafın altında kalan yeni-model hotspot'ları dokunuşu yutmasın
+    const nwHs = Array.prototype.slice.call(nw.querySelectorAll('.hs'));
+    function loop() {
+      if (od) {
+        copy();
+        const edge = f * window.innerWidth;
+        nwHs.forEach(function (b) {
+          const r = b.getBoundingClientRect();
+          b.style.pointerEvents = (r.left + r.width / 2 > edge) ? 'auto' : 'none';
+        });
       }
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
 
-    // --- Uçuş: ikisine de aynı hedef verilir
+    // --- Uçuş: ana kameraya verilir, eski model onu izler
     function fly(th, ph, r, tx, ty, tz) {
-      // Tek model sürer (hedefi o alır), öteki her karede onun anlık kamerasını kopyalar;
-      // böylece iki model uçuş boyunca ve sonunda birebir aynı kalır.
-      const lead = od || nw;
-      lead.cameraOrbit = th + 'rad ' + ph + 'rad ' + r + 'm';
-      lead.cameraTarget = tx + 'm ' + ty + 'm ' + tz + 'm';
-      active = lead; until = performance.now() + 2200;
+      nw.cameraOrbit = th + 'rad ' + ph + 'rad ' + r + 'm';
+      nw.cameraTarget = tx + 'm ' + ty + 'm ' + tz + 'm';
       setTimeout(apply, 120); setTimeout(apply, 600); setTimeout(apply, 1400);
     }
     window.zaReset = function () {
