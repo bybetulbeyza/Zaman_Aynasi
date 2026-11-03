@@ -31,7 +31,13 @@ const Map<String, String> appStringsTr = {
 
   // Ana sayfa
   'hero_title': 'Vakıf mirasını\nhikâyeleriyle keşfet',
-  'qa_nearby': 'Yakınımda',
+  'qa_3d': '3D gez',
+  'three_d_hint': 'Tarihî ve günümüz modellerini döndür, yakınlaş.',
+  'daily_title': 'Günün eseri',
+  'strip_invite_title': 'Mühür topla',
+  'strip_invite': 'Eserleri gez, mühürleri topla, pasaportunu doldur.',
+  'strip_keep': 'Bir sonraki mührü kazanmak için bir eseri ziyaret et.',
+  'strip_done': 'Tüm mühürleri topladın, tebrikler!',
   'qa_create_route': 'Yeni rota',
   'qa_scan_qr': 'QR okut',
   'qa_stories': 'Hikâyeler',
@@ -329,7 +335,13 @@ const Map<String, String> appStringsEn = {
 
   // Home
   'hero_title': 'Discover heritage\nthrough its stories',
-  'qa_nearby': 'Nearby',
+  'qa_3d': 'Explore 3D',
+  'three_d_hint': 'Rotate and zoom the historic and present-day models.',
+  'daily_title': 'Place of the day',
+  'strip_invite_title': 'Collect stamps',
+  'strip_invite': 'Visit places, collect stamps and fill your passport.',
+  'strip_keep': 'Visit another place to earn your next stamp.',
+  'strip_done': 'You collected every stamp, congratulations!',
   'qa_create_route': 'New route',
   'qa_scan_qr': 'Scan QR',
   'qa_stories': 'Stories',

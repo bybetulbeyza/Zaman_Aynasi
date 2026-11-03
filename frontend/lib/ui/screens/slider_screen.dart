@@ -41,7 +41,10 @@ import '../widgets/slider/split_slider_widget.dart';
 class SliderScreen extends StatefulWidget {
   final HeritagePlace place;
 
-  const SliderScreen({super.key, required this.place});
+  /// Eser doğrudan 3B görünümde açılsın (3B modeli varsa).
+  final bool start3d;
+
+  const SliderScreen({super.key, required this.place, this.start3d = false});
 
   @override
   State<SliderScreen> createState() => _SliderScreenState();
@@ -125,7 +128,7 @@ class _SliderScreenState extends State<SliderScreen>
   }
 
   Hotspot? _selectedHotspot;
-  bool _view3d = false;
+  late bool _view3d = widget.start3d && widget.place.has3dModel;
   final TourController _tour = TourController();
 
   HeritagePlace get _place => widget.place;

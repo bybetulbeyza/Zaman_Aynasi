@@ -14,20 +14,22 @@ import '../widgets/common/app_network_image.dart';
 import '../widgets/common/city_picker_sheet.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/common/app_logo.dart';
+import '../widgets/home/daily_place_card.dart';
+import '../widgets/home/passport_strip.dart';
+import '../widgets/home/three_d_sheet.dart';
+import 'passport_screen.dart';
 import 'places_list_screen.dart';
 import 'reels_screen.dart';
 import 'slider_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onExploreMapTap;
-  final VoidCallback? onNearbyTap;
   final VoidCallback? onQrTap;
   final VoidCallback? onCreateRouteTap;
 
   const HomeScreen({
     super.key,
     this.onExploreMapTap,
-    this.onNearbyTap,
     this.onQrTap,
     this.onCreateRouteTap,
   });
@@ -39,6 +41,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final HeritageRepository _repository = HeritageRepository();
 
+  List<HeritagePlace> _all = [];
+  HeritagePlace? _daily;
   List<HeritagePlace> _featuredPlaces = [];
   List<HeritagePlace> _nearbyPlaces = [];
   bool _isLoading = true;
@@ -62,6 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       if (!mounted) return;
       setState(() {
+        _all = all;
+        _daily = _pickDaily(all);
         final featured = all.where((p) => p.isFeatured).toList();
         _featuredPlaces = featured.isNotEmpty
             ? featured.take(6).toList()
@@ -84,6 +90,23 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  /// Her gün farklı bir eser; iki fotoğrafı da olan ana eserler arasından gün sayısına göre seçilir.
+  HeritagePlace? _pickDaily(List<HeritagePlace> all) {
+    final list =
+        all
+            .where(
+              (p) =>
+                  !p.isSubPlace &&
+                  p.imageBeforeUrl.isNotEmpty &&
+                  p.imageAfterUrl.isNotEmpty,
+            )
+            .toList()
+          ..sort((a, b) => a.id.toString().compareTo(b.id.toString()));
+    if (list.isEmpty) return null;
+    final day = DateTime.now().difference(DateTime(2024)).inDays;
+    return list[day % list.length];
   }
 
   void _openPlaces() {
@@ -112,6 +135,29 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             _buildQuickActions(),
             const SizedBox(height: 26),
+            if (_daily != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: DailyPlaceCard(
+                  place: _daily!,
+                  onTap: () => _openSlider(_daily!),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (_all.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: PassportStrip(
+                  total: _all.length,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PassportScreen()),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 26),
+            ],
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SectionTitle(
@@ -306,9 +352,9 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _quickAction(
-            context.t('qa_nearby'),
-            'nearby',
-            widget.onNearbyTap ?? widget.onExploreMapTap,
+            context.t('qa_3d'),
+            'model3d',
+            () => show3dPlacesSheet(context, _all),
           ),
           _quickAction(
             context.t('qa_create_route'),

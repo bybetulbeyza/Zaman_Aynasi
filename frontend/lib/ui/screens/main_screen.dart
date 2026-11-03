@@ -158,13 +158,6 @@ class _MainScreenState extends State<MainScreen> {
         onExploreMapTap: () {
           setState(() => _currentIndex = 1);
         },
-        onNearbyTap: () {
-          setState(() => _currentIndex = 1);
-          // Harita sekmesine geçildiğinde çerçeve çizildikten sonra yakın rotayı tetikler
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _mapKey.currentState?.applyNearbyRoute();
-          });
-        },
       ),
       MapScreen(key: _mapKey),
       const QRScannerScreen(),
