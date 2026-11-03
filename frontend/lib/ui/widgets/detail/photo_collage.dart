@@ -111,7 +111,7 @@ class PhotoCollage extends StatelessWidget {
     Navigator.of(context).push(
       PageRouteBuilder<void>(
         opaque: false,
-        barrierColor: Colors.black,
+        barrierColor: scrimOf(context, 1),
         transitionDuration: const Duration(milliseconds: 220),
         pageBuilder: (_, __, ___) =>
             PhotoViewer(photos: photos, initialIndex: index),

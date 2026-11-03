@@ -103,7 +103,7 @@ Future<void> showStampCeremony(
 }) {
   return showDialog<void>(
     context: context,
-    barrierColor: Colors.black.withValues(alpha: 0.55),
+    barrierColor: scrimOf(context, 0.55),
     builder: (ctx) =>
         _CeremonyDialog(place: place, onOpenPassport: onOpenPassport),
   );

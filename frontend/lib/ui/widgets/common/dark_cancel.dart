@@ -37,6 +37,15 @@ Color shadowOf(BuildContext context, double alpha) =>
     ? Colors.white.withValues(alpha: (alpha * 3).clamp(0.0, 0.9))
     : Colors.black.withValues(alpha: alpha);
 
+/// Diyalog/kart açılırken arkadaki karartma. Koyu modda renk filtresi siyahı beyaza çevirdiği için
+/// ekranı AYDINLATMASIN diye açık bir ön renk kullanılır; filtreden sonra koyu görünür.
+Color scrimOf(BuildContext context, [double alpha = 0.54]) {
+  if (!DarkScope.invertedOf(context))
+    return Colors.black.withValues(alpha: alpha);
+  final a = alpha >= 0.95 ? 1.0 : (alpha * 1.15).clamp(0.0, 0.92);
+  return Colors.white.withValues(alpha: a);
+}
+
 /// Sayfa zemini: açıkta sıcak krem, koyuda derin petrol (kartlardan bir ton açık).
 Color canvasOf(BuildContext context) =>
     DarkScope.invertedOf(context) ? _canvasPreImage : AppColors.bgCanvas;

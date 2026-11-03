@@ -331,7 +331,7 @@ Future<void> showShareCard(
 }) {
   return showDialog<void>(
     context: context,
-    barrierColor: Colors.black.withValues(alpha: 0.6),
+    barrierColor: scrimOf(context, 0.6),
     builder: (_) => _SharePreview(
       card: card,
       text: text,

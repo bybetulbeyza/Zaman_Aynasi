@@ -9,7 +9,7 @@ import '../../../core/l10n/app_lang.dart';
 Future<void> showVideoDialog(BuildContext context, String url) {
   return showDialog<void>(
     context: context,
-    barrierColor: Colors.black87,
+    barrierColor: scrimOf(context, 0.87),
     builder: (_) => _VideoDialog(url: url),
   );
 }

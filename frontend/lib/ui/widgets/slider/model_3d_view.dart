@@ -230,7 +230,7 @@ class _Model3DViewState extends State<Model3DView> {
                 ar: true,
                 arModes: const ['scene-viewer', 'quick-look', 'webxr'],
                 interactionPrompt: InteractionPrompt.none,
-                shadowIntensity: 1,
+                shadowIntensity: 0,
                 exposure: 1.05,
                 cameraOrbit: '35deg 70deg auto',
                 fieldOfView: '45deg',
@@ -355,7 +355,7 @@ html, body { overflow: hidden; background: transparent; }
 .hs::before {
   content: ''; position: absolute; left: -6px; top: -6px; width: 34px; height: 34px;
   border-radius: 50%; background: rgba(255,255,255,.35); pointer-events: none;
-  animation: hshalo 1.4s ease-in-out infinite alternate;
+  transform: scale(1.12); opacity: .75;
 }
 .hs::after {
   content: ''; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px;
@@ -368,11 +368,10 @@ html, body { overflow: hidden; background: transparent; }
 #gknob { position: absolute; top: 50%; width: 56px; height: 140px; margin: -70px 0 0 -28px; z-index: 7;
   touch-action: none; display: flex; align-items: center; justify-content: center; }
 #gknob .ring { position: absolute; width: 56px; height: 56px; border-radius: 50%;
-  border: 1.4px solid rgba(255,255,255,.42); animation: kring 1.4s ease-in-out infinite alternate; pointer-events: none; }
+  border: 1.4px solid rgba(255,255,255,.3); transform: scale(1.14); pointer-events: none; }
 #gknob .dot { width: 48px; height: 48px; border-radius: 50%; box-sizing: border-box;
-  background: linear-gradient(135deg, rgba(255,255,255,.46), rgba(255,255,255,.14));
+  background: linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,.26));
   border: 1.3px solid rgba(255,255,255,.75); box-shadow: 0 4px 14px rgba(0,0,0,.22);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   display: flex; align-items: center; justify-content: center; color: #fff;
   transition: transform .16s ease-out; pointer-events: none; }
 #gknob.on .dot { transform: scale(1.14); }
@@ -427,6 +426,7 @@ html, body { overflow: hidden; background: transparent; }
       });
     }
     nw.addEventListener('load', function () {
+      syncSize();
       limits();
       // Kaydırma sınırları modelin boyutuna göre (büyük yapılarda hotspot'a gidilebilsin)
       const dm = nw.getDimensions();
@@ -517,16 +517,19 @@ html, body { overflow: hidden; background: transparent; }
 
     // --- Tek ana kamera: tüm dokunmalar yeni modele (nw) gider, eski model (od) her karede onu birebir kopyalar
     let lastZ = 0;
+    function syncSize() {
+      if (!od) return;
+      const r = nw.getBoundingClientRect();
+      od.style.width = r.width + 'px';
+      od.style.height = r.height + 'px';
+    }
+    if (od && window.ResizeObserver) new ResizeObserver(syncSize).observe(nw);
     function copy() {
       if (!od) return;
       const o = nw.getCameraOrbit(), t = nw.getCameraTarget();
       od.cameraOrbit = o.theta + 'rad ' + o.phi + 'rad ' + o.radius + 'm';
       od.cameraTarget = t.x + 'm ' + t.y + 'm ' + t.z + 'm';
-      // Zoom görüş açısıyla da yapılabildiği için o da kopyalanır; boyut da birebir aynı olur
       od.fieldOfView = nw.getFieldOfView() + 'deg';
-      const r = nw.getBoundingClientRect();
-      if (od.style.width !== r.width + 'px') od.style.width = r.width + 'px';
-      if (od.style.height !== r.height + 'px') od.style.height = r.height + 'px';
       od.jumpCameraToGoal();
     }
     nw.addEventListener('camera-change', function () {
@@ -540,19 +543,16 @@ html, body { overflow: hidden; background: transparent; }
       }
     });
     // Sol (eski) tarafın altında kalan yeni-model hotspot'ları dokunuşu yutmasın
+    // (kare başına değil, kısa aralıklarla güncellenir)
     const nwHs = Array.prototype.slice.call(nw.querySelectorAll('.hs'));
-    function loop() {
-      if (od) {
-        copy();
-        const edge = f * window.innerWidth;
-        nwHs.forEach(function (b) {
-          const r = b.getBoundingClientRect();
-          b.style.pointerEvents = (r.left + r.width / 2 > edge) ? 'auto' : 'none';
-        });
-      }
-      requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
+    setInterval(function () {
+      if (!od) return;
+      const edge = f * window.innerWidth;
+      nwHs.forEach(function (b) {
+        const r = b.getBoundingClientRect();
+        b.style.pointerEvents = (r.left + r.width / 2 > edge) ? 'auto' : 'none';
+      });
+    }, 160);
 
     // --- Uçuş: ana kameraya verilir, eski model onu izler
     function fly(th, ph, r, tx, ty, tz) {
@@ -599,6 +599,7 @@ html, body { overflow: hidden; background: transparent; }
         lt = 0;
       } else { lt = now; lx = e.clientX; ly = e.clientY; }
     }, true);
+
   });
 })();
 ''';

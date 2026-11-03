@@ -298,15 +298,18 @@ class _SliderScreenState extends State<SliderScreen>
             child: Stack(
               children: [
                 if (_view3d)
-                  Model3DView(
-                    newUrl: _place.modelNewUrl,
-                    oldUrl: _place.modelOldUrl,
-                    name: _place.nameFor(en),
-                    hotspots: _place.modelHotspots,
-                    selected: _selectedHotspot,
-                    tourController: _tour,
-                    onHotspot: _selectHotspot,
-                    bottomInset: _underlap,
+                  // Modeller koyu modda da özgün renginde kalır (fotoğraflar gibi)
+                  DarkCancel(
+                    child: Model3DView(
+                      newUrl: _place.modelNewUrl,
+                      oldUrl: _place.modelOldUrl,
+                      name: _place.nameFor(en),
+                      hotspots: _place.modelHotspots,
+                      selected: _selectedHotspot,
+                      tourController: _tour,
+                      onHotspot: _selectHotspot,
+                      bottomInset: _underlap,
+                    ),
                   )
                 else
                   SplitSliderWidget(

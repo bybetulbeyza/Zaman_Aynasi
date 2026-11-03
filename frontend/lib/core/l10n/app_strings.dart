@@ -96,7 +96,7 @@ const Map<String, String> appStringsTr = {
   'act_all_done': 'Tüm görevler tamam!',
   'dark_mode_switch': 'Koyu mod',
   'a11y_reader_note':
-      'Ekran okuyucu desteği (TalkBack, VoiceOver): düğmeler, görseller ve kaydırıcı etiketlenmiştir; cihazın erişilebilirlik ayarlarından açılır.',
+      'Uygulama ekran okuyucu desteği sunmaktadır. Cihazınızın Erişilebilirlik ayarlarından TalkBack (Android) veya VoiceOver (iOS) özelliğini açarak buton ve görsel açıklamalarını sesli olarak dinleyebilirsiniz.',
   'share_btn': 'Paylaş',
   'share_stamp_hint': 'Başarını paylaş',
   'share_failed': 'Paylaşım açılamadı.',
@@ -426,7 +426,7 @@ const Map<String, String> appStringsEn = {
   'act_all_done': 'All tasks done!',
   'dark_mode_switch': 'Dark mode',
   'a11y_reader_note':
-      'Screen reader support (TalkBack, VoiceOver): buttons, images and the slider are labelled; turn it on in your device accessibility settings.',
+      'The app supports screen readers. Turn on TalkBack (Android) or VoiceOver (iOS) in your device\'s Accessibility settings to hear button and image descriptions read aloud.',
   'share_btn': 'Share',
   'share_stamp_hint': 'Share your achievement',
   'share_failed': 'Could not open sharing.',
