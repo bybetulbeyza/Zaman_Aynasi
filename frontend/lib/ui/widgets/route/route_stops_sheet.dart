@@ -1,3 +1,4 @@
+import '../common/app_card.dart';
 import '../common/pattern_background.dart';
 import '../common/sheet_handle.dart';
 import 'package:flutter/material.dart';
@@ -180,16 +181,13 @@ class _StopTile extends StatelessWidget {
     final style = CategoryStyle.of(place.category);
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      shape: appCardBorder(round: 22),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        customBorder: appCardBorder(round: 22),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.chipBorder),
-          ),
+          decoration: ShapeDecoration(shape: appCardBorder(round: 22)),
           child: Row(
             children: [
               Container(

@@ -1,3 +1,4 @@
+import '../widgets/common/app_card.dart';
 import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/dark_cancel.dart';
@@ -209,17 +210,17 @@ class _RoutesScreenState extends State<RoutesScreen> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        shape: appCardBorder(round: 20),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          customBorder: appCardBorder(round: 20),
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: selected ? AppColors.primaryTeal : AppColors.chipBorder,
-                width: selected ? 1.6 : 1,
+            decoration: ShapeDecoration(
+              shape: appCardBorder(
+                round: 20,
+                side: selected ? AppColors.primaryTeal : AppColors.chipBorder,
+                width: selected ? 1.6 : 1.2,
               ),
             ),
             child: Row(

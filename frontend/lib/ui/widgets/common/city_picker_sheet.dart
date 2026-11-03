@@ -1,3 +1,4 @@
+import 'app_card.dart';
 import 'pattern_background.dart';
 import 'sheet_handle.dart';
 import 'package:flutter/material.dart';
@@ -35,15 +36,13 @@ Future<void> showCityPickerSheet(BuildContext context) {
                     horizontal: 18,
                     vertical: 14,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: AppCities.isAvailable(city)
-                          ? AppColors.primaryTeal
-                          : AppColors.chipBorder,
-                      width: AppCities.isAvailable(city) ? 1.4 : 1,
-                    ),
+                  decoration: appCardDecoration(
+                    round: 22,
+                    shadow: false,
+                    side: AppCities.isAvailable(city)
+                        ? AppColors.primaryTeal
+                        : AppColors.chipBorder,
+                    width: AppCities.isAvailable(city) ? 1.4 : 1.2,
                   ),
                   child: Row(
                     children: [

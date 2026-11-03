@@ -1,3 +1,4 @@
+import '../common/app_card.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_theme.dart';
@@ -72,20 +73,9 @@ class PassportStrip extends StatelessWidget {
             onTap: done ? onOpenPassport : () => onOpenPlace(next),
             child: Container(
               padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
-              decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: bordeauxOf(context).withValues(alpha: 0.4),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+              decoration: appCardDecoration(
+                round: 30,
+                side: bordeauxOf(context).withValues(alpha: 0.4),
               ),
               child: Row(
                 children: [

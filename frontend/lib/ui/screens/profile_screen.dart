@@ -1,3 +1,4 @@
+import '../widgets/common/app_card.dart';
 import '../widgets/common/sheet_handle.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/feedback_sheet.dart';
@@ -401,11 +402,7 @@ class ProfileScreen extends StatelessWidget {
           horizontal: 22,
           vertical: trailing != null ? 11 : 18,
         ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.chipBorder),
-        ),
+        decoration: appCardDecoration(round: 26, shadow: false),
         child: Row(
           children: [
             Expanded(

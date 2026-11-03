@@ -1,3 +1,4 @@
+import '../common/app_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
@@ -120,15 +121,13 @@ class _ActivitiesSectionState extends State<ActivitiesSection> {
           duration: const Duration(milliseconds: 200),
           width: 250,
           padding: const EdgeInsets.fromLTRB(16, 14, 14, 12),
-          decoration: BoxDecoration(
-            color: done ? AppColors.primaryTealLight : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: done
-                  ? AppColors.primaryTeal.withValues(alpha: 0.5)
-                  : AppColors.chipBorder,
-              width: 1.2,
-            ),
+          decoration: appCardDecoration(
+            round: 30,
+            shadow: false,
+            fill: done ? AppColors.primaryTealLight : Colors.white,
+            side: done
+                ? AppColors.primaryTeal.withValues(alpha: 0.5)
+                : AppColors.chipBorder,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

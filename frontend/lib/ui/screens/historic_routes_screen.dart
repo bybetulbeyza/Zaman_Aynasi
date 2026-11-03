@@ -1,3 +1,4 @@
+import '../widgets/common/app_card.dart';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -142,7 +143,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                 child: LayoutBuilder(
                   builder: (context, box) {
                     _measureHeader();
-                    final carouselH = (box.maxHeight - _headerH - 56).clamp(
+                    final carouselH = (box.maxHeight - _headerH - 40).clamp(
                       380.0,
                       680.0,
                     );
@@ -188,14 +189,14 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                                     .toList(),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 14),
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 20,
                               ),
                               child: _buildCreateRow(),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 16),
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 20,
@@ -248,19 +249,16 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
     return GestureDetector(
       onTap: widget.onCreateRoute,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.primaryTealLight,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppColors.primaryTeal.withValues(alpha: 0.35),
-          ),
+        padding: const EdgeInsets.fromLTRB(12, 9, 14, 9),
+        decoration: appCardDecoration(
+          round: 26,
+          side: AppColors.primaryTeal.withValues(alpha: 0.4),
         ),
         child: Row(
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: 36,
+              height: 36,
               decoration: const BoxDecoration(
                 color: AppColors.primaryTeal,
                 shape: BoxShape.circle,

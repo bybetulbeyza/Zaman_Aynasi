@@ -1,3 +1,4 @@
+import '../common/app_card.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_lang.dart';
@@ -122,11 +123,7 @@ class _Transcript extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.chipBorder),
-      ),
+      decoration: appCardDecoration(round: 30, shadow: false),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

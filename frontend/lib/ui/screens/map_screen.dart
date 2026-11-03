@@ -698,9 +698,6 @@ class MapScreenState extends State<MapScreen> {
                                         : ' · ${_walk!.distanceLabel} · ${_walk!.minutes} ${context.t('min_walk')}'),
                           placeName: currentPlace.nameFor(context.isEn),
                           placeDistanceTime: _subtitleFor(currentPlace),
-                          placeDescription: currentPlace.descriptionFor(
-                            context.isEn,
-                          ),
                           placeImageUrl: currentPlace.imageAfterUrl,
                           onDetailTap: () => Navigator.push(
                             context,

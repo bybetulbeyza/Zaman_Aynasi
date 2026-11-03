@@ -1,3 +1,4 @@
+import '../widgets/common/app_card.dart';
 import '../widgets/common/app_icon.dart';
 import 'main_screen.dart' show mainTabRequest;
 import 'dart:async';
@@ -598,11 +599,9 @@ class _SliderScreenState extends State<SliderScreen>
         const SizedBox(height: 24),
       ],
 
-      // AI videosu (video yoksa "yakında" kutusu gösterilmez)
-      if (videoUrl.isNotEmpty || _hasHotspotVideos) ...[
-        _buildVideoCard(videoUrl),
-        const SizedBox(height: 16),
-      ],
+      // AI videosu (yatay 16:9); video henüz yoksa "yakında" durumu gösterilir
+      _buildVideoCard(videoUrl),
+      const SizedBox(height: 16),
 
       // Sesli rehber
       // Kayıtlı ses varsa onu çalar; yoksa sayfayı cihazın sesiyle okur
@@ -852,72 +851,94 @@ class _SliderScreenState extends State<SliderScreen>
 
   Widget _buildVideoCard(String videoUrl) {
     final available = videoUrl.isNotEmpty || _hasHotspotVideos;
-    // Sesli rehber ve tur kartlarıyla aynı köşe şekli: iki sivri, iki kıvrımlı
-    const radius = BorderRadius.only(
-      topLeft: Radius.circular(10),
-      bottomRight: Radius.circular(10),
-      topRight: Radius.circular(44),
-      bottomLeft: Radius.circular(44),
+    // Diğer kartlarla aynı köşe şekli
+    final shape = appCardBorder(
+      round: 40,
+      side: bordeauxOf(context, alpha: 0.45),
+      width: 1.2,
     );
-    return GestureDetector(
-      onTap: !available
-          ? null
-          : (videoUrl.isNotEmpty
-                ? () => showVideoDialog(context, videoUrl)
-                : () => _openReels(null)),
-      child: Container(
-        height: 190,
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          border: Border.all(
-            color: bordeauxOf(context, alpha: 0.45),
-            width: 1.1,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: radius,
-          child: DarkCancel(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.network(
-                  _place.imageAfterUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      const ColoredBox(color: AppColors.heroPetrol),
-                ),
-                Container(color: Colors.black.withValues(alpha: 0.28)),
-                Positioned(top: 12, left: 12, child: const AiLabel()),
-                Center(
-                  child: Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(
-                        alpha: available ? 1 : 0.7,
+    return Semantics(
+      button: available,
+      label: available ? context.t('transform_video') : context.t('video_soon'),
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: !available
+            ? null
+            : (videoUrl.isNotEmpty
+                  ? () => showVideoDialog(context, videoUrl)
+                  : () => _openReels(null)),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: DecoratedBox(
+            decoration: ShapeDecoration(shape: shape),
+            child: ClipPath(
+              clipper: ShapeBorderClipper(shape: shape),
+              child: DarkCancel(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      _place.imageAfterUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const ColoredBox(color: AppColors.heroPetrol),
+                    ),
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: [0.3, 1.0],
+                          colors: [Color(0x33000000), Color(0xCC0F2F3A)],
+                        ),
                       ),
-                      shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      available
-                          ? Icons.play_arrow_rounded
-                          : Icons.hourglass_empty_rounded,
-                      color: AppColors.primaryTeal,
-                      size: 34,
+                    const Positioned(top: 14, left: 18, child: AiLabel()),
+                    Center(
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(
+                            alpha: available ? 0.95 : 0.8,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 14,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          color: AppColors.primaryTeal.withValues(
+                            alpha: available ? 1 : 0.55,
+                          ),
+                          size: 38,
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      left: 20,
+                      right: 20,
+                      bottom: 14,
+                      child: Text(
+                        available
+                            ? context.t('transform_video')
+                            : context.t('video_soon'),
+                        style: const TextStyle(
+                          fontFamily: AppTheme.headingFont,
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  left: 14,
-                  bottom: 12,
-                  child: Text(
-                    available
-                        ? context.t('transform_video')
-                        : context.t('video_soon'),
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -961,13 +982,10 @@ class _SliderScreenState extends State<SliderScreen>
         onTap: _openInventory,
         child: Container(
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: bordeauxOf(context, alpha: 0.4),
-              width: 1.1,
-            ),
+          decoration: appCardDecoration(
+            round: 28,
+            shadow: false,
+            side: bordeauxOf(context, alpha: 0.4),
           ),
           child: Row(
             children: [

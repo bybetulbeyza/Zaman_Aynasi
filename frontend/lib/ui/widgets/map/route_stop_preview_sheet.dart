@@ -1,3 +1,4 @@
+import '../common/app_card.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
@@ -12,7 +13,6 @@ class RouteStopPreviewSheet extends StatelessWidget {
   final String? routeStats; // örn: "Durak 2 / 6 · 3,8 km · 40 dk"
   final String placeName;
   final String placeDistanceTime;
-  final String placeDescription;
   final String? placeImageUrl;
   final VoidCallback onDetailTap;
   final VoidCallback? onNextStopTap;
@@ -29,7 +29,6 @@ class RouteStopPreviewSheet extends StatelessWidget {
     this.routeStats,
     required this.placeName,
     required this.placeDistanceTime,
-    this.placeDescription = '',
     this.placeImageUrl,
     required this.onDetailTap,
     this.onNextStopTap,
@@ -56,11 +55,10 @@ class RouteStopPreviewSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
+      decoration: ShapeDecoration(
         color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.chipBorder),
-        boxShadow: [
+        shape: appCardBorder(round: 36),
+        shadows: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.18),
             blurRadius: 24,
@@ -182,19 +180,6 @@ class RouteStopPreviewSheet extends StatelessWidget {
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primaryTeal,
-                                ),
-                              ),
-                            ],
-                            if (placeDescription.isNotEmpty) ...[
-                              const SizedBox(height: 6),
-                              Text(
-                                placeDescription,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13.5,
-                                  height: 1.35,
-                                  color: AppColors.textMuted,
                                 ),
                               ),
                             ],
