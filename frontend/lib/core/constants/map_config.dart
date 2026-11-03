@@ -4,7 +4,7 @@ class MapConfig {
   static const String mapboxToken = String.fromEnvironment('MAPBOX_TOKEN');
   static const String mapboxStyle = String.fromEnvironment(
     'MAPBOX_STYLE',
-    defaultValue: 'mehtapaslan/cmvvk87wx000y01s8524xau31',
+    defaultValue: 'mehtapaslan/cmw0uc9fe00i101s8b56ihjiv',
   );
 
   /// Mapbox karoları ağ önbelleğinde 12 saat tutulur; stil yayınlanınca bu sayıyı artırmak
