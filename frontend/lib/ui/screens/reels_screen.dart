@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../widgets/common/ai_label.dart';
 import '../widgets/common/app_back_button.dart';
@@ -165,9 +166,18 @@ class _ReelPage extends StatefulWidget {
   State<_ReelPage> createState() => _ReelPageState();
 }
 
-class _ReelPageState extends State<_ReelPage> {
+class _ReelPageState extends State<_ReelPage>
+    with SingleTickerProviderStateMixin {
+  /// Oturum boyunca ilk birkaç videoda "sağa kaydır" ipucu hareketli gösterilir, sonra hiç çıkmaz.
+  static int _hintsLeft = 3;
+
   late final VideoPlayerController _c;
   bool _error = false;
+  late final AnimationController _hint = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 7),
+  );
+  late final bool _showHint = _hintsLeft-- > 0;
 
   @override
   void initState() {
@@ -185,7 +195,13 @@ class _ReelPageState extends State<_ReelPage> {
             if (mounted) setState(() => _error = true);
           });
     widget.pageController.addListener(_syncPlayback);
+    if (_showHint) _hint.forward();
   }
+
+  void _openDetails() => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => SliderScreen(place: widget.reel.place)),
+  );
 
   /// Yalnızca ekranda tam görünen sayfa oynar.
   void _syncPlayback() {
@@ -201,6 +217,7 @@ class _ReelPageState extends State<_ReelPage> {
   @override
   void dispose() {
     widget.pageController.removeListener(_syncPlayback);
+    _hint.dispose();
     _c.dispose();
     super.dispose();
   }
@@ -213,6 +230,10 @@ class _ReelPageState extends State<_ReelPage> {
     final hasScript = script.trim().isNotEmpty;
     return GestureDetector(
       onTap: () => setState(() => _c.value.isPlaying ? _c.pause() : _c.play()),
+      // Sağa kaydırınca eser sayfası açılır
+      onHorizontalDragEnd: (d) {
+        if ((d.primaryVelocity ?? 0) > 280) _openDetails();
+      },
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -285,34 +306,10 @@ class _ReelPageState extends State<_ReelPage> {
                     color: Colors.white,
                   ),
                 ),
-                ListenableBuilder(
-                  listenable: SubtitlePrefs.instance,
-                  builder: (context, _) {
-                    if (hasScript && SubtitlePrefs.instance.on) {
-                      return const SizedBox(height: 10);
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 6, bottom: 12),
-                      child: Text(
-                        r.hotspot.descriptionFor(en),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          height: 1.4,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                const SizedBox(height: 12),
                 GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SliderScreen(place: r.place),
-                    ),
-                  ),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _openDetails,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -322,13 +319,65 @@ class _ReelPageState extends State<_ReelPage> {
                         color: Colors.white,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        '${r.place.nameFor(en)}  ·  ${context.t('see_details')} →',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
+                      Flexible(
+                        child: Text(
+                          r.place.nameFor(en),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
+                      if (_showHint)
+                        AnimatedBuilder(
+                          animation: _hint,
+                          builder: (context, _) {
+                            final t = _hint.value; // 0..1 (7 sn)
+                            // Son %12'de ipucu tamamen silinir
+                            final fade = t < 0.88
+                                ? 1.0
+                                : (1 - (t - 0.88) / 0.12);
+                            if (fade <= 0) return const SizedBox.shrink();
+                            return Opacity(
+                              opacity: fade.clamp(0.0, 1.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '  ·  ${context.t('swipe_details')} ',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  // Soldan sağa dalga gibi yanıp sönen ">>"
+                                  for (var i = 0; i < 2; i++)
+                                    Opacity(
+                                      opacity:
+                                          0.2 +
+                                          0.8 *
+                                              (0.5 +
+                                                  0.5 *
+                                                      math.sin(
+                                                        2 *
+                                                                math.pi *
+                                                                (t * 7 * 0.9 -
+                                                                    i * 0.22) -
+                                                            math.pi / 2,
+                                                      )),
+                                      child: const Icon(
+                                        Icons.chevron_right_rounded,
+                                        size: 20,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ),
