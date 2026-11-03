@@ -129,7 +129,7 @@ class _DailyPlaceCardState extends State<DailyPlaceCard>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          p.category.labelFor(en),
+                          '${p.category.labelFor(en)} · ${p.city}',
                           style: const TextStyle(
                             fontSize: 13,
                             color: Colors.white70,
