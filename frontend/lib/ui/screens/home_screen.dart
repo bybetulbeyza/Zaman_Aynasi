@@ -42,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final HeritageRepository _repository = HeritageRepository();
 
   List<HeritagePlace> _all = [];
+  List<HeritagePlace> _byDistance = [];
   HeritagePlace? _daily;
   List<HeritagePlace> _featuredPlaces = [];
   List<HeritagePlace> _nearbyPlaces = [];
@@ -67,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       setState(() {
         _all = all;
+        _byDistance = all;
         _daily = _pickDaily(all);
         final featured = all.where((p) => p.isFeatured).toList();
         _featuredPlaces = featured.isNotEmpty
@@ -84,6 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
         userLocation: user,
       );
       setState(() {
+        _byDistance = sorted;
         _nearbyPlaces = sorted.take(6).toList();
         _locationOff = LocationService.lastWasFallback;
       });
@@ -154,8 +157,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: PassportStrip(
-                  total: _all.length,
-                  onTap: () => Navigator.push(
+                  places: _byDistance,
+                  showDistance: !_locationOff,
+                  onOpenPlace: _openSlider,
+                  onOpenPassport: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const PassportScreen()),
                   ),
