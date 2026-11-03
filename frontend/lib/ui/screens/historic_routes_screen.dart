@@ -145,7 +145,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                     _measureHeader();
                     final carouselH = (box.maxHeight - _headerH - 40).clamp(
                       380.0,
-                      680.0,
+                      900.0,
                     );
                     return ListView(
                       padding: const EdgeInsets.fromLTRB(0, 16, 0, 24),
