@@ -220,16 +220,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHero() {
     final top = MediaQuery.of(context).padding.top;
+    // Koyu modda başlık da koyulaşır (hero renk filtresinden korunduğu için renkler burada seçilir)
+    final dark = DarkScope.invertedOf(context);
     return DarkCancel(
       child: Container(
         padding: EdgeInsets.fromLTRB(20, top + 10, 20, 24),
         // Çapraz geçiş: sol üstte canlı teal, ortada petrol, sağ altta derin lacivert-petrol
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF138A86), Color(0xFF14505F), Color(0xFF0A2733)],
-            stops: [0.0, 0.5, 1.0],
+            colors: dark
+                ? const [
+                    Color(0xFF0C4F50),
+                    Color(0xFF0B323C),
+                    Color(0xFF061219),
+                  ]
+                : const [
+                    Color(0xFF138A86),
+                    Color(0xFF14505F),
+                    Color(0xFF0A2733),
+                  ],
+            stops: const [0.0, 0.5, 1.0],
           ),
         ),
         foregroundDecoration: BoxDecoration(
@@ -238,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
             center: const Alignment(0.82, -0.2),
             radius: 0.75,
             colors: [
-              Colors.white.withValues(alpha: 0.16),
+              Colors.white.withValues(alpha: dark ? 0.07 : 0.16),
               Colors.white.withValues(alpha: 0.0),
             ],
           ),
