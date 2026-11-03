@@ -126,20 +126,6 @@ class ProfileScreen extends StatelessWidget {
                       value: a11y.highContrast,
                       onChanged: a11y.setHighContrast,
                     ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      activeThumbColor: AppColors.primaryTeal,
-                      title: Text(
-                        context.t('guide_prefer_text'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      subtitle: Text(context.t('guide_prefer_text_hint')),
-                      value: a11y.readGuide,
-                      onChanged: a11y.setReadGuide,
-                    ),
                     const SizedBox(height: 8),
                     Text(
                       context.t('appearance'),
