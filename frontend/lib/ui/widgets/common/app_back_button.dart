@@ -30,7 +30,7 @@ class AppBackButton extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  padding: const EdgeInsets.only(left: 5),
+                  alignment: Alignment.center,
                   child: const Icon(
                     Icons.arrow_back_ios_new,
                     size: 19,
@@ -55,7 +55,7 @@ class AppBackButton extends StatelessWidget {
                 ),
               ],
             ),
-            padding: const EdgeInsets.only(left: 5),
+            alignment: Alignment.center,
             child: const Icon(
               Icons.arrow_back_ios_new,
               size: 19,
