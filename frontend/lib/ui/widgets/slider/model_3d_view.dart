@@ -341,7 +341,7 @@ html, body { overflow: hidden; background: transparent; }
 }
 .hs::after {
   content: ''; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px;
-  border-radius: 50%; background: #17a2a4;
+  border-radius: 50%; background: #0E807A;
 }
 #gline { position: absolute; top: 0; bottom: 0; width: 2.5px; margin-left: -1.25px; z-index: 6;
   pointer-events: none;
