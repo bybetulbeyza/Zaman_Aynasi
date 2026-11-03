@@ -48,6 +48,7 @@ class AppTheme {
     final bordeaux = dark
         ? AppAccessibility.darkPre(const Color(0xFFE5808F))
         : AppColors.ciniBordeaux;
+    final scrim = dark ? Colors.white.withValues(alpha: 0.62) : Colors.black54;
     final canvas = dark
         ? AppAccessibility.darkPre(const Color(0xFF16272E))
         : AppColors.bgCanvas;
@@ -91,6 +92,11 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(foregroundColor: bordeaux),
       ),
+
+      // Kart/diyalog açılırken arkadaki karartma: koyu modda renk filtresi siyahı beyaza çevirip
+      // ekranı AYDINLATTIĞI için, filtre sonrası koyu görünecek açık bir ön renk kullanılır.
+      bottomSheetTheme: BottomSheetThemeData(modalBarrierColor: scrim),
+      dialogTheme: DialogThemeData(barrierColor: scrim),
 
       // İkincil / Gri butonlar
       outlinedButtonTheme: OutlinedButtonThemeData(

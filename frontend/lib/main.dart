@@ -77,7 +77,7 @@ class ZamanAynasiApp extends StatelessWidget {
               data: media.copyWith(
                 // Tam ekran tabletlerde üst boşluk 0 gelebilir; içerik kenara yapışmasın
                 padding: media.padding.copyWith(
-                  top: media.padding.top < 28 ? 28 : media.padding.top,
+                  top: media.padding.top < 36 ? 36 : media.padding.top,
                 ),
                 textScaler: TextScaler.linear(
                   media.textScaler.scale(1) *
