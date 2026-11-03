@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../common/app_network_image.dart';
+import '../common/dark_cancel.dart';
 
 /// Haritanın altında yüzen eser kartı. Eser balonunun tamamı dokunulabilir (sağdaki ok slider'ı açar).
 /// Rota modunda üstte "Durak 2/4 · mesafe" ve önceki/sonraki okları görünür.
@@ -39,11 +40,11 @@ class RouteStopPreviewSheet extends StatelessWidget {
   });
 
   Widget _placeholder() => Container(
-    width: 104,
-    height: 104,
+    width: 84,
+    height: 84,
     decoration: BoxDecoration(
       color: AppColors.borderSubtle,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(18),
     ),
     alignment: Alignment.center,
     child: const Icon(Icons.image_outlined, color: AppColors.textMuted),
@@ -57,7 +58,10 @@ class RouteStopPreviewSheet extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: ShapeDecoration(
         color: AppColors.cardBg,
-        shape: appCardBorder(round: 36),
+        shape: appCardBorder(
+          round: 30,
+          side: bordeauxOf(context).withValues(alpha: 0.4),
+        ),
         shadows: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.18),
@@ -144,74 +148,72 @@ class RouteStopPreviewSheet extends StatelessWidget {
                 if (v < -250) onNextStopTap?.call();
                 if (v > 250) onPrevStopTap?.call();
               },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              child: Row(
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      (placeImageUrl != null && placeImageUrl!.isNotEmpty)
-                          ? AppNetworkImage(
-                              imageUrl: placeImageUrl!,
-                              width: 104,
-                              height: 104,
-                              borderRadius: BorderRadius.circular(20),
-                            )
-                          : _placeholder(),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              placeName,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTheme.titleMedium.copyWith(
-                                fontSize: 21,
-                                height: 1.15,
-                              ),
+                  (placeImageUrl != null && placeImageUrl!.isNotEmpty)
+                      ? AppNetworkImage(
+                          imageUrl: placeImageUrl!,
+                          width: 84,
+                          height: 84,
+                          borderRadius: BorderRadius.circular(18),
+                        )
+                      : _placeholder(),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (placeDistanceTime.isNotEmpty)
+                          Text(
+                            placeDistanceTime,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.2,
+                              color: bordeauxOf(context),
                             ),
-                            if (placeDistanceTime.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                placeDistanceTime,
-                                style: const TextStyle(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primaryTeal,
-                                ),
-                              ),
-                            ],
-                          ],
+                          ),
+                        const SizedBox(height: 2),
+                        Text(
+                          placeName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTheme.titleMedium.copyWith(
+                            fontSize: 19,
+                            height: 1.15,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(width: 8),
+                  // "Eseri keşfet" rozeti: sıradaki mühür kartındaki rozetle aynı
                   Container(
-                    height: 46,
-                    alignment: Alignment.center,
+                    padding: const EdgeInsets.fromLTRB(12, 8, 6, 8),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryTeal,
-                      borderRadius: BorderRadius.circular(24),
+                      color: AppColors.ciniBordeauxLight,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: bordeauxOf(context).withValues(alpha: 0.4),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           context.t('explore_place'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: bordeauxOf(context),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: bordeauxOf(context),
                           size: 20,
-                          color: Colors.white,
                         ),
                       ],
                     ),
