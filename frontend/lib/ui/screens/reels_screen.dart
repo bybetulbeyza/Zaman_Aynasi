@@ -269,93 +269,77 @@ class _ReelPageState extends State<_ReelPage>
                 color: Colors.white70,
               ),
             ),
-          if (hasScript)
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 10,
-              right: 14,
-              child: const SubtitleToggle(),
+          // Üst sağ: yapay zekâ etiketi ve altyazı düğmesi
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 14,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const AiLabel(compact: true),
+                if (hasScript) ...[
+                  const SizedBox(width: 8),
+                  const SubtitleToggle(),
+                ],
+              ],
             ),
-          // Reels düzeni: solda küçük AI etiketi, altyazı üstte; sağ altta "Detaylar" düğmesi
+          ),
+          // Alt: altyazı ve tek satırlık "Detaylar için sağa kaydır »" ipucu
           Positioned(
             left: 20,
             right: 20,
             bottom: 34,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (hasScript)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 18),
-                      child: VideoSubtitles(controller: _c, script: script),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 22),
+                    child: VideoSubtitles(controller: _c, script: script),
+                  ),
+                Semantics(
+                  button: true,
+                  label: context.t('swipe_details'),
+                  excludeSemantics: true,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _openDetails,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          context.t('swipe_details'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            shadows: [
+                              Shadow(color: Colors.black54, blurRadius: 4),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        AnimatedBuilder(
+                          animation: _hint,
+                          builder: (context, child) {
+                            final t = Curves.easeInOut.transform(_hint.value);
+                            return Transform.translate(
+                              offset: Offset(6 * t, 0),
+                              child: Opacity(
+                                opacity: 0.6 + 0.4 * t,
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: const Icon(
+                            Icons.keyboard_double_arrow_right_rounded,
+                            size: 22,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const AiLabel(compact: true),
-                    const Spacer(),
-                    Semantics(
-                      button: true,
-                      label: context.t('swipe_details'),
-                      excludeSemantics: true,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: _openDetails,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 46,
-                              height: 46,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.black.withValues(alpha: 0.38),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.75),
-                                  width: 1.3,
-                                ),
-                              ),
-                              // Sağa kayıp geri dönen çift ok
-                              child: AnimatedBuilder(
-                                animation: _hint,
-                                builder: (context, child) {
-                                  final t = Curves.easeInOut.transform(
-                                    _hint.value,
-                                  );
-                                  return Transform.translate(
-                                    offset: Offset(-3 + 6 * t, 0),
-                                    child: Opacity(
-                                      opacity: 0.65 + 0.35 * t,
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: const Icon(
-                                  Icons.keyboard_double_arrow_right_rounded,
-                                  size: 26,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              context.t('details_short'),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
-                                shadows: [
-                                  Shadow(color: Colors.black54, blurRadius: 4),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
