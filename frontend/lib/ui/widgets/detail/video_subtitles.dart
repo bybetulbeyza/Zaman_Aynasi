@@ -42,7 +42,11 @@ class SubtitleCue {
 /// Anlatım metnini cümlelere böler, her parçaya metin uzunluğuna orantılı bir süre verir.
 /// Metinde zaman bilgisi olmadığı için eşleşme yaklaşıktır; konuşmanın başındaki ve sonundaki
 /// kısa sessizlikler için baştan/sondan pay bırakılır.
-List<SubtitleCue> buildSubtitleCues(String script, double totalSec) {
+List<SubtitleCue> buildSubtitleCues(
+  String script,
+  double totalSec, {
+  int maxChars = 84,
+}) {
   final clean = script
       .replaceAll(RegExp(r'\[[^\]]*\]'), ' ')
       .replaceAll(RegExp(r'\s+'), ' ')
@@ -68,7 +72,7 @@ List<SubtitleCue> buildSubtitleCues(String script, double totalSec) {
   if (current.isNotEmpty) sentences.add(current.join(' '));
   final parts = <String>[];
   for (final sentence in sentences) {
-    if (sentence.length <= 105) {
+    if (sentence.length <= maxChars) {
       parts.add(sentence);
       continue;
     }
@@ -76,7 +80,7 @@ List<SubtitleCue> buildSubtitleCues(String script, double totalSec) {
     final pieces = sentence.split(RegExp(r'(?<=[,;:])\s+'));
     var cur = '';
     for (final piece in pieces) {
-      if (cur.isNotEmpty && (cur.length + piece.length) > 105) {
+      if (cur.isNotEmpty && (cur.length + piece.length) > maxChars) {
         parts.add(cur);
         cur = piece;
       } else {
@@ -144,8 +148,8 @@ class VideoSubtitles extends StatelessWidget {
                     : Container(
                         key: ValueKey(text),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
+                          horizontal: 14,
+                          vertical: 8,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.62),
@@ -156,7 +160,7 @@ class VideoSubtitles extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 16.5,
+                            fontSize: 15.5,
                             height: 1.35,
                             fontWeight: FontWeight.w600,
                           ),

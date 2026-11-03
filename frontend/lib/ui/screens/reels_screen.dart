@@ -209,6 +209,8 @@ class _ReelPageState extends State<_ReelPage> {
   Widget build(BuildContext context) {
     final en = context.isEn;
     final r = widget.reel;
+    final script = r.hotspot.videoScriptFor(en);
+    final hasScript = script.trim().isNotEmpty;
     return GestureDetector(
       onTap: () => setState(() => _c.value.isPlaying ? _c.pause() : _c.play()),
       child: Stack(
@@ -250,17 +252,7 @@ class _ReelPageState extends State<_ReelPage> {
                 color: Colors.white70,
               ),
             ),
-          // Altyazı: alttaki bilgi bloğunun hemen üstünde
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 230,
-            child: VideoSubtitles(
-              controller: _c,
-              script: r.hotspot.videoScriptFor(en),
-            ),
-          ),
-          if (r.hotspot.videoScriptFor(en).trim().isNotEmpty)
+          if (hasScript)
             Positioned(
               top: MediaQuery.of(context).padding.top + 10,
               right: 14,
@@ -274,6 +266,14 @@ class _ReelPageState extends State<_ReelPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Altyazı açıkken açıklama gizlenir; altyazı doğrudan başlığın üstünde durur
+                if (hasScript)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: VideoSubtitles(controller: _c, script: script),
+                    ),
+                  ),
                 const AiLabel(compact: true),
                 const SizedBox(height: 10),
                 Text(
@@ -285,18 +285,27 @@ class _ReelPageState extends State<_ReelPage> {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  r.hotspot.descriptionFor(en),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    height: 1.4,
-                  ),
+                ListenableBuilder(
+                  listenable: SubtitlePrefs.instance,
+                  builder: (context, _) {
+                    if (hasScript && SubtitlePrefs.instance.on) {
+                      return const SizedBox(height: 10);
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 6, bottom: 12),
+                      child: Text(
+                        r.hotspot.descriptionFor(en),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          height: 1.4,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 12),
                 GestureDetector(
                   onTap: () => Navigator.push(
                     context,
