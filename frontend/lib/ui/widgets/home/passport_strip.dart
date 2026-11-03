@@ -9,7 +9,7 @@ import '../common/app_network_image.dart';
 
 /// Ana ekranda "sıradaki mühür" kartı: mührü henüz alınmamış en yakın eseri gösterir,
 /// dokununca o esere gider. Sağdaki "3/23" rozeti pasaportu açar. Hepsi toplanınca tebrik gösterir.
-/// Renkler sesli rehber kartıyla aynıdır.
+/// Sıcak bej zemin ve altın çerçeve: uygulamanın krem zeminiyle uyumlu.
 class PassportStrip extends StatelessWidget {
   /// Yakınlığa göre sıralı eserler (konum yoksa sıra önemsizdir).
   final List<HeritagePlace> places;
@@ -65,10 +65,10 @@ class PassportStrip extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
               decoration: BoxDecoration(
-                color: AppColors.primaryTealLight,
+                color: const Color(0xFFF1E6D0),
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: AppColors.primaryTeal.withValues(alpha: 0.4),
+                  color: AppColors.ornamentGold.withValues(alpha: 0.55),
                   width: 1.2,
                 ),
               ),
@@ -149,7 +149,7 @@ class PassportStrip extends StatelessWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppColors.primaryTeal.withValues(alpha: 0.4),
+                          color: AppColors.ornamentGold.withValues(alpha: 0.55),
                         ),
                       ),
                       child: Row(
