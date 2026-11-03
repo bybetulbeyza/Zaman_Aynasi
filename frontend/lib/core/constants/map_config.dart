@@ -7,10 +7,14 @@ class MapConfig {
     defaultValue: 'mehtapaslan/cmvvk87wx000y01s8524xau31',
   );
 
+  /// Mapbox karoları ağ önbelleğinde 12 saat tutulur; stil yayınlanınca bu sayıyı artırmak
+  /// eski karoların hemen yenilenmesini sağlar (adres değiştiği için önbellek devre dışı kalır).
+  static const String styleVersion = '2';
+
   static bool get useMapbox => mapboxToken.isNotEmpty;
 
   static String get tileUrl => useMapbox
-      ? 'https://api.mapbox.com/styles/v1/$mapboxStyle/tiles/256/{z}/{x}/{y}@2x?access_token=$mapboxToken'
+      ? 'https://api.mapbox.com/styles/v1/$mapboxStyle/tiles/256/{z}/{x}/{y}@2x?access_token=$mapboxToken&v=$styleVersion'
       : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
   /// @2x karolar 256 px boyutunda gösterilir.
