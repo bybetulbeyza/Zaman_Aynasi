@@ -9,7 +9,7 @@ class MapConfig {
 
   /// Mapbox karoları ağ önbelleğinde 12 saat tutulur; stil yayınlanınca bu sayıyı artırmak
   /// eski karoların hemen yenilenmesini sağlar (adres değiştiği için önbellek devre dışı kalır).
-  static const String styleVersion = '2';
+  static const String styleVersion = '3';
 
   static bool get useMapbox => mapboxToken.isNotEmpty;
 
