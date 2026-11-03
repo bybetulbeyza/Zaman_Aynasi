@@ -143,7 +143,7 @@ class _HistoricRoutesScreenState extends State<HistoricRoutesScreen> {
                 child: LayoutBuilder(
                   builder: (context, box) {
                     _measureHeader();
-                    final carouselH = (box.maxHeight - _headerH - 40).clamp(
+                    final carouselH = (box.maxHeight - _headerH - 72).clamp(
                       380.0,
                       900.0,
                     );
