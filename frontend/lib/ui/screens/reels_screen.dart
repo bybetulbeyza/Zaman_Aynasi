@@ -169,7 +169,7 @@ class _ReelPage extends StatefulWidget {
 }
 
 class _ReelPageState extends State<_ReelPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final VideoPlayerController _c;
   bool _error = false;
 
