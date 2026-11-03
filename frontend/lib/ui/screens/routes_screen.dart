@@ -17,7 +17,6 @@ import '../../core/constants/app_theme.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/app_icon.dart';
-import '../widgets/common/pill_button.dart';
 import '../widgets/common/app_logo.dart';
 import '../../core/constants/app_categories.dart';
 import '../../core/l10n/app_lang.dart';

@@ -10,6 +10,9 @@ class ActionCard extends StatelessWidget {
   final Widget? leading;
   final String title;
   final String? subtitle;
+
+  /// Başlığın altında gösterilen ek içerik (ör. ilerleme çubuğu).
+  final Widget? bottom;
   final Widget? trailing;
   final VoidCallback? onTap;
   final bool selected;
@@ -25,6 +28,7 @@ class ActionCard extends StatelessWidget {
     required this.title,
     this.leading,
     this.subtitle,
+    this.bottom,
     this.trailing,
     this.onTap,
     this.selected = false,
@@ -112,6 +116,10 @@ class ActionCard extends StatelessWidget {
                               color: AppColors.textDark,
                             ),
                           ),
+                          if (bottom != null) ...[
+                            const SizedBox(height: 7),
+                            bottom!,
+                          ],
                           if (subtitle != null) ...[
                             const SizedBox(height: 2),
                             Text(

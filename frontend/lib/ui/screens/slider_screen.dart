@@ -499,6 +499,25 @@ class _SliderScreenState extends State<SliderScreen>
               ),
               title: on ? context.t('tour_stop') : context.t('tour_start'),
               subtitle: on ? null : '$n ${context.t('tour_stops')}',
+              // Hangi durakta olunduğunu gösteren segmentli çubuk
+              bottom: Row(
+                children: [
+                  for (var i = 0; i < n; i++)
+                    Expanded(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: 5,
+                        margin: EdgeInsets.only(right: i == n - 1 ? 0 : 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          color: bordeauxOf(context).withValues(
+                            alpha: on && i <= _tour.step ? 0.9 : 0.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               onTap: toggle,
               round: 28,
               shadow: true,
