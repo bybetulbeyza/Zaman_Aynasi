@@ -1,4 +1,4 @@
-import 'app_card.dart';
+import 'action_card.dart';
 import 'pattern_background.dart';
 import 'sheet_handle.dart';
 import 'package:flutter/material.dart';
@@ -30,55 +30,27 @@ Future<void> showCityPickerSheet(BuildContext context) {
               const Text('Şehirler', style: AppTheme.titleLarge),
               const SizedBox(height: 14),
               for (final city in AppCities.all)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 14,
-                  ),
-                  decoration: appCardDecoration(
-                    round: 22,
-                    shadow: false,
-                    side: AppCities.isAvailable(city)
-                        ? AppColors.primaryTeal
-                        : AppColors.chipBorder,
-                    width: AppCities.isAvailable(city) ? 1.4 : 1.2,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        color: AppCities.isAvailable(city)
-                            ? AppColors.primaryTeal
-                            : AppColors.textMuted,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        city,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppCities.isAvailable(city)
-                              ? AppColors.textDark
-                              : AppColors.textMuted,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (AppCities.isAvailable(city))
-                        const Icon(
-                          Icons.check_circle_rounded,
-                          color: AppColors.primaryTeal,
-                        )
-                      else
-                        Text(
-                          'Yakında',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: bordeauxOf(context),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: ActionCard(
+                    leading: ActionCard.iconBubble(
+                      context,
+                      Icons.location_on_outlined,
+                    ),
+                    title: city,
+                    dimmed: !AppCities.isAvailable(city),
+                    selected: AppCities.isAvailable(city),
+                    round: 26,
+                    trailing: AppCities.isAvailable(city)
+                        ? null
+                        : Text(
+                            'Yakında',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: bordeauxOf(context),
+                            ),
                           ),
-                        ),
-                    ],
                   ),
                 ),
             ],
