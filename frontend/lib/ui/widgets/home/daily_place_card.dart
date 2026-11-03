@@ -52,7 +52,7 @@ class _DailyPlaceCardState extends State<DailyPlaceCard>
           child: LayoutBuilder(
             builder: (context, box) => SizedBox(
               width: box.maxWidth,
-              height: (box.maxWidth / 1.3).clamp(0.0, 330.0),
+              height: (box.maxWidth / 1.3).clamp(0.0, 430.0),
               child: DarkCancel(child: _compare(p, en)),
             ),
           ),
