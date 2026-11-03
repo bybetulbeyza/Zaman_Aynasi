@@ -1,6 +1,7 @@
 import 'package:flutter/semantics.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_theme.dart';
 import '../../../core/l10n/app_lang.dart';
 import '../common/app_network_image.dart';
 
@@ -11,6 +12,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
   final String? routeStats; // örn: "Durak 2 / 6 · 3,8 km · 40 dk"
   final String placeName;
   final String placeDistanceTime;
+  final String placeDescription;
   final String? placeImageUrl;
   final VoidCallback onDetailTap;
   final VoidCallback? onNextStopTap;
@@ -27,6 +29,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
     this.routeStats,
     required this.placeName,
     required this.placeDistanceTime,
+    this.placeDescription = '',
     this.placeImageUrl,
     required this.onDetailTap,
     this.onNextStopTap,
@@ -37,11 +40,11 @@ class RouteStopPreviewSheet extends StatelessWidget {
   });
 
   Widget _placeholder() => Container(
-    width: 64,
-    height: 64,
+    width: 104,
+    height: 104,
     decoration: BoxDecoration(
       color: AppColors.borderSubtle,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(20),
     ),
     alignment: Alignment.center,
     child: const Icon(Icons.image_outlined, color: AppColors.textMuted),
@@ -51,16 +54,17 @@ class RouteStopPreviewSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final inRoute = routeTitle != null;
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.chipBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.14),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -142,68 +146,92 @@ class RouteStopPreviewSheet extends StatelessWidget {
                 if (v < -250) onNextStopTap?.call();
                 if (v > 250) onPrevStopTap?.call();
               },
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.bgCanvas,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.borderSubtle, width: 0.8),
-                ),
-                child: Row(
-                  children: [
-                    (placeImageUrl != null && placeImageUrl!.isNotEmpty)
-                        ? AppNetworkImage(
-                            imageUrl: placeImageUrl!,
-                            width: 64,
-                            height: 64,
-                            borderRadius: BorderRadius.circular(14),
-                          )
-                        : _placeholder(),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            placeName,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16.5,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textDark,
-                              height: 1.2,
-                            ),
-                          ),
-                          if (placeDistanceTime.isNotEmpty) ...[
-                            const SizedBox(height: 3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      (placeImageUrl != null && placeImageUrl!.isNotEmpty)
+                          ? AppNetworkImage(
+                              imageUrl: placeImageUrl!,
+                              width: 104,
+                              height: 104,
+                              borderRadius: BorderRadius.circular(20),
+                            )
+                          : _placeholder(),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              placeDistanceTime,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textMuted,
+                              placeName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTheme.titleMedium.copyWith(
+                                fontSize: 21,
+                                height: 1.15,
                               ),
                             ),
+                            if (placeDistanceTime.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                placeDistanceTime,
+                                style: const TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primaryTeal,
+                                ),
+                              ),
+                            ],
+                            if (placeDescription.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                placeDescription,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 13.5,
+                                  height: 1.35,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    height: 46,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryTeal,
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryTeal,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 20,
-                        color: Colors.white,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          context.t('explore_place'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

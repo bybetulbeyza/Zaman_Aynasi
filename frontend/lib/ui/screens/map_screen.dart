@@ -54,7 +54,7 @@ class MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
 
   /// Bu yakınlıktan sonra pinlerin altında eser adı görünür.
-  static const double _labelZoom = 15.8;
+  static const double _labelZoom = 16.5;
   final HeritageRepository _heritageRepository = HeritageRepository();
 
   final LatLng _bursaCenter = LocationService.defaultCenter;
@@ -698,6 +698,9 @@ class MapScreenState extends State<MapScreen> {
                                         : ' · ${_walk!.distanceLabel} · ${_walk!.minutes} ${context.t('min_walk')}'),
                           placeName: currentPlace.nameFor(context.isEn),
                           placeDistanceTime: _subtitleFor(currentPlace),
+                          placeDescription: currentPlace.descriptionFor(
+                            context.isEn,
+                          ),
                           placeImageUrl: currentPlace.imageAfterUrl,
                           onDetailTap: () => Navigator.push(
                             context,

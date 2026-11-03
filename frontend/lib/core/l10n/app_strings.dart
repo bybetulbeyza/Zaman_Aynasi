@@ -31,6 +31,7 @@ const Map<String, String> appStringsTr = {
 
   // Ana sayfa
   'hero_title': 'Vakıf mirasını\nhikâyeleriyle keşfet',
+  'explore_place': 'Eseri keşfet',
   'qa_3d': '3D gez',
   'three_d_hint': 'Tarihî ve günümüz modellerini döndür, yakınlaş.',
   'daily_title': 'Günün eseri',
@@ -335,6 +336,7 @@ const Map<String, String> appStringsEn = {
 
   // Home
   'hero_title': 'Discover heritage\nthrough its stories',
+  'explore_place': 'Explore',
   'qa_3d': 'Explore 3D',
   'three_d_hint': 'Rotate and zoom the historic and present-day models.',
   'daily_title': 'Place of the day',
