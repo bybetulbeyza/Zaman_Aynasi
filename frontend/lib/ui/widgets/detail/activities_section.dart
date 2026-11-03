@@ -86,22 +86,33 @@ class _ActivitiesSectionState extends State<ActivitiesSection>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Mühür kartından gelinince başlık iki kez büyüyüp küçülür ve kartlar hafifçe parlar
-            AnimatedBuilder(
-              animation: _pulse,
-              builder: (_, child) {
-                // Tek bir yumuşak büyüyüp küçülme (sinüs yarım dalgası)
-                final wave = math.sin(_pulse.value * math.pi);
-                return Transform.scale(
-                  scale: 1 + 0.12 * wave,
-                  alignment: Alignment.centerLeft,
-                  child: child,
-                );
-              },
-              child: SectionTitle(
-                context.t('act_title'),
-                actionLabel: '$done/${_items.length}',
-              ),
+            // Mühür kartından gelinince yalnızca başlık bir kez büyüyüp küçülür; sağdaki sayaç sabit kalır
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: AnimatedBuilder(
+                    animation: _pulse,
+                    builder: (_, child) {
+                      final wave = math.sin(_pulse.value * math.pi);
+                      return Transform.scale(
+                        scale: 1 + 0.12 * wave,
+                        alignment: Alignment.centerLeft,
+                        child: child,
+                      );
+                    },
+                    child: SectionTitle(context.t('act_title')),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '$done/${_items.length}',
+                  style: const TextStyle(
+                    color: AppColors.primaryTeal,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             SizedBox(
