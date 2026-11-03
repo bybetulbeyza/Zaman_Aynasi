@@ -12,11 +12,15 @@ class CategoryPin extends StatelessWidget {
   final bool selected;
   final int? order;
 
+  /// Pinin altında gösterilen eser adı (null ise gösterilmez).
+  final String? label;
+
   const CategoryPin({
     super.key,
     required this.category,
     this.selected = false,
     this.order,
+    this.label,
   });
 
   @override
@@ -42,6 +46,11 @@ class CategoryPin extends StatelessWidget {
               top: 8,
               child: AppIcon(style.icon, size: 32, color: Colors.white),
             ),
+            if (label != null)
+              Positioned(
+                top: height + 3,
+                child: IgnorePointer(child: _NameTag(label!, style.color)),
+              ),
             if (order != null)
               Positioned(
                 top: -4,
@@ -106,4 +115,49 @@ class _PinPainter extends CustomPainter {
   @override
   bool shouldRepaint(_PinPainter old) =>
       old.color != color || old.selected != selected;
+}
+
+/// Pinin altındaki kısa ad etiketi: parantez içi atılır, uzun adlar kesilir.
+class _NameTag extends StatelessWidget {
+  final String name;
+  final Color color;
+  const _NameTag(this.name, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    final short = name.replaceAll(RegExp(r'\s*\([^)]*\)'), '').trim();
+    return OverflowBox(
+      minWidth: 0,
+      maxWidth: 120,
+      alignment: Alignment.topCenter,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.94),
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.55),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                short,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF2B2B2B),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -52,6 +52,10 @@ class _CountingTileProvider extends NetworkTileProvider {
 
 class MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
+
+  /// Bu yakınlıktan sonra pinlerin altında eser adı görünür.
+  static const double _labelZoom = 16.6;
+  bool _showLabels = false;
   final HeritageRepository _heritageRepository = HeritageRepository();
 
   final LatLng _bursaCenter = LocationService.defaultCenter;
@@ -221,6 +225,9 @@ class MapScreenState extends State<MapScreen> {
                 category: place.category,
                 selected: isSelected,
                 order: _routeChip != null ? index + 1 : null,
+                label: (_showLabels || isSelected)
+                    ? place.nameFor(context.isEn)
+                    : null,
               ),
             ),
           ),
@@ -426,6 +433,10 @@ class MapScreenState extends State<MapScreen> {
                   : _bursaCenter,
               initialZoom: 16.5,
               backgroundColor: AppColors.bgCanvas,
+              onPositionChanged: (cam, _) {
+                final show = cam.zoom >= _labelZoom;
+                if (show != _showLabels) setState(() => _showLabels = show);
+              },
               onTap: (_, __) {
                 if (_routeChip == null && _cardOpen) {
                   setState(() => _cardOpen = false);
