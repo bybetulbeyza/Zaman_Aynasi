@@ -31,6 +31,9 @@ class ActivityRepository {
     }
   }
 
-  static Future<List<PlaceActivity>> forPlace(String placeId) async =>
-      (await _all())[placeId] ?? const [];
+  /// Eserin görevleri; en başta her eserde ortak olan "QR kodunu okut" görevi bulunur.
+  static Future<List<PlaceActivity>> forPlace(String placeId) async => [
+    PlaceActivity.qr(placeId),
+    ...((await _all())[placeId] ?? const <PlaceActivity>[]),
+  ];
 }

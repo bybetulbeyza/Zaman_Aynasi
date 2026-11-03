@@ -36,7 +36,7 @@ const Map<String, String> appStringsTr = {
   'daily_title': 'Günün eseri',
   'next_stamp_first': 'İlk mührünü kazan',
   'next_stamp': 'Sıradaki mührün',
-  'next_stamp_how': 'QR okut, yakınına git ya da görevleri tamamla',
+  'next_stamp_how': 'QR okut ve görevleri tamamla',
   'strip_done': 'Tüm mühürleri topladın, tebrikler!',
   'qa_create_route': 'Yeni rota',
   'qa_scan_qr': 'QR okut',
@@ -101,7 +101,7 @@ const Map<String, String> appStringsTr = {
   'passport_row': 'Pasaportum',
   'passport_count': '{n}/{total} mühür',
   'passport_hint':
-      'Bir eseri ziyaret et, QR kodunu okut ya da görevlerini tamamla; mührünü kazan.',
+      'Bir eseri ziyaret et, tabeladaki QR kodunu okut ve görevlerini tamamla; mührünü kazan.',
 
   'a11y_back': 'Geri',
   'a11y_sheet_up': 'Bilgi kartını genişlet',
@@ -133,8 +133,8 @@ const Map<String, String> appStringsTr = {
   'stops_hint': 'Bir durağa dokun, haritada göster',
   'walk_between': '{m} dk yürüyüş · {d}',
   'route_chip': 'Rota: {name}',
-  'geo_nearby': 'Yakınındasın: {name}',
-  'geo_open': 'Aç',
+  'qr_task_done':
+      'QR okundu! Mühür için kalan görevleri tamamla ({n}/{total}).',
 
   // QR
   'qr_align': 'Karekodu Hizalayın',
@@ -340,7 +340,7 @@ const Map<String, String> appStringsEn = {
   'daily_title': 'Place of the day',
   'next_stamp_first': 'Earn your first stamp',
   'next_stamp': 'Your next stamp',
-  'next_stamp_how': 'Scan the QR, go nearby or finish the tasks',
+  'next_stamp_how': 'Scan the QR and finish the tasks',
   'strip_done': 'You collected every stamp, congratulations!',
   'qa_create_route': 'New route',
   'qa_scan_qr': 'Scan QR',
@@ -405,7 +405,7 @@ const Map<String, String> appStringsEn = {
   'passport_row': 'Passport',
   'passport_count': '{n}/{total} stamps',
   'passport_hint':
-      'Visit a landmark, scan its QR code or finish its tasks to earn its stamp.',
+      'Visit a landmark, scan the QR code on its sign and finish its tasks to earn its stamp.',
 
   'a11y_back': 'Back',
   'a11y_sheet_up': 'Expand the info card',
@@ -437,8 +437,8 @@ const Map<String, String> appStringsEn = {
   'stops_hint': 'Tap a stop to see it on the map',
   'walk_between': '{m} min walk · {d}',
   'route_chip': 'Route: {name}',
-  'geo_nearby': 'You are near: {name}',
-  'geo_open': 'Open',
+  'qr_task_done':
+      'QR scanned! Finish the remaining tasks for the stamp ({n}/{total}).',
 
   // QR
   'qr_align': 'Align the QR code',

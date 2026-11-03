@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/models/place_activity.dart';
+import '../../data/repositories/activity_repository.dart';
 import '../auth/auth_service.dart';
 
 /// Bursa Pasaportu: tamamlanan görevler ve kazanılan mühürler.
@@ -22,10 +23,13 @@ class Passport extends ChangeNotifier {
 
   int get stampCount => _stamps.length;
   bool hasStamp(String placeId) => _stamps.contains(placeId);
-  bool isDone(int activityId) => _activities.contains(activityId);
+  bool isDone(int activityId) =>
+      _activities.contains(activityId) ||
+      // Mührü zaten kazanılmış eserlerde QR görevi tamamlanmış sayılır (eski ilerleme bozulmasın)
+      (activityId < 0 && _stamps.contains('${-activityId}'));
 
   int doneCount(List<PlaceActivity> list) =>
-      list.where((a) => _activities.contains(a.id)).length;
+      list.where((a) => isDone(a.id)).length;
 
   Future<void> init() async {
     try {
@@ -74,12 +78,34 @@ class Passport extends ChangeNotifier {
     _push('activity', a.id, add: nowDone);
     notifyListeners();
     _save();
-    if (nowDone && all.every((x) => _activities.contains(x.id))) {
+    if (nowDone && all.every((x) => isDone(x.id))) {
       earnStamp(place);
     }
   }
 
-  /// Mührü verir (zaten varsa false döner). QR, yakınlık ve görev tamamlama burayı kullanır.
+  /// QR okutuldu: eserin "QR kodunu okut" görevi tamamlanır; tüm görevler bittiyse mühür kazanılır.
+  /// Kalan görev sayısını döndürür (mühür kazanıldıysa 0).
+  Future<({int done, int total, bool stamped})> completeQr(
+    HeritagePlace place,
+  ) async {
+    final qrId = PlaceActivity.qrIdFor(place.id);
+    if (_activities.add(qrId)) {
+      _push('activity', qrId, add: true);
+      notifyListeners();
+      _save();
+    }
+    final all = await ActivityRepository.forPlace(place.id);
+    final done = doneCount(all);
+    final complete = done >= all.length;
+    final stamped = complete && earnStamp(place);
+    return (
+      done: done,
+      total: all.length,
+      stamped: stamped || hasStamp(place.id),
+    );
+  }
+
+  /// Mührü verir (zaten varsa false döner). Mühür yalnızca eserin tüm görevleri (QR dahil) bitince verilir.
   bool earnStamp(HeritagePlace place) {
     if (!_stamps.add(place.id)) return false;
     _push('stamp', int.tryParse(place.id) ?? 0, add: true);

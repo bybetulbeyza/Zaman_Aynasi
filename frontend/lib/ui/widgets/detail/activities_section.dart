@@ -6,6 +6,7 @@ import '../../../core/state/passport.dart';
 import '../../../data/models/heritage_place.dart';
 import '../../../data/models/place_activity.dart';
 import '../../../data/repositories/activity_repository.dart';
+import '../../screens/main_screen.dart' show mainTabRequest;
 import '../common/section_title.dart';
 
 /// Eser sayfasındaki "Keşif görevleri": yatay kaydırmalı, işaretlenebilir kartlar.
@@ -39,6 +40,8 @@ class _ActivitiesSectionState extends State<ActivitiesSection> {
         return Icons.directions_walk_rounded;
       case 'fotograf':
         return Icons.photo_camera_outlined;
+      case 'qr':
+        return Icons.qr_code_scanner_rounded;
       case 'dinlen':
         return Icons.headphones_outlined;
       default:
@@ -208,6 +211,14 @@ class _ActivitiesSectionState extends State<ActivitiesSection> {
 
   void _toggle(PlaceActivity a) {
     HapticFeedback.selectionClick();
+    // QR görevi işaretlenerek değil, gerçekten okutularak tamamlanır: tarayıcıya götürür
+    if (a.isQr) {
+      if (!Passport.instance.isDone(a.id)) {
+        Navigator.of(context).popUntil((r) => r.isFirst);
+        mainTabRequest.value = 2;
+      }
+      return;
+    }
     Passport.instance.toggleActivity(a, widget.place, _items);
   }
 }

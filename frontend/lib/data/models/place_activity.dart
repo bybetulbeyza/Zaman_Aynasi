@@ -22,6 +22,26 @@ class PlaceActivity {
     required this.sortOrder,
   });
 
+  /// Her eserde bulunan, veritabanında olmayan ortak görev: tabeladaki QR kodunu okutmak.
+  /// Kimliği eksi eser numarasıdır (veritabanı görevleriyle çakışmaz).
+  static int qrIdFor(String placeId) => -(int.tryParse(placeId) ?? 0);
+
+  factory PlaceActivity.qr(String placeId) => PlaceActivity(
+    id: qrIdFor(placeId),
+    placeId: placeId,
+    kind: 'qr',
+    title: 'Tabeladaki QR kodunu okut',
+    titleEn: 'Scan the QR code on the sign',
+    description:
+        'Eserin yanındaki tabelada karekodu bul ve uygulamayla okut. Bu görev yalnızca okutunca tamamlanır.',
+    descriptionEn:
+        'Find the QR code on the sign next to the building and scan it. This task completes only by scanning.',
+    source: '',
+    sortOrder: -1,
+  );
+
+  bool get isQr => kind == 'qr';
+
   factory PlaceActivity.fromJson(Map<String, dynamic> json) {
     String s(String key) => (json[key] as String? ?? '').trim();
     return PlaceActivity(

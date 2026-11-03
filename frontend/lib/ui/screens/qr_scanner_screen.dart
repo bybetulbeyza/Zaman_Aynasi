@@ -69,7 +69,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           _isProcessing = false;
         });
 
-        Passport.instance.earnStamp(matchedPlace);
+        final res = await Passport.instance.completeQr(matchedPlace);
+        if (!mounted) return;
+        if (!res.stamped) {
+          AppToast.show(
+            context,
+            context
+                .t('qr_task_done')
+                .replaceAll('{n}', '${res.done}')
+                .replaceAll('{total}', '${res.total}'),
+            icon: Icons.qr_code_2_rounded,
+          );
+        }
         Navigator.push(
           context,
           MaterialPageRoute(

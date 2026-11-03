@@ -13,9 +13,6 @@ import '../../core/state/active_route.dart';
 import '../widgets/common/app_icon.dart';
 import '../../data/models/heritage_place.dart';
 import 'historic_routes_screen.dart';
-import 'slider_screen.dart';
-import '../../core/utils/geofence_service.dart';
-import '../../data/repositories/heritage_repository.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'qr_scanner_screen.dart';
@@ -36,12 +33,9 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0; // Varsayılan olarak Ana Sayfa ile başlar
   final GlobalKey<MapScreenState> _mapKey = GlobalKey<MapScreenState>();
 
-  final GeofenceService _geofence = GeofenceService();
-
   @override
   void initState() {
     super.initState();
-    _startGeofence();
     mainTabRequest.addListener(_onTabRequest);
     Passport.instance.ceremony.addListener(_onCeremony);
   }
@@ -96,30 +90,7 @@ class _MainScreenState extends State<MainScreen> {
   void dispose() {
     mainTabRequest.removeListener(_onTabRequest);
     Passport.instance.ceremony.removeListener(_onCeremony);
-    _geofence.stop();
     super.dispose();
-  }
-
-  Future<void> _startGeofence() async {
-    final places = await HeritageRepository().getPlaces();
-    if (!mounted || places.isEmpty) return;
-    await _geofence.start(places, (place) {
-      if (!mounted) return;
-      Passport.instance.earnStamp(place);
-      AppToast.show(
-        context,
-        context
-            .t('geo_nearby')
-            .replaceAll('{name}', place.nameFor(context.isEn)),
-        icon: Icons.place_rounded,
-        actionLabel: context.t('geo_open'),
-        duration: const Duration(seconds: 8),
-        onAction: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
-        ),
-      );
-    });
   }
 
   /// Haritaya geçip verilen rotayı çizer.
