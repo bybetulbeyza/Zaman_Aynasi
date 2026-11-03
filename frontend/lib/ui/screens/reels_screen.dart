@@ -131,6 +131,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
                 child: Row(
                   children: [
                     const AppBackButton(onPhoto: true),
+                    const SizedBox(width: 10),
                     Text(
                       context.t('reels_title'),
                       style: const TextStyle(
