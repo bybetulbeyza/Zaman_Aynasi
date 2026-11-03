@@ -495,12 +495,48 @@ class _RoutesScreenState extends State<RoutesScreen> {
                               },
                             ),
                             const SizedBox(height: 14),
-                            SizedBox(
-                              width: double.infinity,
-                              child: PillButton(
-                                context.t('rc_create'),
-                                color: bordeauxOf(context),
-                                onPressed: _handleCreateRoute,
+                            // Eser kartındaki "Eseri keşfet" rozetiyle aynı tarz: açık bordo zemin, bordo çerçeve ve yazı
+                            Semantics(
+                              button: true,
+                              label: context.t('rc_create'),
+                              excludeSemantics: true,
+                              child: GestureDetector(
+                                onTap: _handleCreateRoute,
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    18,
+                                    14,
+                                    12,
+                                    14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.ciniBordeauxLight,
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: bordeauxOf(
+                                        context,
+                                      ).withValues(alpha: 0.4),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        context.t('rc_create'),
+                                        style: TextStyle(
+                                          fontSize: 16.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: bordeauxOf(context),
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.chevron_right_rounded,
+                                        color: bordeauxOf(context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ],
