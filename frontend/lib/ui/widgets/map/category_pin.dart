@@ -7,6 +7,7 @@ import '../common/app_icon.dart';
 class CategoryPin extends StatelessWidget {
   static const double width = 50;
   static const double height = 62;
+  static const double _tagWidth = 130;
 
   final PlaceCategory category;
   final bool selected;
@@ -47,9 +48,14 @@ class CategoryPin extends StatelessWidget {
               child: AppIcon(style.icon, size: 32, color: Colors.white),
             ),
             if (label != null)
+              // Pinden geniş sabit bir alan: etiket ortalanır, uzun adlar kesilir
               Positioned(
                 top: height + 3,
-                child: IgnorePointer(child: _NameTag(label!, style.color)),
+                left: -(_tagWidth - width) / 2,
+                width: _tagWidth,
+                child: IgnorePointer(
+                  child: Center(child: _NameTag(label!, style.color)),
+                ),
               ),
             if (order != null)
               Positioned(
@@ -126,37 +132,22 @@ class _NameTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final short = name.replaceAll(RegExp(r'\s*\([^)]*\)'), '').trim();
-    return OverflowBox(
-      minWidth: 0,
-      maxWidth: 120,
-      alignment: Alignment.topCenter,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.94),
-                borderRadius: BorderRadius.circular(9),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.55),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                short,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF2B2B2B),
-                ),
-              ),
-            ),
-          ),
-        ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(color: color.withValues(alpha: 0.55), width: 1),
+      ),
+      child: Text(
+        short,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF2B2B2B),
+        ),
       ),
     );
   }

@@ -54,8 +54,7 @@ class MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
 
   /// Bu yakınlıktan sonra pinlerin altında eser adı görünür.
-  static const double _labelZoom = 16.6;
-  bool _showLabels = false;
+  static const double _labelZoom = 15.8;
   final HeritageRepository _heritageRepository = HeritageRepository();
 
   final LatLng _bursaCenter = LocationService.defaultCenter;
@@ -195,7 +194,7 @@ class MapScreenState extends State<MapScreen> {
     }
   }
 
-  List<Marker> _buildPinMarkers() {
+  List<Marker> _buildPinMarkers({bool showLabels = false}) {
     final markers = List.generate(_filteredPlaces.length, (index) {
       final place = _filteredPlaces[index];
       final isSelected =
@@ -225,7 +224,7 @@ class MapScreenState extends State<MapScreen> {
                 category: place.category,
                 selected: isSelected,
                 order: _routeChip != null ? index + 1 : null,
-                label: (_showLabels || isSelected)
+                label: (showLabels || isSelected)
                     ? place.nameFor(context.isEn)
                     : null,
               ),
@@ -433,10 +432,6 @@ class MapScreenState extends State<MapScreen> {
                   : _bursaCenter,
               initialZoom: 16.5,
               backgroundColor: AppColors.bgCanvas,
-              onPositionChanged: (cam, _) {
-                final show = cam.zoom >= _labelZoom;
-                if (show != _showLabels) setState(() => _showLabels = show);
-              },
               onTap: (_, __) {
                 if (_routeChip == null && _cardOpen) {
                   setState(() => _cardOpen = false);
@@ -512,7 +507,16 @@ class MapScreenState extends State<MapScreen> {
                 ),
 
               // Kategori pinleri (rota modunda sıra rozetli)
-              DarkCancel(child: MarkerLayer(markers: _buildPinMarkers())),
+              // Yakınlaşınca pinlerin altında eser adı görünür (zoom, harita kamerasından okunur)
+              Builder(
+                builder: (ctx) => DarkCancel(
+                  child: MarkerLayer(
+                    markers: _buildPinMarkers(
+                      showLabels: MapCamera.of(ctx).zoom >= _labelZoom,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
 
