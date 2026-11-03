@@ -275,59 +275,87 @@ class _ReelPageState extends State<_ReelPage>
               right: 14,
               child: const SubtitleToggle(),
             ),
+          // Reels düzeni: solda küçük AI etiketi, altyazı üstte; sağ altta "Detaylar" düğmesi
           Positioned(
             left: 20,
             right: 20,
-            bottom: 36,
+            bottom: 34,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Altyazı açıkken açıklama gizlenir; altyazı doğrudan başlığın üstünde durur
                 if (hasScript)
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.only(bottom: 18),
                       child: VideoSubtitles(controller: _c, script: script),
                     ),
                   ),
-                const AiLabel(compact: true),
-                const SizedBox(height: 12),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _openDetails,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        context.t('swipe_details'),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      AnimatedBuilder(
-                        animation: _hint,
-                        builder: (context, child) {
-                          final t = Curves.easeInOut.transform(_hint.value);
-                          return Transform.translate(
-                            offset: Offset(7 * t, 0),
-                            child: Opacity(
-                              opacity: 0.6 + 0.4 * t,
-                              child: child,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const AiLabel(compact: true),
+                    const Spacer(),
+                    Semantics(
+                      button: true,
+                      label: context.t('swipe_details'),
+                      excludeSemantics: true,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: _openDetails,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.black.withValues(alpha: 0.38),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                  width: 1.3,
+                                ),
+                              ),
+                              // Sağa kayıp geri dönen çift ok
+                              child: AnimatedBuilder(
+                                animation: _hint,
+                                builder: (context, child) {
+                                  final t = Curves.easeInOut.transform(
+                                    _hint.value,
+                                  );
+                                  return Transform.translate(
+                                    offset: Offset(-3 + 6 * t, 0),
+                                    child: Opacity(
+                                      opacity: 0.65 + 0.35 * t,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: const Icon(
+                                  Icons.keyboard_double_arrow_right_rounded,
+                                  size: 26,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          );
-                        },
-                        child: const Icon(
-                          Icons.keyboard_double_arrow_right_rounded,
-                          size: 22,
-                          color: Colors.white,
+                            const SizedBox(height: 5),
+                            Text(
+                              context.t('details_short'),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                shadows: [
+                                  Shadow(color: Colors.black54, blurRadius: 4),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
