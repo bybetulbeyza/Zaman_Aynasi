@@ -936,11 +936,17 @@ class _SliderScreenState extends State<SliderScreen>
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
+                    // Video varsa kapak, videonun kendi karesidir; yüklenemezse eser fotoğrafı
                     Image.network(
-                      _place.imageAfterUrl,
+                      (videoUrl.isNotEmpty ? videoPoster(videoUrl) : null) ??
+                          _place.imageAfterUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          const ColoredBox(color: AppColors.heroPetrol),
+                      errorBuilder: (_, __, ___) => Image.network(
+                        _place.imageAfterUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            const ColoredBox(color: AppColors.heroPetrol),
+                      ),
                     ),
                     const DecoratedBox(
                       decoration: BoxDecoration(

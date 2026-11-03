@@ -58,6 +58,19 @@ String? _lightVideo(String? url) {
   return '${url.substring(0, i + marker.length)}q_auto:good,w_1280,vc_h264/$rest';
 }
 
+/// Cloudinary videosunun kapak karesi (3. saniyeden bir JPG); başka adreslerde null döner.
+String? videoPoster(String url) {
+  const marker = '/video/upload/';
+  const light = 'q_auto:good,w_1280,vc_h264/';
+  final i = url.indexOf(marker);
+  if (i < 0 || !url.contains('res.cloudinary.com')) return null;
+  var rest = url.substring(i + marker.length);
+  if (rest.startsWith(light)) rest = rest.substring(light.length);
+  final dot = rest.lastIndexOf('.');
+  if (dot < 0) return null;
+  return '${url.substring(0, i + marker.length)}so_3,w_1280,q_auto,f_jpg/${rest.substring(0, dot)}.jpg';
+}
+
 class Hotspot {
   final dynamic id;
   final dynamic placeId;
