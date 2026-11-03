@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/common/ai_label.dart';
 import '../widgets/common/app_back_button.dart';
 import '../widgets/common/dark_cancel.dart';
@@ -171,11 +172,38 @@ class _ReelPageState extends State<_ReelPage>
     with SingleTickerProviderStateMixin {
   late final VideoPlayerController _c;
   bool _error = false;
-  // "Sağa kaydır" okları: hafifçe sağa kayıp geri döner, sürekli tekrarlar
+
+  /// Kullanıcı bir kere detaya girdiyse ipucu bir daha gösterilmez (hatırlanır).
+  static bool _knowsSwipe = false;
+  static bool _prefLoaded = false;
+
+  // "Sağa kaydır" okları: hafifçe sağa kayıp geri döner
   late final AnimationController _hint = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1100),
-  )..repeat(reverse: true);
+  );
+  // İpucunun görünme süresi: ~5 sn görünür, sonra yumuşakça kaybolur
+  late final AnimationController _hintLife = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 5600),
+  );
+
+  Future<void> _loadSwipePref() async {
+    if (_prefLoaded) return;
+    _prefLoaded = true;
+    try {
+      final p = await SharedPreferences.getInstance();
+      _knowsSwipe = p.getBool('reels_swipe_known') ?? false;
+    } catch (_) {}
+  }
+
+  void _startHint() {
+    if (_knowsSwipe || _hintLife.isAnimating || _hintLife.value > 0) return;
+    _hint.repeat(reverse: true);
+    _hintLife.forward().whenComplete(() {
+      if (mounted) _hint.stop();
+    });
+  }
 
   @override
   void initState() {
@@ -187,18 +215,28 @@ class _ReelPageState extends State<_ReelPage>
             if (mounted) {
               setState(() {});
               _syncPlayback();
+              _loadSwipePref().then((_) {
+                if (mounted) _startHint();
+              });
             }
           })
           .catchError((_) {
             if (mounted) setState(() => _error = true);
           });
     widget.pageController.addListener(_syncPlayback);
+    _loadSwipePref();
   }
 
-  void _openDetails() => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => SliderScreen(place: widget.reel.place)),
-  );
+  Future<void> _openDetails() async {
+    _knowsSwipe = true;
+    SharedPreferences.getInstance()
+        .then((p) => p.setBool('reels_swipe_known', true))
+        .catchError((_) => false);
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SliderScreen(place: widget.reel.place)),
+    );
+  }
 
   /// Yalnızca ekranda tam görünen sayfa oynar.
   void _syncPlayback() {
@@ -215,6 +253,7 @@ class _ReelPageState extends State<_ReelPage>
   void dispose() {
     widget.pageController.removeListener(_syncPlayback);
     _hint.dispose();
+    _hintLife.dispose();
     _c.dispose();
     super.dispose();
   }
@@ -296,47 +335,65 @@ class _ReelPageState extends State<_ReelPage>
                     padding: const EdgeInsets.only(bottom: 22),
                     child: VideoSubtitles(controller: _c, script: script),
                   ),
-                Semantics(
-                  button: true,
-                  label: context.t('swipe_details'),
-                  excludeSemantics: true,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: _openDetails,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          context.t('swipe_details'),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            shadows: [
-                              Shadow(color: Colors.black54, blurRadius: 4),
-                            ],
+                AnimatedBuilder(
+                  animation: _hintLife,
+                  builder: (context, child) {
+                    final t = _hintLife.value;
+                    // Başta kısa bir belirme, son %20'de kaybolma
+                    final a = t == 0
+                        ? 0.0
+                        : t < 0.06
+                        ? t / 0.06
+                        : t > 0.8
+                        ? (1 - (t - 0.8) / 0.2)
+                        : 1.0;
+                    return IgnorePointer(
+                      ignoring: a <= 0.05,
+                      child: Opacity(opacity: a.clamp(0.0, 1.0), child: child),
+                    );
+                  },
+                  child: Semantics(
+                    button: true,
+                    label: context.t('swipe_details'),
+                    excludeSemantics: true,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _openDetails,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            context.t('swipe_details'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              shadows: [
+                                Shadow(color: Colors.black54, blurRadius: 4),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 2),
-                        AnimatedBuilder(
-                          animation: _hint,
-                          builder: (context, child) {
-                            final t = Curves.easeInOut.transform(_hint.value);
-                            return Transform.translate(
-                              offset: Offset(6 * t, 0),
-                              child: Opacity(
-                                opacity: 0.6 + 0.4 * t,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: const Icon(
-                            Icons.keyboard_double_arrow_right_rounded,
-                            size: 22,
-                            color: Colors.white,
+                          const SizedBox(width: 2),
+                          AnimatedBuilder(
+                            animation: _hint,
+                            builder: (context, child) {
+                              final t = Curves.easeInOut.transform(_hint.value);
+                              return Transform.translate(
+                                offset: Offset(6 * t, 0),
+                                child: Opacity(
+                                  opacity: 0.6 + 0.4 * t,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: const Icon(
+                              Icons.keyboard_double_arrow_right_rounded,
+                              size: 22,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
