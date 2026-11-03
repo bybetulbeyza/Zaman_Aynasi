@@ -332,7 +332,12 @@ class _SliderScreenState extends State<SliderScreen>
                       _buildDragHandle(size),
                       Expanded(
                         child: ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+                          padding: EdgeInsets.fromLTRB(
+                            20,
+                            0,
+                            20,
+                            110 + MediaQuery.of(context).padding.bottom,
+                          ),
                           children: _buildSheetContent(en),
                         ),
                       ),
@@ -651,21 +656,6 @@ class _SliderScreenState extends State<SliderScreen>
       // Keşif görevleri (görev yoksa görünmez)
       ActivitiesSection(place: _place),
 
-      // Bu eserle ilgili geri bildirim
-      Align(
-        alignment: Alignment.centerLeft,
-        child: TextButton.icon(
-          onPressed: () => FeedbackSheet.show(
-            context,
-            placeId: _place.id,
-            placeName: _place.nameFor(en),
-          ),
-          icon: const Icon(Icons.rate_review_outlined, size: 18),
-          label: Text(context.t('fb_place_link')),
-          style: TextButton.styleFrom(foregroundColor: AppColors.primaryTeal),
-        ),
-      ),
-
       // Eski fotoğraf envanteri (fotoğraf yoksa hiç görünmez)
       if (_place.oldPhotos.isNotEmpty) ...[
         SectionTitle(context.t('old_photos')),
@@ -683,6 +673,22 @@ class _SliderScreenState extends State<SliderScreen>
       _buildSourceCard(en),
       const SizedBox(height: 12),
       _buildAiNote(),
+      const SizedBox(height: 8),
+
+      // Bu eserle ilgili geri bildirim
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: () => FeedbackSheet.show(
+            context,
+            placeId: _place.id,
+            placeName: _place.nameFor(en),
+          ),
+          icon: const Icon(Icons.rate_review_outlined, size: 18),
+          label: Text(context.t('fb_place_link')),
+          style: TextButton.styleFrom(foregroundColor: AppColors.primaryTeal),
+        ),
+      ),
     ];
   }
 
