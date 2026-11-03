@@ -48,9 +48,13 @@ class _DailyPlaceCardState extends State<DailyPlaceCard>
         onTap: widget.onTap,
         child: SquircleFrame(
           radius: 40,
-          child: AspectRatio(
-            aspectRatio: 1.3,
-            child: DarkCancel(child: _compare(p, en)),
+          // Geniş ekranlarda (tablet) kart ekranı doldurmasın
+          child: LayoutBuilder(
+            builder: (context, box) => SizedBox(
+              width: box.maxWidth,
+              height: (box.maxWidth / 1.3).clamp(0.0, 330.0),
+              child: DarkCancel(child: _compare(p, en)),
+            ),
           ),
         ),
       ),
