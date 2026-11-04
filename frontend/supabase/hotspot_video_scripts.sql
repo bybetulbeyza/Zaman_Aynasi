@@ -1,5 +1,6 @@
 -- Hotspot video metinleri (video_script_tr / video_script_en): hikâyeleştirilmiş, kısa, konuşur gibi.
--- Kapsam: Koza Han, Ulu Camii, Yeşil Külliye ve alt eserleri (Yeşil Camii, Yeşil Türbe, Medrese, İmaret).
+-- Kapsam: Koza Han, Ulu Camii ve Yeşil Külliye'nin alt eserleri (Yeşil Camii, Yeşil Türbe, Medrese, İmaret).
+-- Külliyeden yapılara yönlendiren hotspot'lara (id 59-62) video metni eklenmez; doğrudan yapıya gider.
 -- Bilgilerin tamamı hotspot açıklamalarındaki envanter metinlerinden alınmıştır; yeni bilgi eklenmemiştir.
 -- Dokunulmayanlar: Müezzin Mahfili (id 21): videosu hazır, altyazı mevcut seslendirmeyle uyuşsun diye metni aynı bırakıldı.
 -- Hotspot açıklamaları (description) değişmez; uygulamada kartta aynen görünür.
@@ -131,30 +132,6 @@ update public."Hotspots" set
   video_script_tr = $q$Bursa'nın simgesi bu kubbe. Dışta turkuaz çinilerden bir zırh, içte kalem işleriyle süslü. Sekizgen kütleyi görkemle örtüyor.$q$,
   video_script_en = $q$This dome is the symbol of Bursa. Outside, an armor of turquoise tiles; inside, hand-painted decoration. It crowns the octagonal body with grandeur.$q$
 where id = 44;
-
--- #59 Yeşil Camii
-update public."Hotspots" set
-  video_script_tr = $q$1419'da yapılan Yeşil Camii, külliyenin ana ibadet yapısı. Büyüleyici mermer taç kapısı ve çini kaplı iç mekanıyla, külliyenin kalbi.$q$,
-  video_script_en = $q$Built in 1419, the Green Mosque is the main place of worship of the complex. With its enchanting marble portal and tile-covered interior, it is the heart of the complex.$q$
-where id = 59;
-
--- #60 Yeşil Türbe
-update public."Hotspots" set
-  video_script_tr = $q$1421'de Çelebi Sultan Mehmed için yapılan sekizgen yapı. Dışı tamamen turkuaz çinilerle kaplı tek anıt mezar.$q$,
-  video_script_en = $q$The octagonal building made in 1421 for Sultan Çelebi Mehmed. The only monumental tomb whose exterior is entirely covered in turquoise tiles.$q$
-where id = 60;
-
--- #61 Yeşil (Sultaniye) Medresesi
-update public."Hotspots" set
-  video_script_tr = $q$1424'te tamamlanan, açık avlulu ve 13 hücreli medrese. Selçuklu eğitim mimarisini Osmanlı'ya taşıyan anıtsal bir bilim yuvası.$q$,
-  video_script_en = $q$Completed in 1424, a madrasa with an open courtyard and 13 cells. A monumental home of learning that carried Seljuk educational architecture into the Ottoman world.$q$
-where id = 61;
-
--- #62 Yeşil İmareti
-update public."Hotspots" set
-  video_script_tr = $q$Burada kimin zengin, kimin fakir olduğu sorulmazdı. Herkese günde iki öğün sıcak yemek verilirdi. Osmanlı'nın sosyal dayanışma ocağı.$q$,
-  video_script_en = $q$Here, nobody asked who was rich and who was poor. Everyone was served two hot meals a day. The hearth of Ottoman social solidarity.$q$
-where id = 62;
 
 -- #80 Mutfak ve Yemek Salonu
 update public."Hotspots" set
