@@ -41,8 +41,13 @@ class ReelsScreen extends StatefulWidget {
 }
 
 class _ReelsScreenState extends State<ReelsScreen> {
-  final PageController _page = PageController();
+  PageController? _page;
   List<_Reel> _reels = [];
+
+  /// Birden fazla video varsa akış sonsuz döner: son videodan sonra ilki gelir.
+  /// PageView'a çok sayıda sayfa verilir ve ortadan başlanır; her sayfa `i % n` videosudur.
+  static const int _cycles = 10000;
+  bool get _loop => _reels.length > 1;
   bool _loading = true;
 
   @override
@@ -75,20 +80,21 @@ class _ReelsScreenState extends State<ReelsScreen> {
       start = reels.indexWhere((r) => r.place.id == widget.initialPlace!.id);
     }
     if (!mounted) return;
+    final first = start < 0 ? 0 : start;
     setState(() {
       _reels = reels;
       _loading = false;
-    });
-    if (start > 0) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _page.jumpToPage(start),
+      _page = PageController(
+        initialPage: reels.length > 1
+            ? reels.length * (_cycles ~/ 2) + first
+            : first,
       );
-    }
+    });
   }
 
   @override
   void dispose() {
-    _page.dispose();
+    _page?.dispose();
     super.dispose();
   }
 
@@ -118,15 +124,15 @@ class _ReelsScreenState extends State<ReelsScreen> {
               )
             else
               PageView.builder(
-                controller: _page,
+                controller: _page!,
                 scrollDirection: Axis.vertical,
                 // Bir sonraki/önceki video ekran dışında önceden yüklenir; kaydırınca bekleme olmaz
                 allowImplicitScrolling: true,
-                itemCount: _reels.length,
+                itemCount: _loop ? _reels.length * _cycles : _reels.length,
                 itemBuilder: (_, i) => _ReelPage(
-                  key: ValueKey('${_reels[i].hotspot.id}'),
-                  reel: _reels[i],
-                  pageController: _page,
+                  key: ValueKey('${_reels[i % _reels.length].hotspot.id}-$i'),
+                  reel: _reels[i % _reels.length],
+                  pageController: _page!,
                   index: i,
                 ),
               ),
@@ -273,7 +279,12 @@ class _ReelPageState extends State<_ReelPage>
       // İpucu video ekrana geldiğinde başlar (önceden yüklenen sayfada boşa dolmasın)
       _startHint();
     }
-    if (!visible && _c.value.isPlaying) _c.pause();
+    if (!visible && _c.value.isPlaying) {
+      // Ekrandan çıkan video başa sarılır: kaydırırken sahne geçişinin ortasında donmuş
+      // (iki sahnenin üst üste bindiği) bir kare görünmez, geri gelince baştan başlar
+      _c.pause();
+      _c.seekTo(Duration.zero);
+    }
   }
 
   @override
@@ -342,7 +353,8 @@ class _ReelPageState extends State<_ReelPage>
           // Oynat simgesi videonun anlık durumunu izler (otomatik başlayınca/durunca kendiliğinden güncellenir)
           ValueListenableBuilder<VideoPlayerValue>(
             valueListenable: _c,
-            builder: (context, v, _) => (v.isInitialized && !v.isPlaying)
+            builder: (context, v, _) =>
+                (v.isInitialized && !v.isPlaying && _userPaused)
                 ? const Center(
                     child: IgnorePointer(
                       child: Icon(

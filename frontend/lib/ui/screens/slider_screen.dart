@@ -399,17 +399,22 @@ class _SliderScreenState extends State<SliderScreen>
                     children: [
                       _buildDragHandle(size),
                       Expanded(
-                        child: ListView(
-                          controller: _sheetScroll,
-                          // Görevler bölümüne kaydırabilmek için alt kısımlar da önceden kurulur
-                          cacheExtent: 4000,
-                          padding: EdgeInsets.fromLTRB(
-                            20,
-                            0,
-                            20,
-                            110 + MediaQuery.of(context).padding.bottom,
+                        // İçerik en üstteyken aşağı çekmek kartı da indirir (tutamaç
+                        // ekranın tepesinde erişilemez kaldığında, ör. açılır pencerede)
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (n) => _onSheetScroll(n, size),
+                          child: ListView(
+                            controller: _sheetScroll,
+                            // Görevler bölümüne kaydırabilmek için alt kısımlar da önceden kurulur
+                            cacheExtent: 4000,
+                            padding: EdgeInsets.fromLTRB(
+                              20,
+                              0,
+                              20,
+                              110 + MediaQuery.of(context).padding.bottom,
+                            ),
+                            children: _buildSheetContent(en),
                           ),
-                          children: _buildSheetContent(en),
                         ),
                       ),
                     ],
@@ -427,6 +432,29 @@ class _SliderScreenState extends State<SliderScreen>
         ],
       ),
     );
+  }
+
+  bool _pullingSheet = false;
+
+  /// Kart içeriği en üstteyken aşağı çekilirse kart küçülür; bırakınca en yakın konuma oturur.
+  bool _onSheetScroll(ScrollNotification n, Size size) {
+    if (n is OverscrollNotification &&
+        n.overscroll < 0 &&
+        n.dragDetails != null &&
+        _extent > _sheetMin) {
+      _extentAnim.stop();
+      _pullingSheet = true;
+      setState(() {
+        _extent = (_extent + n.overscroll / size.height).clamp(
+          _sheetMin,
+          _sheetMax,
+        );
+      });
+    } else if (n is ScrollEndNotification && _pullingSheet) {
+      _pullingSheet = false;
+      _animateExtentTo(_extent < _sheetMax - 0.06 ? _sheetMin : _sheetMax);
+    }
+    return false;
   }
 
   /// Bordo tutamaç: yukarı çekince kart tam ekran olur, aşağı çekince fotoğraf geri gelir.

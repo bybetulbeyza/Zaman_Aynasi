@@ -23,6 +23,7 @@ import '../widgets/map/category_pin.dart';
 import '../widgets/map/map_top_search_bar.dart';
 import '../widgets/map/route_stop_preview_sheet.dart';
 import 'slider_screen.dart';
+import '../widgets/yadigar/yadigar_widget.dart' show YadigarVisibility;
 
 class MapScreen extends StatefulWidget {
   final bool startWithNearby;
@@ -433,6 +434,8 @@ class MapScreenState extends State<MapScreen> {
     final hasPlaces = _filteredPlaces.isNotEmpty;
     final currentPlace = hasPlaces ? _filteredPlaces[_currentStopIndex] : null;
     final showCard = currentPlace != null && (_routeChip != null || _cardOpen);
+    // Eser kartı açıkken Yadigâr gizlenir (harita 1. sekme)
+    YadigarVisibility.report(1, showCard);
     final List<LatLng> routePoints = _filteredPlaces
         .map((p) => p.location)
         .toList();

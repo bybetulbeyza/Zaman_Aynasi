@@ -12,6 +12,7 @@ import '../../core/l10n/app_lang.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import 'slider_screen.dart';
+import '../widgets/yadigar/yadigar_widget.dart' show YadigarVisibility;
 
 class QRScannerScreen extends StatefulWidget {
   /// true: bir eser sayfasındaki QR görevinden açıldı (sekme değil, kapatınca geri döner).
@@ -117,6 +118,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Kamera açıkken Yadigâr gizlenir (QR 2. sekme)
+    if (!widget.pushed) YadigarVisibility.report(2, _isScannerOpen);
     if (_isScannerOpen) {
       return DarkCancel(
         child: Scaffold(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Bir Navigator'daki açık sayfaları izler; aynı sayfanın üst üste yığılmasını önlemek için kullanılır.
@@ -5,17 +7,27 @@ import 'package:flutter/material.dart';
 class StackObserver extends NavigatorObserver {
   final List<Route<dynamic>> _stack = [];
 
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _stack.add(route);
+  /// Açık sayfa sayısı (gezinme bitince güncellenir; build sırasında değişmez).
+  final ValueNotifier<int> depth = ValueNotifier(0);
+  void _changed() => scheduleMicrotask(() => depth.value = _stack.length);
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _stack.remove(route);
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _stack.add(route);
+    _changed();
+  }
 
   @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _stack.remove(route);
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _stack.remove(route);
+    _changed();
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _stack.remove(route);
+    _changed();
+  }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
@@ -25,6 +37,7 @@ class StackObserver extends NavigatorObserver {
     } else if (newRoute != null) {
       _stack.add(newRoute);
     }
+    _changed();
   }
 
   bool isOpen(String name) => _stack.any((r) => r.settings.name == name);

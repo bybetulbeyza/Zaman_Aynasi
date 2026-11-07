@@ -17,7 +17,10 @@ import 'historic_routes_screen.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'qr_scanner_screen.dart';
+import '../widgets/yadigar/yadigar_widget.dart';
+import '../../core/config/features.dart';
 import 'routes_screen.dart';
+import 'slider_screen.dart';
 import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -55,7 +58,10 @@ class _MainScreenState extends State<MainScreen> {
       place,
       onOpenPassport: () =>
           AppNav.open(context, AppNav.passport, (_) => const PassportScreen()),
-    ).then((_) => _nudgeGuest());
+    ).then((_) {
+      YadigarEvents.stampCelebrated();
+      _nudgeGuest();
+    });
   }
 
   /// Misafir ilk (ve üçüncü) mührünü kazanınca, kaybolmaması için hesaba kaydetmesini önerir.
@@ -116,10 +122,14 @@ class _MainScreenState extends State<MainScreen> {
     setState(() => _currentIndex = index);
   }
 
-  Widget _tab(int i, Widget child) => Navigator(
-    key: _navKeys[i],
-    observers: [_navObs[i]],
-    onGenerateRoute: (_) => MaterialPageRoute(builder: (_) => child),
+  // Görünmeyen sekmelerin animasyonları (ör. Yadigâr) durur
+  Widget _tab(int i, Widget child) => TickerMode(
+    enabled: i == _currentIndex,
+    child: Navigator(
+      key: _navKeys[i],
+      observers: [_navObs[i]],
+      onGenerateRoute: (_) => MaterialPageRoute(builder: (_) => child),
+    ),
   );
 
   @override
@@ -203,7 +213,44 @@ class _MainScreenState extends State<MainScreen> {
             bottom: safeBottom + _barHeight - (_qrSize + 12 - _qrRise),
             child: Center(child: _buildQrButton()),
           ),
+          // Yadigâr: yalnızca beş ana ekranda; sekmede bir sayfa açıkken, tam ekran
+          // sayfalarda, QR kamerasında ve haritada eser kartı açıkken gizlenir
+          if (AppFeatures.yadigar)
+            ListenableBuilder(
+              listenable: Listenable.merge([
+                AppNav.root.depth,
+                YadigarVisibility.hiddenTabs,
+                for (final o in _navObs) o.depth,
+              ]),
+              builder: (context, _) {
+                final visible =
+                    AppNav.root.depth.value <= 1 &&
+                    _navObs[_currentIndex].depth.value <= 1 &&
+                    !YadigarVisibility.hiddenTabs.value.contains(_currentIndex);
+                return Positioned(
+                  right: 4,
+                  // Haritada yakınlaştırma ve konum düğmelerinin üstünde durur
+                  bottom:
+                      safeBottom + _barHeight + (_currentIndex == 1 ? 176 : 4),
+                  child: YadigarWidget(
+                    visible: visible,
+                    tab: _currentIndex,
+                    onOpenPlace: _openPlaceFromYadigar,
+                  ),
+                );
+              },
+            ),
         ],
+      ),
+    );
+  }
+
+  /// Yadigâr'ın kutusundaki eser, açık sekmenin içinde açılır.
+  void _openPlaceFromYadigar(HeritagePlace p) {
+    _navKeys[_currentIndex].currentState?.push(
+      MaterialPageRoute(
+        settings: RouteSettings(name: AppNav.place(p.id)),
+        builder: (_) => SliderScreen(place: p),
       ),
     );
   }
