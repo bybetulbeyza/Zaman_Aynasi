@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/config/features.dart';
 import '../../../core/constants/app_colors.dart';
@@ -12,6 +13,7 @@ import '../../../data/models/heritage_place.dart';
 import '../../../data/repositories/heritage_repository.dart';
 import '../../../data/repositories/yadigar_repository.dart';
 import '../../../core/constants/app_theme.dart';
+import '../common/dark_cancel.dart';
 import 'yadigar_sprites.dart';
 
 /// Uygulamanın diğer yerlerinden Yadigâr'a gelen olaylar.
@@ -113,6 +115,13 @@ class _YadigarWidgetState extends State<YadigarWidget>
   bool _pendingCelebrate = false;
 
   bool _cardOpen = false;
+
+  /// "Bir sırrım var, dokun!" balonu: kullanıcı Yadigâr'a ilk kez dokunana kadar,
+  /// her açılışta selamlamanın ardından birkaç saniye görünür.
+  static const _kTapped = 'yadigar_tapped';
+  bool _everTapped = true;
+  bool _hint = false;
+  Timer? _hintTimer;
   HeritagePlace? _pick;
   String?
   _pickText; // "Biliyor muydunuz?" bilgisi (yoksa kısa açıklama gösterilir)
@@ -126,6 +135,9 @@ class _YadigarWidgetState extends State<YadigarWidget>
     WidgetsBinding.instance.addObserver(this);
     YadigarEvents.celebrate.addListener(_onCelebrate);
     _fade.addListener(_bump);
+    SharedPreferences.getInstance()
+        .then((p) => _everTapped = p.getBool(_kTapped) ?? false)
+        .catchError((_) => false);
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeGreet());
   }
 
@@ -177,6 +189,7 @@ class _YadigarWidgetState extends State<YadigarWidget>
     _ticker.dispose();
     _fade.dispose();
     _repaint.dispose();
+    _hintTimer?.cancel();
     _img?.dispose();
     _fadeImg?.dispose();
     super.dispose();
@@ -285,6 +298,7 @@ class _YadigarWidgetState extends State<YadigarWidget>
       if (_state == YadigarState.takingPaper) {
         _play(YadigarState.reading);
       } else {
+        if (_state == YadigarState.greeting) _showHint();
         _next();
       }
       return;
@@ -302,7 +316,26 @@ class _YadigarWidgetState extends State<YadigarWidget>
 
   // ---------- Kutu ----------
 
+  void _showHint() {
+    if (_everTapped || !mounted || !widget.visible) return;
+    setState(() => _hint = true);
+    _hintTimer?.cancel();
+    _hintTimer = Timer(const Duration(milliseconds: 4500), _hideHint);
+  }
+
+  void _hideHint() {
+    _hintTimer?.cancel();
+    if (mounted && _hint) setState(() => _hint = false);
+  }
+
   void _onTap() {
+    _hideHint();
+    if (!_everTapped) {
+      _everTapped = true;
+      SharedPreferences.getInstance()
+          .then((p) => p.setBool(_kTapped, true))
+          .catchError((_) => false);
+    }
     if (_state == YadigarState.takingPaper) return;
     // Kutu açıkken Yadigâr'a dokunmak yeni bir bilgi getirir (kâğıt yeniden çıkarılmaz)
     if (_cardOpen) {
@@ -410,22 +443,48 @@ class _YadigarWidgetState extends State<YadigarWidget>
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: _onTap,
-                child: Padding(
-                  padding: const EdgeInsets.all(_pad),
-                  child: SizedBox(
-                    width: w,
-                    height: h,
-                    child: CustomPaint(
-                      painter: _SpritePainter(
-                        repaint: _repaint,
-                        frame: () => _fi,
-                        image: () => _img,
-                        fadeImage: () => _fade.isAnimating ? _fadeImg : null,
-                        fadeRect: () => _fadeRect,
-                        fadeT: () => _fade.value,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(_pad),
+                      child: SizedBox(
+                        width: w,
+                        height: h,
+                        // Karakter koyu modda da özgün renginde kalır
+                        child: DarkCancel(
+                          child: CustomPaint(
+                            painter: _SpritePainter(
+                              repaint: _repaint,
+                              frame: () => _fi,
+                              image: () => _img,
+                              fadeImage: () =>
+                                  _fade.isAnimating ? _fadeImg : null,
+                              fadeRect: () => _fadeRect,
+                              fadeT: () => _fade.value,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    // İpucu balonu: karakterin solunda, başı hizasında
+                    Positioned(
+                      right: w + _pad - 6,
+                      top: h * 0.08,
+                      child: IgnorePointer(
+                        child: AnimatedSlide(
+                          offset: _hint ? Offset.zero : const Offset(0.08, 0),
+                          duration: const Duration(milliseconds: 280),
+                          curve: Curves.easeOutBack,
+                          child: AnimatedOpacity(
+                            opacity: _hint ? 1 : 0,
+                            duration: const Duration(milliseconds: 250),
+                            child: _HintBubble(text: context.t('yadigar_hint')),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -656,4 +715,74 @@ class _YadigarCard extends StatelessWidget {
     }
     return parts.first;
   }
+}
+
+/// Yadigâr'ın konuşma balonu: sağda karaktere doğru küçük bir kuyruk.
+class _HintBubble extends StatelessWidget {
+  final String text;
+  const _HintBubble({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxWidth: 190),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFBF6EA),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.primaryTeal, width: 1.4),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x33402A14),
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontFamily: 'DMSans',
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primaryTeal,
+                height: 1.25,
+              ),
+            ),
+          ),
+          CustomPaint(size: const Size(9, 14), painter: _TailPainter()),
+        ],
+      ),
+    );
+  }
+}
+
+class _TailPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, size.height / 2)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, Paint()..color = const Color(0xFFFBF6EA));
+    canvas.drawPath(
+      Path()
+        ..moveTo(0, 0)
+        ..lineTo(size.width, size.height / 2)
+        ..lineTo(0, size.height),
+      Paint()
+        ..color = AppColors.primaryTeal
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_TailPainter old) => false;
 }

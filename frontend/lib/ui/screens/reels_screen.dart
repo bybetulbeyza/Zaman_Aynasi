@@ -332,8 +332,11 @@ class _ReelPageState extends State<_ReelPage>
           else if (!_c.value.isInitialized)
             const Center(child: LogoLoader(textColor: Colors.white70))
           else
+            // Taşan kısım kesilir: "cover" videoyu sayfadan büyük çizer; kesilmezse komşu
+            // sayfanın videosu bu sayfanın altında/üstünde görünür
             FittedBox(
               fit: BoxFit.cover,
+              clipBehavior: Clip.hardEdge,
               child: SizedBox(
                 width: _c.value.size.width,
                 height: _c.value.size.height,

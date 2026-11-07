@@ -107,9 +107,12 @@ class _SliderScreenState extends State<SliderScreen>
     if (aspects.isEmpty || !mounted) return;
     final avg = aspects.reduce((a, b) => a + b) / aspects.length;
     final size = MediaQuery.of(context).size;
+    // Tablette (geniş ekran) alt kart fotoğrafı fazla kapatmasın: fotoğrafa ekranın
+    // yarısından fazlası ayrılır
+    final tablet = size.shortestSide >= 600;
     final fraction = ((size.width / avg) * 1.15 / size.height).clamp(
-      0.40,
-      0.52,
+      tablet ? 0.56 : 0.40,
+      tablet ? 0.62 : 0.52,
     );
     if ((fraction - _photoFraction).abs() < 0.005) return;
     final wasMin = !_sheetRaised;
