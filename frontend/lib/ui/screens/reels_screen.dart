@@ -1,7 +1,4 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../widgets/common/ai_label.dart';
 import '../widgets/common/app_back_button.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/logo_loader.dart';
@@ -66,6 +63,10 @@ class _ReelsScreenState extends State<ReelsScreen> {
         if (url != null) reels.add(_Reel(p, h, url));
       }
     }
+    // Ana sayfa kısayolundan (belirli bir eser/hotspot olmadan) açılınca her seferinde karışık sıra
+    if (widget.initialPlace == null && widget.initialHotspotId == null) {
+      reels.shuffle();
+    }
     var start = -1;
     if (widget.initialHotspotId != null) {
       start = reels.indexWhere((r) => r.hotspot.id == widget.initialHotspotId);
@@ -118,6 +119,8 @@ class _ReelsScreenState extends State<ReelsScreen> {
               PageView.builder(
                 controller: _page,
                 scrollDirection: Axis.vertical,
+                // Bir sonraki/önceki video ekran dışında önceden yüklenir; kaydırınca bekleme olmaz
+                allowImplicitScrolling: true,
                 itemCount: _reels.length,
                 itemBuilder: (_, i) => _ReelPage(
                   key: ValueKey('${_reels[i].hotspot.id}'),
@@ -168,14 +171,9 @@ class _ReelPage extends StatefulWidget {
   State<_ReelPage> createState() => _ReelPageState();
 }
 
-class _ReelPageState extends State<_ReelPage>
-    with TickerProviderStateMixin {
+class _ReelPageState extends State<_ReelPage> with TickerProviderStateMixin {
   late final VideoPlayerController _c;
   bool _error = false;
-
-  /// Kullanıcı bir kere detaya girdiyse ipucu bir daha gösterilmez (hatırlanır).
-  static bool _knowsSwipe = false;
-  static bool _prefLoaded = false;
 
   // "Sağa kaydır" okları: hafifçe sağa kayıp geri döner
   late final AnimationController _hint = AnimationController(
@@ -188,17 +186,9 @@ class _ReelPageState extends State<_ReelPage>
     duration: const Duration(milliseconds: 5600),
   );
 
-  Future<void> _loadSwipePref() async {
-    if (_prefLoaded) return;
-    _prefLoaded = true;
-    try {
-      final p = await SharedPreferences.getInstance();
-      _knowsSwipe = p.getBool('reels_swipe_known') ?? false;
-    } catch (_) {}
-  }
-
   void _startHint() {
-    if (_knowsSwipe || _hintLife.isAnimating || _hintLife.value > 0) return;
+    // Her videoda gösterilir (eskiden bir kez detaya girince tamamen gizleniyordu; kaldırıldı)
+    if (_hintLife.isAnimating || _hintLife.value > 0) return;
     _hint.repeat(reverse: true);
     _hintLife.forward().whenComplete(() {
       if (mounted) _hint.stop();
@@ -215,27 +205,27 @@ class _ReelPageState extends State<_ReelPage>
             if (mounted) {
               setState(() {});
               _syncPlayback();
-              _loadSwipePref().then((_) {
-                if (mounted) _startHint();
-              });
             }
           })
           .catchError((_) {
             if (mounted) setState(() => _error = true);
           });
     widget.pageController.addListener(_syncPlayback);
-    _loadSwipePref();
   }
 
   Future<void> _openDetails() async {
-    _knowsSwipe = true;
-    SharedPreferences.getInstance()
-        .then((p) => p.setBool('reels_swipe_known', true))
-        .catchError((_) => false);
+    // Eser sayfası açıkken hikâyenin sesi arkada çalmasın
+    _c.pause();
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => SliderScreen(place: widget.reel.place)),
+      MaterialPageRoute(
+        builder: (_) => SliderScreen(
+          place: widget.reel.place,
+          focusHotspot: widget.reel.hotspot,
+        ),
+      ),
     );
+    if (mounted) _syncPlayback();
   }
 
   /// Yalnızca ekranda tam görünen sayfa oynar.
@@ -245,7 +235,11 @@ class _ReelPageState extends State<_ReelPage>
         ? widget.pageController.page
         : 0.0;
     final visible = ((page ?? 0) - widget.index).abs() < 0.5;
-    if (visible && !_c.value.isPlaying) _c.play();
+    if (visible && !_c.value.isPlaying) {
+      _c.play();
+      // İpucu video ekrana geldiğinde başlar (önceden yüklenen sayfada boşa dolmasın)
+      _startHint();
+    }
     if (!visible && _c.value.isPlaying) _c.pause();
   }
 
@@ -266,9 +260,10 @@ class _ReelPageState extends State<_ReelPage>
     final hasScript = script.trim().isNotEmpty;
     return GestureDetector(
       onTap: () => setState(() => _c.value.isPlaying ? _c.pause() : _c.play()),
-      // Sağa kaydırınca eser sayfası açılır
+      // Yatay kaydırınca eser sayfası açılır
       onHorizontalDragEnd: (d) {
-        if ((d.primaryVelocity ?? 0) > 280) _openDetails();
+        // Her iki yöne de yatay kaydırma eser sayfasını açar
+        if ((d.primaryVelocity ?? 0).abs() > 280) _openDetails();
       },
       child: Stack(
         fit: StackFit.expand,
@@ -316,12 +311,6 @@ class _ReelPageState extends State<_ReelPage>
               right: 14,
               child: const SubtitleToggle(),
             ),
-          // "Hikâyeler" başlığının hemen altında yapay zekâ etiketi
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 66,
-            left: 11,
-            child: const AiLabel(compact: true),
-          ),
           // Alt: altyazı ve tek satırlık "Detaylar için sağa kaydır »" ipucu
           Positioned(
             left: 20,
@@ -339,7 +328,7 @@ class _ReelPageState extends State<_ReelPage>
                   animation: _hintLife,
                   builder: (context, child) {
                     final t = _hintLife.value;
-                    // Başta kısa bir belirme, son %20'de kaybolma
+                    // Her videoda: kısa belirme, ~5 sn görünür, sonra yumuşakça kaybolur
                     final a = t == 0
                         ? 0.0
                         : t < 0.06

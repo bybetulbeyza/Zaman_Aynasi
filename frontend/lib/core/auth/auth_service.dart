@@ -164,25 +164,14 @@ class AuthService {
     } catch (_) {}
   }
 
-  /// Supabase hata mesajını kullanıcıya göstermelik hâle getirir.
-  static String friendlyError(Object e, bool en) {
+  /// Supabase hata mesajını kullanıcıya gösterilecek metnin sözlük anahtarına çevirir.
+  static String friendlyErrorKey(Object e) {
     final m = e is AuthException ? e.message.toLowerCase() : e.toString();
-    if (m.contains('invalid login')) {
-      return en ? 'Wrong e-mail or password.' : 'E-posta veya şifre hatalı.';
-    }
-    if (m.contains('already registered')) {
-      return en
-          ? 'This e-mail is already registered.'
-          : 'Bu e-posta zaten kayıtlı.';
-    }
-    if (m.contains('email not confirmed')) {
-      return en
-          ? 'Please confirm your e-mail first.'
-          : 'Önce e-postanı doğrulaman gerekiyor.';
-    }
-    if (m.contains('socket') || m.contains('network')) {
-      return en ? 'No connection.' : 'Bağlantı kurulamadı.';
-    }
-    return en ? 'Something went wrong.' : 'Bir sorun oluştu.';
+    if (m.contains('invalid login')) return 'auth_err_wrong';
+    if (m.contains('already registered')) return 'auth_err_exists';
+    if (m.contains('email not confirmed')) return 'auth_err_unconfirmed';
+    if (m.contains('socket') || m.contains('network'))
+      return 'auth_err_network';
+    return 'auth_err_generic';
   }
 }

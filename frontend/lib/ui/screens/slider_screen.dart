@@ -48,11 +48,15 @@ class SliderScreen extends StatefulWidget {
   /// Açılınca kart yukarı çıkıp "Keşif görevleri" bölümüne kayar (ana ekrandaki mühür kartından).
   final bool focusTasks;
 
+  /// Hikâyeler'den gelince: eser sayfası bu hotspot seçili (kartı açık) açılır.
+  final Hotspot? focusHotspot;
+
   const SliderScreen({
     super.key,
     required this.place,
     this.start3d = false,
     this.focusTasks = false,
+    this.focusHotspot,
   });
 
   @override
@@ -169,6 +173,14 @@ class _SliderScreenState extends State<SliderScreen>
     super.initState();
     _loadRelated();
     if (widget.focusTasks) _scheduleTaskFocus();
+    final fh = widget.focusHotspot;
+    if (fh != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await Future.delayed(const Duration(milliseconds: 350));
+        if (!mounted) return;
+        _selectHotspot(fh);
+      });
+    }
     _extentAnim.addListener(() {
       final t = _extentTween;
       if (t != null && mounted) {
@@ -359,7 +371,7 @@ class _SliderScreenState extends State<SliderScreen>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.10),
+                    color: shadowOf(context, 0.10),
                     blurRadius: 16,
                     offset: const Offset(0, -4),
                   ),
@@ -655,9 +667,11 @@ class _SliderScreenState extends State<SliderScreen>
         const SizedBox(height: 24),
       ],
 
-      // AI videosu (yatay 16:9); video henüz yoksa "yakında" durumu gösterilir
-      _buildVideoCard(videoUrl),
-      const SizedBox(height: 16),
+      // AI videosu (yatay 16:9). Eserin ne kendi videosu ne hotspot videosu varsa kart hiç gösterilmez
+      if (videoUrl.isNotEmpty || _hasHotspotVideos) ...[
+        _buildVideoCard(videoUrl),
+        const SizedBox(height: 16),
+      ],
 
       // Sesli rehber
       // Kayıtlı ses varsa onu çalar; yoksa sayfayı cihazın sesiyle okur
@@ -1016,7 +1030,7 @@ class _SliderScreenState extends State<SliderScreen>
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.25),
+                              color: shadowOf(context, 0.25),
                               blurRadius: 14,
                               offset: const Offset(0, 4),
                             ),
@@ -1255,7 +1269,7 @@ class _SliderScreenState extends State<SliderScreen>
         shape: shape,
         shadows: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.22),
+            color: shadowOf(context, 0.22),
             blurRadius: 22,
             offset: const Offset(0, 8),
           ),

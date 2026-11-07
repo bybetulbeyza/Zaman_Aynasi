@@ -6,6 +6,7 @@ enum PlaceCategory {
   hamam,
   turbe,
   kulliye,
+  medrese,
   sosyalSivilYapilar;
 
   String labelFor(bool en) {
@@ -21,6 +22,8 @@ enum PlaceCategory {
         return 'Tomb';
       case PlaceCategory.kulliye:
         return 'Complex';
+      case PlaceCategory.medrese:
+        return 'Madrasa';
       case PlaceCategory.sosyalSivilYapilar:
         return 'Social & Civil';
     }
@@ -38,6 +41,8 @@ enum PlaceCategory {
         return 'Türbe';
       case PlaceCategory.kulliye:
         return 'Külliye';
+      case PlaceCategory.medrese:
+        return 'Medrese';
       case PlaceCategory.sosyalSivilYapilar:
         return 'Sosyal & Sivil Yapılar';
     }
@@ -441,6 +446,8 @@ class HeritagePlace {
     final normalized = cat?.toLowerCase().trim() ?? '';
     if (normalized.contains('sosyal') || normalized.contains('sivil')) {
       return PlaceCategory.sosyalSivilYapilar;
+    } else if (normalized.contains('medrese')) {
+      return PlaceCategory.medrese;
     } else if (normalized.contains('külliye') ||
         normalized.contains('kulliye')) {
       return PlaceCategory.kulliye;
@@ -450,8 +457,11 @@ class HeritagePlace {
       return PlaceCategory.hamam;
     } else if (normalized.contains('türbe') || normalized.contains('turbe')) {
       return PlaceCategory.turbe;
-    } else {
+    } else if (normalized.contains('han')) {
       return PlaceCategory.han;
+    } else {
+      // Tanınmayan kategori yanlışlıkla "Han" görünmesin
+      return PlaceCategory.sosyalSivilYapilar;
     }
   }
 }

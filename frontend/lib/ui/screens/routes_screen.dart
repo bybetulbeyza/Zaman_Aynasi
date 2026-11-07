@@ -12,12 +12,11 @@ import '../../core/constants/category_style.dart';
 import '../../core/utils/location_service.dart';
 import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
-import '../../core/constants/app_cities.dart';
 import '../../core/constants/app_theme.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/filter_chip_pill.dart';
 import '../widgets/common/app_icon.dart';
-import '../widgets/common/app_logo.dart';
+import '../widgets/common/pill_button.dart';
 import '../../core/constants/app_categories.dart';
 import '../../core/l10n/app_lang.dart';
 import '../../core/state/active_route.dart';
@@ -37,7 +36,6 @@ class RoutesScreen extends StatefulWidget {
 class _RoutesScreenState extends State<RoutesScreen> {
   final HeritageRepository _repository = HeritageRepository();
 
-  String _selectedCity = AppCities.active;
   int _selectedHours = 2; // 1, 2, 3 saat
 
   // Çoklu kategori seçimi (Envanter ve Harita ile aynı kategori listesi)
@@ -258,326 +256,460 @@ class _RoutesScreenState extends State<RoutesScreen> {
     }
   }
 
-  Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Text(
-      text,
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textDark,
+  /// Numaralı adım başlığı: "1  Nereden başlıyorsun?"
+  Widget _step(int n, String title, {String? hint}) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: AppColors.primaryTeal,
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            '$n',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textDark,
+                  ),
+                ),
+              ),
+              if (hint != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    hint,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
+  /// Seçilebilir büyük kutucuk (başlangıç ve süre seçenekleri için ortak görünüm).
+  Widget _optionTile({
+    required bool selected,
+    required VoidCallback onTap,
+    required Widget child,
+    String? semanticLabel,
+  }) => Semantics(
+    button: true,
+    selected: selected,
+    label: semanticLabel,
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: appCardDecoration(
+          round: 22,
+          shadow: false,
+          fill: selected ? AppColors.primaryTealLight : Colors.white,
+          side: selected ? AppColors.primaryTeal : AppColors.chipBorder,
+          width: selected ? 1.8 : 1.2,
+        ),
+        child: child,
       ),
     ),
   );
 
-  Widget _field({required Widget child, EdgeInsets? padding}) => Container(
-    width: double.infinity,
-    padding:
-        padding ?? const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-    decoration: appCardDecoration(
-      round: 24,
-      shadow: false,
-      side: bordeauxOf(context).withValues(alpha: 0.4),
-    ),
-    child: child,
+  Widget _startOptions() {
+    final fromPlace = _startPlace != null;
+    Widget tile({
+      required bool selected,
+      required IconData icon,
+      required String title,
+      required String sub,
+      required VoidCallback onTap,
+    }) => Expanded(
+      child: _optionTile(
+        selected: selected,
+        onTap: onTap,
+        semanticLabel: '$title, $sub',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 22,
+                  color: selected ? AppColors.primaryTeal : AppColors.textMuted,
+                ),
+                const Spacer(),
+                if (selected)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    size: 20,
+                    color: AppColors.primaryTeal,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              sub,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12.5,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    return Row(
+      children: [
+        tile(
+          selected: !fromPlace,
+          icon: Icons.my_location_rounded,
+          title: context.t('rc_my_location'),
+          sub: context.t('rc_my_location_sub'),
+          onTap: () => setState(() => _startPlace = null),
+        ),
+        const SizedBox(width: 10),
+        tile(
+          selected: fromPlace,
+          icon: Icons.account_balance_rounded,
+          title: fromPlace
+              ? _startPlace!.nameFor(context.isEn)
+              : context.t('rc_from_place'),
+          sub: fromPlace
+              ? context.t('rc_change')
+              : context.t('rc_from_place_sub'),
+          onTap: _pickStart,
+        ),
+      ],
+    );
+  }
+
+  Widget _durationOptions() => Row(
+    children: [1, 2, 3].map((h) {
+      final sel = _selectedHours == h;
+      return Expanded(
+        child: Padding(
+          padding: EdgeInsets.only(right: h != 3 ? 10 : 0),
+          child: _optionTile(
+            selected: sel,
+            onTap: () => setState(() => _selectedHours = h),
+            semanticLabel: '$h ${context.t('rc_hour')}',
+            child: Center(
+              child: Text(
+                '$h ${context.t('rc_hour')}',
+                style: TextStyle(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w800,
+                  color: sel ? AppColors.primaryTeal : AppColors.textDark,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }).toList(),
   );
+
+  Widget _categoryChips() => Wrap(
+    spacing: 10,
+    runSpacing: 10,
+    children: AppCategories.filters.whereType<PlaceCategory>().map((cat) {
+      final sel = _selectedCategories.contains(cat);
+      // Tüm seçili çipler aynı renkte (teal): neyin seçili olduğu tek bakışta anlaşılsın
+      return FilterChipPill(
+        label: cat.labelFor(context.isEn),
+        icon: CategoryStyle.of(cat).icon,
+        selected: sel,
+        onTap: () => setState(() {
+          if (sel) {
+            if (_selectedCategories.length > 1) _selectedCategories.remove(cat);
+          } else {
+            _selectedCategories.add(cat);
+          }
+        }),
+      );
+    }).toList(),
+  );
+
+  /// Canlı önizleme: seçimlere göre çıkacak rotanın durakları ve süresi.
+  Widget _preview(({List<HeritagePlace> stops, int minutes}) plan) {
+    final en = context.isEn;
+    final stops = plan.stops;
+    const maxShown = 5;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      decoration: appCardDecoration(
+        round: 26,
+        shadow: false,
+        fill: AppColors.creamSoft,
+        side: AppColors.ornamentGold,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.route_rounded,
+                size: 20,
+                color: AppColors.primaryTeal,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                context.t('rc_preview'),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                context
+                    .t('rc_preview_stats')
+                    .replaceAll('{n}', '${stops.length}')
+                    .replaceAll('{m}', '${plan.minutes}'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryTeal,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (stops.isEmpty)
+            Text(
+              context.t('rc_none_found'),
+              style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+            )
+          else
+            for (var i = 0; i < stops.length && i < maxShown; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 22,
+                      height: 22,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.primaryTeal,
+                          width: 1.4,
+                        ),
+                      ),
+                      child: Text(
+                        '${i + 1}',
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryTeal,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        stops[i].nameFor(en),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14.5,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          if (stops.length > maxShown)
+            Padding(
+              padding: const EdgeInsets.only(left: 32),
+              child: Text(
+                context
+                    .t('rc_more_stops')
+                    .replaceAll('{n}', '${stops.length - maxShown}'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ),
+          const SizedBox(height: 4),
+          Text(
+            context.t('rc_preview_note'),
+            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final plan = _isLoading ? (stops: <HeritagePlace>[], minutes: 0) : _plan();
     return PatternBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          bottom: false,
           child: _isLoading
-              ? const Center(child: const LogoLoader())
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const AppBackButton(),
-                          const SizedBox(width: 8),
-                          Text(
-                            context.t('rc_title'),
-                            style: AppTheme.displayLarge,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(22),
-                        decoration: appCardDecoration(
-                          context: context,
-                          round: 40,
-                          side: AppColors.chipBorder,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _label(context.t('rc_city')),
-                            _field(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: _selectedCity,
-                                  isExpanded: true,
-                                  icon: const Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: AppColors.textDark,
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    fontFamily: AppTheme.bodyFont,
-                                    color: AppColors.textDark,
-                                  ),
-                                  items: AppCities.all
-                                      .map(
-                                        (c) => DropdownMenuItem(
-                                          value: c,
-                                          enabled: AppCities.isAvailable(c),
-                                          child: Text(
-                                            AppCities.isAvailable(c)
-                                                ? c
-                                                : '$c · ${context.t('soon')}',
-                                            style: TextStyle(
-                                              color: AppCities.isAvailable(c)
-                                                  ? AppColors.textDark
-                                                  : AppColors.textMuted,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (v) {
-                                    if (v != null)
-                                      setState(() => _selectedCity = v);
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            _label(context.t('rc_start')),
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: _pickStart,
-                              child: _field(
-                                child: Row(
+              ? const Center(child: LogoLoader())
+              : Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 640),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
                                   children: [
-                                    Container(
-                                      width: 10,
-                                      height: 10,
-                                      decoration: BoxDecoration(
-                                        color: bordeauxOf(context),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
+                                    const AppBackButton(),
+                                    const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        _startPlace == null
-                                            ? context.t('rc_my_location')
-                                            : _startPlace!.nameFor(
-                                                context.isEn,
-                                              ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 17,
-                                          color: AppColors.textDark,
-                                        ),
+                                        context.t('rc_title'),
+                                        style: AppTheme.displayLarge,
                                       ),
-                                    ),
-                                    const Icon(
-                                      Icons.keyboard_arrow_down_rounded,
-                                      color: AppColors.textDark,
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            _label(context.t('rc_duration')),
-                            Row(
-                              children: [1, 2, 3].map((h) {
-                                final sel = _selectedHours == h;
-                                return Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      right: h != 3 ? 10 : 0,
-                                    ),
-                                    child: GestureDetector(
-                                      onTap: () =>
-                                          setState(() => _selectedHours = h),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 160,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 14,
-                                        ),
-                                        alignment: Alignment.center,
-                                        decoration: appCardDecoration(
-                                          round: 24,
-                                          shadow: false,
-                                          fill: sel
-                                              ? AppColors.ciniBordeauxLight
-                                              : Colors.white,
-                                          side: sel
-                                              ? bordeauxOf(context)
-                                              : AppColors.chipBorder,
-                                          width: sel ? 1.6 : 1.2,
-                                        ),
-                                        child: Text(
-                                          '$h ${context.t('rc_hour')}',
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            color: sel
-                                                ? bordeauxOf(context)
-                                                : AppColors.textDark,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 22),
-                            _label(context.t('rc_types')),
-                            Wrap(
-                              spacing: 10,
-                              runSpacing: 10,
-                              children: AppCategories.filters
-                                  .whereType<PlaceCategory>()
-                                  .map((cat) {
-                                    final sel = _selectedCategories.contains(
-                                      cat,
-                                    );
-                                    return FilterChipPill(
-                                      label: cat.labelFor(context.isEn),
-                                      icon: CategoryStyle.of(cat).icon,
-                                      accent: CategoryStyle.of(cat).color,
-                                      selected: sel,
-                                      onTap: () => setState(() {
-                                        if (sel) {
-                                          if (_selectedCategories.length > 1) {
-                                            _selectedCategories.remove(cat);
-                                          }
-                                        } else {
-                                          _selectedCategories.add(cat);
-                                        }
-                                      }),
-                                    );
-                                  })
-                                  .toList(),
-                            ),
-                            const SizedBox(height: 20),
-                            Builder(
-                              builder: (context) {
-                                final plan = _plan();
-                                return Text(
-                                  context
-                                      .t('rc_summary')
-                                      .replaceAll('{n}', '${plan.stops.length}')
-                                      .replaceAll('{m}', '${plan.minutes}'),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: AppColors.textMuted,
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 14),
-                            // Eser kartındaki "Eseri keşfet" rozetiyle aynı tarz: açık bordo zemin, bordo çerçeve ve yazı
-                            Semantics(
-                              button: true,
-                              label: context.t('rc_create'),
-                              excludeSemantics: true,
-                              child: GestureDetector(
-                                onTap: _handleCreateRoute,
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    18,
-                                    14,
-                                    12,
-                                    14,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.ciniBordeauxLight,
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                      color: bordeauxOf(
-                                        context,
-                                      ).withValues(alpha: 0.4),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                const SizedBox(height: 40),
+                                _step(1, context.t('rc_q_start')),
+                                _startOptions(),
+                                const SizedBox(height: 26),
+                                _step(2, context.t('rc_q_time')),
+                                _durationOptions(),
+                                const SizedBox(height: 26),
+                                _step(
+                                  3,
+                                  context.t('rc_types'),
+                                  hint: context.t('rc_types_hint'),
+                                ),
+                                _categoryChips(),
+                                const SizedBox(height: 26),
+                                _preview(plan),
+                                const SizedBox(height: 24),
+                                Center(
+                                  child: Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 6,
                                     children: [
                                       Text(
-                                        context.t('rc_create'),
-                                        style: TextStyle(
-                                          fontSize: 16.5,
-                                          fontWeight: FontWeight.w800,
-                                          color: bordeauxOf(context),
+                                        context.t('rc_ready_q'),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: AppColors.textMuted,
                                         ),
                                       ),
-                                      Icon(
-                                        Icons.chevron_right_rounded,
-                                        color: bordeauxOf(context),
+                                      GestureDetector(
+                                        behavior: HitTestBehavior.opaque,
+                                        onTap: widget.onBrowseRoutes,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 6,
+                                          ),
+                                          child: Text(
+                                            context.t('rc_browse'),
+                                            style: TextStyle(
+                                              fontSize: 14.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: bordeauxOf(context),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 28),
-                      Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              context.t('rc_ready_q'),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: AppColors.textMuted,
-                              ),
+                    ),
+                    // Sabit alt düğme: kaydırmadan her zaman görünür
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
+                      decoration: BoxDecoration(
+                        color: canvasOf(context),
+                        boxShadow: [
+                          BoxShadow(
+                            color: shadowOf(context, 0.08),
+                            blurRadius: 12,
+                            offset: const Offset(0, -4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 640),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: PillButton(
+                              plan.stops.isEmpty
+                                  ? context.t('rc_create')
+                                  : context
+                                        .t('rc_create_n')
+                                        .replaceAll(
+                                          '{n}',
+                                          '${plan.stops.length}',
+                                        ),
+                              onPressed: plan.stops.isEmpty
+                                  ? null
+                                  : _handleCreateRoute,
                             ),
-                            const SizedBox(height: 6),
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: widget.onBrowseRoutes,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
-                                ),
-                                child: Text(
-                                  context.t('rc_browse'),
-                                  style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
-                                    color: bordeauxOf(context),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            const AppLogo(size: 92),
-                          ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
         ),
       ),

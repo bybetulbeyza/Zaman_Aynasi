@@ -50,7 +50,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       if (mounted) {
         setState(() {
           _busy = false;
-          _error = AuthService.friendlyError(e, context.isEn);
+          _error = context.t(AuthService.friendlyErrorKey(e));
         });
       }
     }

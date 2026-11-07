@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/app_lang.dart';
 import '../../../core/constants/app_colors.dart';
@@ -71,7 +69,6 @@ class _Model3DViewState extends State<Model3DView> {
   int _tourIdx = 0;
   double _f =
       0.5; // bölücü konumu; çizgi ve geçiş web sayfasında çizilir, burada yalnızca rozetler için
-  bool _canAr = false;
 
   int _syncedStops = -1;
   bool _syncedTouring = false;
@@ -118,21 +115,6 @@ class _Model3DViewState extends State<Model3DView> {
       // Kapatınca kamera yerinde kalır; kullanıcı o bölümü incelemeye devam edebilir
       if (_touring) _stopTour(notify: false);
     }
-  }
-
-  /// Android'de Google Scene Viewer doğrudan açılır (WebView içinden AR başlatılamıyor);
-  /// olmazsa sayfadaki model-viewer'ın kendi AR yoluna düşer.
-  Future<void> _openAr() async {
-    final url = widget.newUrl;
-    if (Platform.isAndroid && url.isNotEmpty) {
-      final uri = Uri.parse(
-        'https://arvr.google.com/scene-viewer/1.0?file=${Uri.encodeComponent(url)}&mode=ar_preferred',
-      );
-      try {
-        if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
-      } catch (_) {}
-    }
-    _js('window.zaAR&&window.zaAR()');
   }
 
   void _startTour() {
@@ -234,8 +216,7 @@ class _Model3DViewState extends State<Model3DView> {
                 backgroundColor: Colors.transparent,
                 cameraControls: true,
                 disableZoom: false,
-                ar: true,
-                arModes: const ['scene-viewer', 'quick-look', 'webxr'],
+                ar: false,
                 interactionPrompt: InteractionPrompt.none,
                 shadowIntensity: 0,
                 exposure: 1.05,
@@ -266,8 +247,6 @@ class _Model3DViewState extends State<Model3DView> {
                       } else if (msg.startsWith('f:')) {
                         final v = double.tryParse(msg.substring(2));
                         if (v != null && mounted) setState(() => _f = v);
-                      } else if (msg == 'ar') {
-                        if (mounted) setState(() => _canAr = true);
                       } else {
                         final z = double.tryParse(msg);
                         if (z != null && (z - _zoom).abs() > 0.05 && mounted) {
@@ -310,19 +289,6 @@ class _Model3DViewState extends State<Model3DView> {
                 ),
               ),
             ],
-
-            // AR (cihaz destekliyorsa), geri okun altında
-            if (_canAr)
-              Positioned(
-                left: 14,
-                top: top + 52,
-                child: GlassPill(
-                  onTap: _openAr,
-                  label: 'AR',
-                  text: 'AR',
-                  icon: Icons.view_in_ar_rounded,
-                ),
-              ),
 
             // Yakınlaşınca: oran ve sıfırlama
             Positioned(

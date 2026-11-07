@@ -32,7 +32,7 @@ class AppLogo extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.28),
+            color: shadowOf(context, 0.28),
             blurRadius: size * 0.18,
             offset: Offset(0, size * 0.06),
           ),

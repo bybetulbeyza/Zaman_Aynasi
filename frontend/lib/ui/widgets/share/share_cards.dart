@@ -403,42 +403,58 @@ class _SharePreviewState extends State<_SharePreview> {
   @override
   Widget build(BuildContext context) {
     final h = MediaQuery.of(context).size.height;
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: h * 0.68),
-            child: AspectRatio(
-              aspectRatio: kShareW / kShareH,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: RepaintBoundary(key: _key, child: widget.card),
-                ),
+    // Kartın ve düğmelerin dışındaki her yere (aradaki boşluklar dahil) dokununca kapanır
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => Navigator.pop(context),
+          ),
+        ),
+        // Dialog yerine dokunuşu yutmayan saydam katman: yalnızca kart ve düğmeler dokunuşu alır
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Material(
+              type: MaterialType.transparency,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: h * 0.68),
+                    child: AspectRatio(
+                      aspectRatio: kShareW / kShareH,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: RepaintBoundary(key: _key, child: widget.card),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: 280,
+                    child: PillButton(
+                      context.t('share_btn'),
+                      onPressed: _busy ? null : _share,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      context.t('ok_btn'),
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: 280,
-            child: PillButton(
-              context.t('share_btn'),
-              onPressed: _busy ? null : _share,
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              context.t('ok_btn'),
-              style: const TextStyle(color: Colors.white70),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -11,7 +11,9 @@ import '../common/dark_cancel.dart';
 /// Rota modunda üstte "Durak 2/4 · mesafe" ve önceki/sonraki okları görünür.
 class RouteStopPreviewSheet extends StatelessWidget {
   final String? routeTitle;
-  final String? routeStats; // örn: "Durak 2 / 6 · 3,8 km · 40 dk"
+  final String? routeStats; // örn: "Durak 2 / 6"
+  /// Rotanın yürüyüşü (örn. "38 dk yürüyüş · 3,0 km"); yürüyen insan simgeli vurgulu etiket olarak gösterilir.
+  final String? routeWalk;
   final String placeName;
   final String placeDistanceTime;
   final String? placeImageUrl;
@@ -28,6 +30,7 @@ class RouteStopPreviewSheet extends StatelessWidget {
     super.key,
     this.routeTitle,
     this.routeStats,
+    this.routeWalk,
     required this.placeName,
     required this.placeDistanceTime,
     this.placeImageUrl,
@@ -93,14 +96,25 @@ class RouteStopPreviewSheet extends StatelessWidget {
                             color: AppColors.textDark,
                           ),
                         ),
-                        if (routeStats != null)
-                          Text(
-                            routeStats!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 12.5,
-                              color: AppColors.textMuted,
+                        if (routeStats != null || routeWalk != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Row(
+                              children: [
+                                if (routeStats != null)
+                                  Text(
+                                    routeStats!,
+                                    maxLines: 1,
+                                    style: const TextStyle(
+                                      fontSize: 12.5,
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                if (routeStats != null && routeWalk != null)
+                                  const SizedBox(width: 8),
+                                if (routeWalk != null)
+                                  Flexible(child: _WalkChip(text: routeWalk!)),
+                              ],
                             ),
                           ),
                       ],
@@ -257,6 +271,46 @@ class RouteStopPreviewSheet extends StatelessWidget {
                 ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Rotanın yürüyüş süresi/mesafesi: yürüyen insan simgeli, açık teal zeminli vurgulu etiket.
+class _WalkChip extends StatelessWidget {
+  final String text;
+  const _WalkChip({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(7, 3, 10, 3),
+      decoration: BoxDecoration(
+        color: AppColors.primaryTeal.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.directions_walk_rounded,
+            size: 16,
+            color: AppColors.primaryTeal,
+          ),
+          const SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryTeal,
+              ),
+            ),
+          ),
         ],
       ),
     );

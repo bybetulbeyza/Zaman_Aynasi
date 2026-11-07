@@ -460,7 +460,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                 border: Border.all(color: Colors.white, width: 3),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35),
+                    color: shadowOf(context, 0.35),
                     blurRadius: 16,
                     offset: const Offset(0, 5),
                   ),
@@ -813,7 +813,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                       border: Border.all(color: Colors.white, width: 2.2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.35),
+                          color: shadowOf(context, 0.35),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -836,7 +836,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
+                          color: shadowOf(context, 0.3),
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
@@ -909,7 +909,7 @@ class _SplitSliderWidgetState extends State<SplitSliderWidget>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.22),
+                      color: shadowOf(context, 0.22),
                       blurRadius: 14,
                       offset: const Offset(0, 4),
                     ),

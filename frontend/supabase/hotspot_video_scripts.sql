@@ -1,6 +1,6 @@
 -- Hotspot video metinleri (video_script_tr / video_script_en): hikâyeleştirilmiş, kısa, konuşur gibi.
--- Kapsam: Koza Han, Ulu Camii ve Yeşil Külliye'nin alt eserleri (Yeşil Camii, Yeşil Türbe, Medrese, İmaret).
--- Külliyeden yapılara yönlendiren hotspot'lara (id 59-62) video metni eklenmez; doğrudan yapıya gider.
+-- Kapsam: Koza Han, Ulu Camii ve Yeşil Külliye'nin alt eserleri (Yeşil Camii, Yeşil Türbe, Medrese). Yeşil İmareti kapsamdan çıkarıldı.
+-- Külliyeden yapılara yönlendiren hotspot'lara (id 59-61) video metni eklenmez; doğrudan yapıya gider.
 -- Bilgilerin tamamı hotspot açıklamalarındaki envanter metinlerinden alınmıştır; yeni bilgi eklenmemiştir.
 -- Dokunulmayanlar: Müezzin Mahfili (id 21): videosu hazır, altyazı mevcut seslendirmeyle uyuşsun diye metni aynı bırakıldı.
 -- Hotspot açıklamaları (description) değişmez; uygulamada kartta aynen görünür.
@@ -132,24 +132,6 @@ update public."Hotspots" set
   video_script_tr = $q$Bursa'nın simgesi bu kubbe. Dışta turkuaz çinilerden bir zırh, içte kalem işleriyle süslü. Sekizgen kütleyi görkemle örtüyor.$q$,
   video_script_en = $q$This dome is the symbol of Bursa. Outside, an armor of turquoise tiles; inside, hand-painted decoration. It crowns the octagonal body with grandeur.$q$
 where id = 44;
-
--- #80 Mutfak ve Yemek Salonu
-update public."Hotspots" set
-  video_script_tr = $q$26 metrelik dev bir mutfak ve 16 metrelik yemek salonu. Asırlarca günde iki öğün sıcak yemek verilen bir aşevi kompleksi.$q$,
-  video_script_en = $q$A giant 26-meter kitchen and a 16-meter dining hall. A soup-kitchen complex that served two hot meals a day for centuries.$q$
-where id = 80;
-
--- #81 Moloz Taş ve Tuğla Duvar
-update public."Hotspots" set
-  video_script_tr = $q$Moloz taş ve tuğla sırayla örülmüş. Bu almaşık duvarlar, imaretin asırlardır ayakta kalan sağlam gövdesi.$q$,
-  video_script_en = $q$Rubble stone and brick laid in alternating courses. These walls form the sturdy body of the soup kitchen, standing for centuries.$q$
-where id = 81;
-
--- #82 Giriş
-update public."Hotspots" set
-  video_script_tr = $q$Anıtsal giriş kapısının ardında yedi tarihi fırın var. İmaret, yüzlerce kişiyi aynı anda besleyebilen devasa bir mutfaktı.$q$,
-  video_script_en = $q$Behind the monumental entrance are seven historic ovens. The soup kitchen was a vast kitchen able to feed hundreds of people at once.$q$
-where id = 82;
 
 -- #83 Çini Kaplı Tavan
 update public."Hotspots" set

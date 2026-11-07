@@ -10,6 +10,7 @@ class AppCategories {
     PlaceCategory.hamam,
     PlaceCategory.turbe,
     PlaceCategory.kulliye,
+    PlaceCategory.medrese,
     PlaceCategory.sosyalSivilYapilar,
   ];
 }

@@ -39,8 +39,11 @@ Color shadowOf(BuildContext context, double alpha) =>
 
 /// Diyalog/kart açılırken arkadaki karartma. Koyu modda renk filtresi siyahı beyaza çevirdiği için
 /// ekranı AYDINLATMASIN diye açık bir ön renk kullanılır; filtreden sonra koyu görünür.
+/// Karartma her zaman kök gezginin katmanında (genel koyu mod filtresinin içinde) çizilir; bu yüzden
+/// çağıran widget'ın [DarkCancel] içinde olup olmamasına değil, uygulamanın genel koyu moduna bakılır.
+/// (Aksi hâlde fotoğraf/video alanından açılan pencerelerde arka sayfa beyazlıyordu.)
 Color scrimOf(BuildContext context, [double alpha = 0.54]) {
-  if (!DarkScope.invertedOf(context))
+  if (!AppAccessibility.instance.isDark(context))
     return Colors.black.withValues(alpha: alpha);
   final a = alpha >= 0.95 ? 1.0 : (alpha * 1.15).clamp(0.0, 0.92);
   return Colors.white.withValues(alpha: a);

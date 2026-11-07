@@ -1,4 +1,5 @@
 import '../widgets/common/pill_button.dart';
+import '../../core/utils/search_fold.dart';
 import 'dart:async';
 
 import '../widgets/common/app_icon.dart';
@@ -359,13 +360,13 @@ class MapScreenState extends State<MapScreen> {
   void _applyFilters() {
     setState(() {
       final filtered = _allPlaces.where((place) {
-        final q = _searchQuery.toLowerCase();
-        final matchesSearch =
-            place.name.toLowerCase().contains(q) ||
-            place.city.toLowerCase().contains(q) ||
-            place.nameEn.toLowerCase().contains(q) ||
-            place.shortDescription.toLowerCase().contains(q) ||
-            place.shortDescriptionEn.toLowerCase().contains(q);
+        final matchesSearch = searchMatches(_searchQuery, [
+          place.name,
+          place.city,
+          place.nameEn,
+          place.shortDescription,
+          place.shortDescriptionEn,
+        ]);
 
         final matchesCategory =
             _selectedCategory == null || place.category == _selectedCategory;
@@ -702,18 +703,18 @@ class MapScreenState extends State<MapScreen> {
                           routeStats: _routeChip == null
                               ? null
                               : context
-                                        .t('stop_of')
-                                        .replaceAll(
-                                          '{i}',
-                                          '${_currentStopIndex + 1}',
-                                        )
-                                        .replaceAll(
-                                          '{n}',
-                                          '${_filteredPlaces.length}',
-                                        ) +
-                                    (_walk == null
-                                        ? ''
-                                        : ' · ${_walk!.distanceLabel} · ${_walk!.minutes} ${context.t('min_walk')}'),
+                                    .t('stop_of')
+                                    .replaceAll(
+                                      '{i}',
+                                      '${_currentStopIndex + 1}',
+                                    )
+                                    .replaceAll(
+                                      '{n}',
+                                      '${_filteredPlaces.length}',
+                                    ),
+                          routeWalk: (_routeChip == null || _walk == null)
+                              ? null
+                              : '${_walk!.minutes} ${context.t('min_walk')} · ${_walk!.distanceLabel}',
                           placeName: currentPlace.nameFor(context.isEn),
                           placeDistanceTime: _subtitleFor(currentPlace),
                           placeImageUrl: currentPlace.imageAfterUrl,

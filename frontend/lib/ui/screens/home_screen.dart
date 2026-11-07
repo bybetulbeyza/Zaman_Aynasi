@@ -70,10 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _all = all;
         _byDistance = all;
         _daily = _pickDaily(all);
-        final featured = all.where((p) => p.isFeatured).toList();
-        _featuredPlaces = featured.isNotEmpty
-            ? featured.take(6).toList()
-            : all.take(6).toList();
+        _featuredPlaces = _pickFeatured(all);
         _nearbyPlaces = all.take(6).toList(); // konum gelene kadar geçici
         _isLoading = false;
       });
@@ -95,8 +92,42 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// Demo için pilot (3B modeli ve içeriği dolu) eserler.
+  static const _pilotKeys = ['koza han', 'yeşil türbe', 'ulu camii'];
+
+  HeritagePlace? _pilot(List<HeritagePlace> all, String key) {
+    for (final p in all) {
+      if (!p.isSubPlace && p.name.toLowerCase().contains(key)) return p;
+    }
+    return null;
+  }
+
+  List<HeritagePlace> _pickFeatured(List<HeritagePlace> all) {
+    final out = <HeritagePlace>[];
+    for (final k in _pilotKeys) {
+      final p = _pilot(all, k);
+      if (p != null) out.add(p);
+    }
+    for (final p in all) {
+      if (out.length >= 6) break;
+      if (p.isFeatured &&
+          !out.contains(p) &&
+          !p.name.toLowerCase().contains('muradiye')) {
+        out.add(p);
+      }
+    }
+    return out.isNotEmpty ? out : all.take(6).toList();
+  }
+
+  /// Ana sayfadaki "Günün eseri": jüri için sabit, içi dolu pilot eser.
+  /// (Her gün değişen seçim yerine şimdilik statik.)
+  HeritagePlace? _pickStatic(List<HeritagePlace> all) =>
+      _pilot(all, 'koza han');
+
   /// Her gün farklı bir eser; iki fotoğrafı da olan ana eserler arasından gün sayısına göre seçilir.
   HeritagePlace? _pickDaily(List<HeritagePlace> all) {
+    final fixed = _pickStatic(all);
+    if (fixed != null) return fixed;
     final list =
         all
             .where(
@@ -135,7 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             _buildHero(),
-            const SizedBox(height: 20),
+            // Kısayolların üstündeki boşluk alttakiyle (26) aynı
+            const SizedBox(height: 26),
             _buildQuickActions(),
             const SizedBox(height: 26),
             if (_daily != null) ...[
@@ -225,11 +257,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHero() {
     final top = MediaQuery.of(context).padding.top;
+    // Geniş ekranda (tablet) yazı/logo boyutu aynı kalır, yalnızca dikey boşluklar artar ki başlık
+    // ince bir şerit gibi durmasın. e: telefonda 0, ~680 dp ve üstünde 1.
+    final e = ((MediaQuery.of(context).size.width - 400) / 280).clamp(0.0, 1.0);
     // Koyu modda başlık da koyulaşır (hero renk filtresinden korunduğu için renkler burada seçilir)
     final dark = DarkScope.invertedOf(context);
     return DarkCancel(
       child: Container(
-        padding: EdgeInsets.fromLTRB(20, top + 10, 20, 24),
+        padding: EdgeInsets.fromLTRB(20, top + 10 + 26 * e, 20, 24 + 26 * e),
         // Çapraz geçiş: sol üstte canlı teal, ortada petrol, sağ altta derin lacivert-petrol
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -268,12 +303,12 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _brandOrnament(),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const FittedBox(
+                      FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -288,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
                         context.t('hero_title').replaceAll('\n', ' '),
                         style: TextStyle(
@@ -301,11 +336,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                const AppLogo(size: 84, shadow: true),
+                SizedBox(width: 12),
+                AppLogo(size: 84, shadow: true),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24 + 18 * e),
             DarkReapply(
               child: GestureDetector(
                 onTap: _openPlaces,
@@ -319,15 +354,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Row(
                     children: [
-                      const AppIcon(
-                        'search',
-                        color: AppColors.textDark,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
+                      AppIcon('search', color: AppColors.textDark, size: 24),
+                      SizedBox(width: 12),
                       Text(
                         context.t('search_hint'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 15,
                         ),

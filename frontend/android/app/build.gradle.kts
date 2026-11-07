@@ -25,7 +25,8 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // 35: Android 16 tabletlerde uygulamanın ekran yönü isteği (video tam ekranı yatay, normalde dikey) yok sayılmasın
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

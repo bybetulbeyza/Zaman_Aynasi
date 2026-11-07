@@ -212,7 +212,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
+                        color: shadowOf(context, 0.02),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),

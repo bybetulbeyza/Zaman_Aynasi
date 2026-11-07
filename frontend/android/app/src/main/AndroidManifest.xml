@@ -23,6 +23,11 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
+            <!-- Android 16 büyük ekranlarda (tablet) uygulamanın ekran yönü isteğini yok sayar; video tam
+                 ekranında yataya çevirebilmek için geçici muafiyet. (Yedek: video_dialog.dart videoyu kendisi döndürür.) -->
+            <property
+                android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+                android:value="true" />
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues

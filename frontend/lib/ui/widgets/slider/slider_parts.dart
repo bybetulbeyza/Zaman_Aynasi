@@ -1,3 +1,4 @@
+import '../common/dark_cancel.dart';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -155,7 +156,7 @@ class _GlassKnobState extends State<GlassKnob>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.22),
+                        color: shadowOf(context, 0.22),
                         blurRadius: 14,
                         offset: const Offset(0, 4),
                       ),

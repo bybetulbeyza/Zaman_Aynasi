@@ -16,6 +16,7 @@ String passportTitleKey(List<HeritagePlace> places) {
     PlaceCategory.hamam: 'title_hamam',
     PlaceCategory.turbe: 'title_turbe',
     PlaceCategory.kulliye: 'title_kulliye',
+    PlaceCategory.medrese: 'title_medrese',
     PlaceCategory.sosyalSivilYapilar: 'title_sosyal',
   };
   for (final e in names.entries) {

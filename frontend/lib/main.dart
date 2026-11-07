@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/app_theme.dart';
@@ -16,6 +17,10 @@ final DateTime _appStarted = DateTime.now();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Uygulama dikey tasarlandı; yalnızca video tam ekranı yataya geçer (video_dialog.dart)
+  await SystemChrome.setPreferredOrientations(const [
+    DeviceOrientation.portraitUp,
+  ]);
 
   // Supabase Dashboard -> Project Settings -> API
   await Supabase.initialize(

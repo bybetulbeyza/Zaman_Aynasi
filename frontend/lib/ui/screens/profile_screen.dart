@@ -281,7 +281,9 @@ class ProfileScreen extends StatelessWidget {
                   context.t('feedback_row'),
                   onTap: () => FeedbackSheet.show(context),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(
+                  height: 66,
+                ), // satırın 12 alt payıyla birlikte ~78: eskisinin üç katı
                 Center(
                   child: Text(
                     context.t('profile_footer'),
@@ -309,10 +311,14 @@ class ProfileScreen extends StatelessWidget {
     final name = AuthService.displayName;
     final body = Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(signedIn ? 16 : 22, 14, 14, 14),
+      // Giriş yapılmamışken kart açık bordo, düğme beyaz: zıtlıkla dikkat çeker; biraz daha yüksek
+      padding: signedIn
+          ? const EdgeInsets.fromLTRB(16, 14, 14, 14)
+          : const EdgeInsets.fromLTRB(22, 24, 16, 24),
       decoration: appCardDecoration(
         round: 34,
-        side: bordeauxOf(context).withValues(alpha: 0.4),
+        fill: signedIn ? Colors.white : AppColors.ciniBordeauxLight,
+        side: bordeauxOf(context).withValues(alpha: signedIn ? 0.4 : 0.55),
       ),
       child: Row(
         children: [
@@ -371,7 +377,7 @@ class ProfileScreen extends StatelessWidget {
               size: 28,
             )
           else
-            PillButton(
+            PillButton.outlined(
               context.t('auth_login'),
               onPressed: () => Navigator.push(
                 context,

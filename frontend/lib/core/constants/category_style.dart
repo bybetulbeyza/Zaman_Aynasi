@@ -20,6 +20,8 @@ class CategoryStyle {
         return const CategoryStyle(Color(0xFF6B7A3A), 'pin_turbe');
       case PlaceCategory.kulliye:
         return const CategoryStyle(Color(0xFF14414F), 'pin_kulliye');
+      case PlaceCategory.medrese:
+        return const CategoryStyle(Color(0xFF5B4A8B), 'pin_medrese');
       case PlaceCategory.sosyalSivilYapilar:
         return const CategoryStyle(Color(0xFFB8913F), 'pin_sosyal');
     }

@@ -8,7 +8,6 @@ import '../../core/utils/launcher_util.dart';
 import '../widgets/common/pattern_background.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/section_title.dart';
-import '../widgets/common/app_logo.dart';
 
 /// Proje, amaç ve arşiv kaynaklarını tek sayfada toplar.
 class AboutScreen extends StatelessWidget {
@@ -57,6 +56,10 @@ class AboutScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 26),
+              SectionTitle(context.t('about_photos_title')),
+              const SizedBox(height: 10),
+              _body(context.t('about_photos_body')),
+              const SizedBox(height: 26),
               SectionTitle(context.t('about_ai_title')),
               const SizedBox(height: 10),
               _body(context.t('about_ai_body')),
@@ -64,8 +67,7 @@ class AboutScreen extends StatelessWidget {
               SectionTitle(context.t('about_privacy_title')),
               const SizedBox(height: 10),
               _body(context.t('about_privacy_body')),
-              const SizedBox(height: 32),
-              const Center(child: AppLogo(size: 88)),
+              const SizedBox(height: 24),
             ],
           ),
         ),

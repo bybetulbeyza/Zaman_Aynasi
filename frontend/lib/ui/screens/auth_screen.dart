@@ -88,7 +88,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
-    final en = context.isEn;
     setState(() {
       _busy = true;
       _error = null;
@@ -110,7 +109,8 @@ class _AuthScreenState extends State<AuthScreen> {
         await AuthService.signIn(_email.text, _password.text);
       }
     } catch (e) {
-      if (mounted) setState(() => _error = AuthService.friendlyError(e, en));
+      if (mounted)
+        setState(() => _error = context.t(AuthService.friendlyErrorKey(e)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -168,18 +168,18 @@ class _AuthScreenState extends State<AuthScreen> {
       );
     } catch (e) {
       if (mounted) {
-        setState(() => _error = AuthService.friendlyError(e, context.isEn));
+        setState(() => _error = context.t(AuthService.friendlyErrorKey(e)));
       }
     }
   }
 
   Future<void> _google() async {
-    final en = context.isEn;
     setState(() => _error = null);
     try {
       await AuthService.signInWithGoogle();
     } catch (e) {
-      if (mounted) setState(() => _error = AuthService.friendlyError(e, en));
+      if (mounted)
+        setState(() => _error = context.t(AuthService.friendlyErrorKey(e)));
     }
   }
 

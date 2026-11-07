@@ -1,4 +1,5 @@
 import '../widgets/common/app_icon.dart';
+import '../../core/utils/search_fold.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/dark_cancel.dart';
 import '../widgets/common/app_back_button.dart';
@@ -58,21 +59,37 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   }
 
   void _applyFilter() {
-    final query = _searchController.text.toLowerCase().trim();
+    final query = _searchController.text;
     setState(() {
       _filteredPlaces = _allPlaces.where((place) {
-        final matchesSearch =
-            place.name.toLowerCase().contains(query) ||
-            place.city.toLowerCase().contains(query) ||
-            place.nameEn.toLowerCase().contains(query) ||
-            place.shortDescription.toLowerCase().contains(query) ||
-            place.shortDescriptionEn.toLowerCase().contains(query);
+        final matchesSearch = searchMatches(query, [
+          place.name,
+          place.city,
+          place.nameEn,
+          place.shortDescription,
+          place.shortDescriptionEn,
+        ]);
         final matchesCat =
             _selectedCategory == null || place.category == _selectedCategory;
         return matchesSearch && matchesCat;
       }).toList();
       if (_sortAlphabetical) {
         _filteredPlaces.sort((a, b) => a.name.compareTo(b.name));
+      }
+      // Arama varken adı eşleşenler üstte; aynı derecedekiler mevcut sırasını korur
+      if (query.trim().isNotEmpty) {
+        final rank = {
+          for (final p in _filteredPlaces)
+            p: searchRank(query, [p.name, p.nameEn]),
+        };
+        final order = {
+          for (var i = 0; i < _filteredPlaces.length; i++)
+            _filteredPlaces[i]: i,
+        };
+        _filteredPlaces.sort((a, b) {
+          final r = rank[a]!.compareTo(rank[b]!);
+          return r != 0 ? r : order[a]!.compareTo(order[b]!);
+        });
       }
     });
   }
@@ -181,7 +198,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                         itemCount: _filteredPlaces.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 20),
+                        separatorBuilder: (_, __) => const SizedBox(height: 52),
                         itemBuilder: (_, i) =>
                             _buildPlaceCard(_filteredPlaces[i]),
                       ),
@@ -225,8 +242,9 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
       children: [
         GestureDetector(
           onTap: () => _openPlace(place),
-          child: SizedBox(
-            height: 190,
+          // Sabit yükseklik geniş ekranda fotoğrafı çok kırpıyordu; oranla büyür (telefonda ~225, tablette ~400)
+          child: AspectRatio(
+            aspectRatio: 1.7,
             child: SquircleFrame(
               radius: 40,
               child: DarkCancel(
@@ -243,7 +261,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -255,7 +273,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                     place.nameFor(context.isEn),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTheme.titleLarge,
+                    style: AppTheme.titleLarge.copyWith(fontSize: 23),
                   ),
                   const SizedBox(height: 2),
                   Row(
