@@ -224,7 +224,7 @@ class _PassportScreenState extends State<PassportScreen> {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 18,
           crossAxisSpacing: 8,
-          childAspectRatio: 0.78,
+          childAspectRatio: 0.7,
           children: [for (final p in e.value) _slot(context, p, en)],
         ),
         const SizedBox(height: 18),
@@ -262,10 +262,50 @@ class _PassportScreenState extends State<PassportScreen> {
                 color: has ? AppColors.textDark : AppColors.textMuted,
               ),
             ),
+            if (Passport.instance.stampDate(p.id) case final d?)
+              Text(
+                _date(d, en),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                ),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  static String _date(DateTime d, bool en) {
+    const tr = [
+      'Oca',
+      'Şub',
+      'Mar',
+      'Nis',
+      'May',
+      'Haz',
+      'Tem',
+      'Ağu',
+      'Eyl',
+      'Eki',
+      'Kas',
+      'Ara',
+    ];
+    const enM = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${d.day} ${(en ? enM : tr)[d.month - 1]} ${d.year}';
   }
 
   void _open(HeritagePlace p) =>

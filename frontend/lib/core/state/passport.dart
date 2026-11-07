@@ -14,9 +14,14 @@ class Passport extends ChangeNotifier {
 
   static const _kActivities = 'pp_activities';
   static const _kStamps = 'pp_stamps';
+  static const _kStampDates = 'pp_stamp_dates';
 
   final Set<int> _activities = {};
   final Set<String> _stamps = {};
+
+  /// Mührün kazanıldığı gün (yalnızca bu cihazda kazanılanlar için bilinir).
+  final Map<String, DateTime> _dates = {};
+  DateTime? stampDate(String placeId) => _dates[placeId];
 
   /// Yeni mühür kazanılınca dolar; ana ekran bunu dinleyip kutlama gösterir.
   final ValueNotifier<HeritagePlace?> ceremony = ValueNotifier(null);
@@ -36,6 +41,11 @@ class Passport extends ChangeNotifier {
       final p = await SharedPreferences.getInstance();
       _activities.addAll((p.getStringList(_kActivities) ?? []).map(int.parse));
       _stamps.addAll(p.getStringList(_kStamps) ?? []);
+      for (final e in p.getStringList(_kStampDates) ?? <String>[]) {
+        final i = e.indexOf('=');
+        final d = i > 0 ? DateTime.tryParse(e.substring(i + 1)) : null;
+        if (d != null) _dates[e.substring(0, i)] = d;
+      }
     } catch (_) {}
     AuthService.changes.listen((s) {
       if (s.event == AuthChangeEvent.signedOut) {
@@ -51,6 +61,7 @@ class Passport extends ChangeNotifier {
   Future<void> _clearLocal() async {
     _activities.clear();
     _stamps.clear();
+    _dates.clear();
     ceremony.value = null;
     notifyListeners();
     await _save();
@@ -64,6 +75,9 @@ class Passport extends ChangeNotifier {
         _activities.map((e) => '$e').toList(),
       );
       await p.setStringList(_kStamps, _stamps.toList());
+      await p.setStringList(_kStampDates, [
+        for (final e in _dates.entries) '${e.key}=${e.value.toIso8601String()}',
+      ]);
     } catch (_) {}
   }
 
@@ -108,6 +122,7 @@ class Passport extends ChangeNotifier {
   /// Mührü verir (zaten varsa false döner). Mühür yalnızca eserin tüm görevleri (QR dahil) bitince verilir.
   bool earnStamp(HeritagePlace place) {
     if (!_stamps.add(place.id)) return false;
+    _dates[place.id] = DateTime.now();
     _push('stamp', int.tryParse(place.id) ?? 0, add: true);
     notifyListeners();
     _save();

@@ -6,7 +6,7 @@ import '../../../core/l10n/app_lang.dart';
 import '../../../core/state/passport.dart';
 import '../../../core/utils/location_service.dart';
 import '../../../data/models/heritage_place.dart';
-import '../common/app_network_image.dart';
+import '../passport/stamp_widget.dart';
 import '../common/dark_cancel.dart';
 
 /// Ana ekranda "sıradaki mühür" kartı: önce günün eserini (mührü alınmamışsa), yoksa mührü alınmamış en yakın eseri gösterir,
@@ -95,12 +95,8 @@ class PassportStrip extends StatelessWidget {
                       ),
                     )
                   else
-                    AppNetworkImage(
-                      imageUrl: next.imageAfterUrl,
-                      width: 56,
-                      height: 56,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    // Kazanılacak mührün kendisi: kullanıcı neyi toplayacağını görür
+                    StampWidget(place: next, earned: true, size: 64),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
