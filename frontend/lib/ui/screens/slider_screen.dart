@@ -95,6 +95,7 @@ class _SliderScreenState extends State<SliderScreen>
   /// Fotoğraf alanının ekran yüksekliğine oranı: fotoğraf oranına göre hesaplanır,
   /// böylece büyük görünür ama gereksiz kırpılmaz.
   double _photoFraction = 0.46;
+  Size? _bodySize;
   double get _sheetMin => 1 - _photoFraction;
 
   Future<void> _fitPhotoArea() async {
@@ -106,13 +107,12 @@ class _SliderScreenState extends State<SliderScreen>
     }
     if (aspects.isEmpty || !mounted) return;
     final avg = aspects.reduce((a, b) => a + b) / aspects.length;
-    final size = MediaQuery.of(context).size;
-    // Tablette (geniş ekran) alt kart fotoğrafı fazla kapatmasın: fotoğrafa ekranın
-    // yarısından fazlası ayrılır
-    final tablet = size.shortestSide >= 600;
-    final fraction = ((size.width / avg) * 1.15 / size.height).clamp(
-      tablet ? 0.56 : 0.40,
-      tablet ? 0.62 : 0.52,
+    final size = _bodySize ?? MediaQuery.of(context).size;
+    // Fotoğraf alanı görselin kendi oranında: fotoğraf büyütülmez/kırpılmaz, tamamı görünür;
+    // kart fotoğrafın hemen altından başlar (alttaki yuvarlak köşe payı dahil)
+    final fraction = ((size.width / avg + _underlap) / size.height).clamp(
+      0.30,
+      0.70,
     );
     if ((fraction - _photoFraction).abs() < 0.005) return;
     final wasMin = !_sheetRaised;
@@ -309,131 +309,141 @@ class _SliderScreenState extends State<SliderScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final en = context.isEn;
-
-    return Scaffold(
-      backgroundColor: canvasOf(context),
-      body: Stack(
-        children: [
-          // 1. Dönem / Bugün karşılaştırma alanı
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: size.height * _photoFraction + _underlap,
-            child: Stack(
-              children: [
-                if (_view3d)
-                  // Modeller koyu modda da özgün renginde kalır (fotoğraflar gibi)
-                  DarkCancel(
-                    child: Model3DView(
-                      darkBackground: DarkScope.invertedOf(context),
-                      newUrl: _place.modelNewUrl,
-                      oldUrl: _place.modelOldUrl,
-                      name: _place.nameFor(en),
-                      hotspots: _place.modelHotspots,
-                      selected: _selectedHotspot,
-                      tourController: _tour,
-                      onHotspot: _selectHotspot,
-                      bottomInset: _underlap,
-                    ),
-                  )
-                else
-                  SplitSliderWidget(
-                    topOffset: _place.has3dModel ? 46 : 0,
-                    tourController: _tour,
-                    beforeImageUrl: _place.imageBeforeUrl,
-                    afterImageUrl: _place.imageAfterUrl,
-                    afterLabel: context.t('period_label'),
-                    beforeLabel: context.t('today_label'),
-                    hotspots: _place.hotspots,
-                    selectedHotspot: _selectedHotspot,
-                    navCategories: {
-                      for (final c in _children) c.id: c.category,
-                    },
-                    bottomInset: _underlap,
-                    onHotspotSelected: _selectHotspot,
-                  ),
-                if (_place.has3dModel)
-                  Positioned(
-                    top: MediaQuery.of(context).padding.top + 12,
-                    right: 14,
-                    child: _viewToggle(),
-                  ),
-                if (_selectedHotspot != null)
-                  Positioned(
-                    top: size.height * 0.11,
-                    left: 20,
-                    right: 20,
-                    child: _buildHotspotPopup(_selectedHotspot!, en),
-                  ),
-              ],
-            ),
-          ),
-
-          // 2. Alt bilgi kartı: yalnızca tutamaçtan sürüklenir, içerik kendi içinde kayar
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: size.height * _extent,
-            child: Container(
-              decoration: BoxDecoration(
-                color: canvasOf(context),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: shadowOf(context, 0.10),
-                    blurRadius: 16,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
-                ),
-                child: PatternBackground(
-                  lineOpacity: 0.07,
-                  child: Column(
-                    children: [
-                      _buildDragHandle(size),
-                      Expanded(
-                        // İçerik en üstteyken aşağı çekmek kartı da indirir (tutamaç
-                        // ekranın tepesinde erişilemez kaldığında, ör. açılır pencerede)
-                        child: NotificationListener<ScrollNotification>(
-                          onNotification: (n) => _onSheetScroll(n, size),
-                          child: ListView(
-                            controller: _sheetScroll,
-                            // Görevler bölümüne kaydırabilmek için alt kısımlar da önceden kurulur
-                            cacheExtent: 4000,
-                            padding: EdgeInsets.fromLTRB(
-                              20,
-                              0,
-                              20,
-                              110 + MediaQuery.of(context).padding.bottom,
-                            ),
-                            children: _buildSheetContent(en),
-                          ),
+    // Sayfanın gerçek yüksekliği: sekme içinde alt menü kadar kısadır; fotoğraf ve kart buna göre
+    return LayoutBuilder(
+      builder: (context, box) {
+        final size = Size(box.maxWidth, box.maxHeight);
+        _bodySize = size;
+        return Scaffold(
+          backgroundColor: canvasOf(context),
+          body: Stack(
+            children: [
+              // 1. Dönem / Bugün karşılaştırma alanı
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: size.height * _photoFraction + _underlap,
+                child: Stack(
+                  children: [
+                    if (_view3d)
+                      // Modeller koyu modda da özgün renginde kalır (fotoğraflar gibi)
+                      DarkCancel(
+                        child: Model3DView(
+                          darkBackground: DarkScope.invertedOf(context),
+                          newUrl: _place.modelNewUrl,
+                          oldUrl: _place.modelOldUrl,
+                          name: _place.nameFor(en),
+                          hotspots: _place.modelHotspots,
+                          selected: _selectedHotspot,
+                          tourController: _tour,
+                          onHotspot: _selectHotspot,
+                          bottomInset: _underlap,
                         ),
+                      )
+                    else
+                      SplitSliderWidget(
+                        topOffset: _place.has3dModel ? 46 : 0,
+                        tourController: _tour,
+                        beforeImageUrl: _place.imageBeforeUrl,
+                        afterImageUrl: _place.imageAfterUrl,
+                        afterLabel: context.t('period_label'),
+                        beforeLabel: context.t('today_label'),
+                        hotspots: _place.hotspots,
+                        selectedHotspot: _selectedHotspot,
+                        navCategories: {
+                          for (final c in _children) c.id: c.category,
+                        },
+                        bottomInset: _underlap,
+                        onHotspotSelected: _selectHotspot,
+                      ),
+                    if (_place.has3dModel)
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 12,
+                        right: 14,
+                        child: _viewToggle(),
+                      ),
+                    if (_selectedHotspot != null)
+                      Positioned(
+                        top: size.height * 0.11,
+                        left: 20,
+                        right: 20,
+                        child: _buildHotspotPopup(_selectedHotspot!, en),
+                      ),
+                  ],
+                ),
+              ),
+
+              // 2. Alt bilgi kartı: yalnızca tutamaçtan sürüklenir, içerik kendi içinde kayar
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: size.height * _extent,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: canvasOf(context),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: shadowOf(context, 0.10),
+                        blurRadius: 16,
+                        offset: const Offset(0, -4),
                       ),
                     ],
                   ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    child: PatternBackground(
+                      lineOpacity: 0.07,
+                      child: Column(
+                        children: [
+                          _buildDragHandle(size),
+                          Expanded(
+                            // İçerik en üstteyken aşağı çekmek kartı da indirir (tutamaç
+                            // ekranın tepesinde erişilemez kaldığında, ör. açılır pencerede)
+                            child: NotificationListener<ScrollNotification>(
+                              onNotification: (n) => _onSheetScroll(n, size),
+                              child: ListView(
+                                controller: _sheetScroll,
+                                // Görevler bölümüne kaydırabilmek için alt kısımlar da önceden kurulur
+                                cacheExtent: 4000,
+                                padding: EdgeInsets.fromLTRB(
+                                  20,
+                                  0,
+                                  20,
+                                  110 + MediaQuery.of(context).padding.bottom,
+                                ),
+                                children: _buildSheetContent(en),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+
+              // Geri oku: kart tam ekran olunca da görünsün diye kartın üstünde durur
+              _buildBackArrow(),
+
+              // 3. Sabit alt eylem çubuğu
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _buildActionBar(),
+              ),
+            ],
           ),
-
-          // Geri oku: kart tam ekran olunca da görünsün diye kartın üstünde durur
-          _buildBackArrow(),
-
-          // 3. Sabit alt eylem çubuğu
-          Positioned(left: 0, right: 0, bottom: 0, child: _buildActionBar()),
-        ],
-      ),
+        );
+      },
     );
   }
 
