@@ -1,4 +1,3 @@
-import 'slider_screen.dart';
 import '../../core/navigation/app_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,10 +29,6 @@ class MainScreen extends StatefulWidget {
 
 /// Başka ekranlardan (örn. eser sayfası) ana ekrandaki bir sekmeye geçmek için.
 final ValueNotifier<int?> mainTabRequest = ValueNotifier<int?>(null);
-
-/// Eser sayfasından başka bir sekmeye (harita, rotalar) geçilirken kapanan eser.
-/// Ana Sayfa sekmesine dönülünce bu eser yeniden açılır; kullanıcı baştan başlamaz.
-HeritagePlace? resumePlace;
 
 /// Eser sayfasından "Haritada gör": harita sekmesine geçip o eseri seçer.
 final ValueNotifier<HeritagePlace?> mapFocusRequest =
@@ -105,14 +100,27 @@ class _MainScreenState extends State<MainScreen> {
     setState(() => _currentIndex = i);
   }
 
+  /// Her sekmenin kendi sayfa yığını: sekme değişince açık sayfalar olduğu yerde kalır.
+  final List<GlobalKey<NavigatorState>> _navKeys = List.generate(
+    5,
+    (_) => GlobalKey<NavigatorState>(),
+  );
+  final List<StackObserver> _navObs = List.generate(5, (_) => StackObserver());
+
+  /// Sekmeye basınca oraya geçer; zaten o sekmedeysen sekmenin başına döner.
   void _selectTab(int index) {
-    setState(() => _currentIndex = index);
-    final p = resumePlace;
-    if (index == 0 && p != null) {
-      resumePlace = null;
-      AppNav.open(context, AppNav.place(p.id), (_) => SliderScreen(place: p));
+    if (index == _currentIndex) {
+      _navKeys[index].currentState?.popUntil((r) => r.isFirst);
+      return;
     }
+    setState(() => _currentIndex = index);
   }
+
+  Widget _tab(int i, Widget child) => Navigator(
+    key: _navKeys[i],
+    observers: [_navObs[i]],
+    onGenerateRoute: (_) => MaterialPageRoute(builder: (_) => child),
+  );
 
   @override
   void dispose() {
@@ -172,19 +180,31 @@ class _MainScreenState extends State<MainScreen> {
     // QR düğmesi çubuğun üstüne taşar; çubuğun üstünde beyaz boşluk kalmaması için
     // düğme Scaffold'un üstünde ayrı çizilir, çubuk yalnızca bordo çizgiden başlar.
     final safeBottom = MediaQuery.of(context).padding.bottom;
-    return Stack(
-      children: [
-        Scaffold(
-          body: IndexedStack(index: _currentIndex, children: screens),
-          bottomNavigationBar: _buildBottomBar(),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: safeBottom + _barHeight - (_qrSize + 12 - _qrRise),
-          child: Center(child: _buildQrButton()),
-        ),
-      ],
+    return PopScope(
+      // Geri tuşu önce açık sekmedeki sayfayı kapatır
+      canPop: !(_navKeys[_currentIndex].currentState?.canPop() ?? false),
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _navKeys[_currentIndex].currentState?.maybePop();
+      },
+      child: Stack(
+        children: [
+          Scaffold(
+            body: IndexedStack(
+              index: _currentIndex,
+              children: [
+                for (var i = 0; i < screens.length; i++) _tab(i, screens[i]),
+              ],
+            ),
+            bottomNavigationBar: _buildBottomBar(),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: safeBottom + _barHeight - (_qrSize + 12 - _qrRise),
+            child: Center(child: _buildQrButton()),
+          ),
+        ],
+      ),
     );
   }
 

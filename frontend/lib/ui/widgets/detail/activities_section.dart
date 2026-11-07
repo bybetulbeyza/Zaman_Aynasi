@@ -300,7 +300,7 @@ class _ActivitiesSectionState extends State<ActivitiesSection>
     if (a.isQr) {
       if (!Passport.instance.isDone(a.id)) {
         // Eser sayfası kapanmasın: tarayıcı bu sayfanın üstünde açılır, geri ile buraya dönülür
-        Navigator.of(context).push(
+        Navigator.of(context, rootNavigator: true).push(
           MaterialPageRoute(
             builder: (_) =>
                 QRScannerScreen(pushed: true, returnToPlaceId: widget.place.id),

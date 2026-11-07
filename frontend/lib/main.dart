@@ -66,7 +66,7 @@ class ZamanAynasiApp extends StatelessWidget {
       lang: AppLang.instance,
       child: MaterialApp(
         navigatorKey: rootNavigatorKey,
-        navigatorObservers: [AppNav.instance],
+        navigatorObservers: [AppNav.root],
         title: 'Zaman Aynası',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.themeFor(dark: false),

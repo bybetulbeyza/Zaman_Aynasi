@@ -1,7 +1,8 @@
 import '../../core/navigation/app_nav.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/app_icon.dart';
-import 'main_screen.dart' show mainTabRequest, mapFocusRequest, resumePlace;
+import 'main_screen.dart' show mainTabRequest, mapFocusRequest;
+import '../../main.dart' show rootNavigatorKey;
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -162,6 +163,15 @@ class _SliderScreenState extends State<SliderScreen>
     });
   }
 
+  /// Başka sekmeye geçerken: sekme içindeyse sayfa açık kalır (geri dönünce yerinde);
+  /// tam ekran (kök) açıldıysa sekmeler görünsün diye kapanır.
+  void _leaveForTab() {
+    final nav = Navigator.of(context);
+    if (identical(nav, rootNavigatorKey.currentState)) {
+      nav.popUntil((r) => r.isFirst);
+    }
+  }
+
   void _openPlace(HeritagePlace place) {
     AppNav.open(
       context,
@@ -240,6 +250,7 @@ class _SliderScreenState extends State<SliderScreen>
         placeOnly: true,
         initialHotspotId: start?.id,
       ),
+      rootNavigator: true,
     );
   }
 
@@ -287,8 +298,7 @@ class _SliderScreenState extends State<SliderScreen>
       actionLabel: action,
       bottomMargin: 92,
       onAction: () {
-        resumePlace = _place;
-        Navigator.of(context).popUntil((r) => r.isFirst);
+        _leaveForTab();
         mainTabRequest.value = 3;
       },
     );
@@ -760,8 +770,7 @@ class _SliderScreenState extends State<SliderScreen>
   /// "Haritada gör": harita sekmesinde bu eseri seçili gösterir (yol tarifi Google Haritalar'a gider).
   Widget _buildShowOnMap() {
     void go() {
-      resumePlace = _place;
-      Navigator.of(context).popUntil((r) => r.isFirst);
+      _leaveForTab();
       mapFocusRequest.value = _place;
     }
 

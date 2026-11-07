@@ -429,6 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               AppNav.reels(null),
               (_) => const ReelsScreen(),
+              rootNavigator: true,
             ),
             highlight: true,
           ),
