@@ -1,3 +1,4 @@
+import '../../screens/qr_scanner_screen.dart';
 import '../common/app_card.dart';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
@@ -9,7 +10,6 @@ import '../../../core/state/passport.dart';
 import '../../../data/models/heritage_place.dart';
 import '../../../data/models/place_activity.dart';
 import '../../../data/repositories/activity_repository.dart';
-import '../../screens/main_screen.dart' show mainTabRequest;
 import '../common/section_title.dart';
 
 /// Eser sayfasındaki "Keşif görevleri": yatay kaydırmalı, işaretlenebilir kartlar.
@@ -260,8 +260,13 @@ class _ActivitiesSectionState extends State<ActivitiesSection>
     // QR görevi işaretlenerek değil, gerçekten okutularak tamamlanır: tarayıcıya götürür
     if (a.isQr) {
       if (!Passport.instance.isDone(a.id)) {
-        Navigator.of(context).popUntil((r) => r.isFirst);
-        mainTabRequest.value = 2;
+        // Eser sayfası kapanmasın: tarayıcı bu sayfanın üstünde açılır, geri ile buraya dönülür
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) =>
+                QRScannerScreen(pushed: true, returnToPlaceId: widget.place.id),
+          ),
+        );
       }
       return;
     }

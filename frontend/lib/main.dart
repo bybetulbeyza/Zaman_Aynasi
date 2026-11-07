@@ -1,3 +1,4 @@
+import 'core/navigation/app_nav.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -65,6 +66,7 @@ class ZamanAynasiApp extends StatelessWidget {
       lang: AppLang.instance,
       child: MaterialApp(
         navigatorKey: rootNavigatorKey,
+        navigatorObservers: [AppNav.instance],
         title: 'Zaman Aynası',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.themeFor(dark: false),

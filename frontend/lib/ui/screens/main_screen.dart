@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/auth/auth_service.dart';
@@ -52,10 +53,8 @@ class _MainScreenState extends State<MainScreen> {
     showStampCeremony(
       context,
       place,
-      onOpenPassport: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const PassportScreen()),
-      ),
+      onOpenPassport: () =>
+          AppNav.open(context, AppNav.passport, (_) => const PassportScreen()),
     ).then((_) => _nudgeGuest());
   }
 

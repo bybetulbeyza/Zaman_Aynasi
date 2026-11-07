@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_theme.dart';
@@ -29,8 +30,36 @@ class _DailyPlaceCardState extends State<DailyPlaceCard>
     curve: Curves.easeInOutCubic,
   );
 
+  /// Kullanıcı sürüklerken çizginin konumu (0–1); null iken kendiliğinden kayar.
+  double? _manual;
+  Timer? _resume;
+
+  void _dragStart() {
+    _resume?.cancel();
+    _c.stop();
+    setState(() => _manual = 0.18 + 0.64 * _t.value);
+  }
+
+  void _dragUpdate(DragUpdateDetails d, double w) {
+    setState(() {
+      _manual = ((_manual ?? 0.5) + d.delta.dx / w).clamp(0.04, 0.96);
+    });
+  }
+
+  /// Bırakınca kısa bir süre o konumda kalır, sonra kendiliğinden kaymaya devam eder.
+  void _dragEnd() {
+    _resume?.cancel();
+    _resume = Timer(const Duration(milliseconds: 2500), () {
+      if (!mounted) return;
+      _c.value = (((_manual ?? 0.5) - 0.18) / 0.64).clamp(0.0, 1.0);
+      setState(() => _manual = null);
+      _c.repeat(reverse: true);
+    });
+  }
+
   @override
   void dispose() {
+    _resume?.cancel();
     _c.dispose();
     return super.dispose();
   }
@@ -65,106 +94,113 @@ class _DailyPlaceCardState extends State<DailyPlaceCard>
     return LayoutBuilder(
       builder: (context, box) {
         final w = box.maxWidth, h = box.maxHeight;
-        return AnimatedBuilder(
-          animation: _t,
-          builder: (context, _) {
-            final d = 0.18 + 0.64 * _t.value;
-            final x = d * w;
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                // sağ: günümüz, sol: tarihî (eser sayfasındaki slider ile aynı)
-                AppNetworkImage(imageUrl: p.imageAfterUrl, fit: BoxFit.cover),
-                ClipRect(
-                  clipper: _LeftClip(d),
-                  child: AppNetworkImage(
-                    imageUrl: p.imageBeforeUrl,
-                    fit: BoxFit.cover,
+        return GestureDetector(
+          // Kaydırıcı elle de tutulup çekilebilir (dokunmak yine eseri açar)
+          onHorizontalDragStart: (_) => _dragStart(),
+          onHorizontalDragUpdate: (d) => _dragUpdate(d, w),
+          onHorizontalDragEnd: (_) => _dragEnd(),
+          onHorizontalDragCancel: _dragEnd,
+          child: AnimatedBuilder(
+            animation: _t,
+            builder: (context, _) {
+              final d = _manual ?? 0.18 + 0.64 * _t.value;
+              final x = d * w;
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  // sağ: günümüz, sol: tarihî (eser sayfasındaki slider ile aynı)
+                  AppNetworkImage(imageUrl: p.imageAfterUrl, fit: BoxFit.cover),
+                  ClipRect(
+                    clipper: _LeftClip(d),
+                    child: AppNetworkImage(
+                      imageUrl: p.imageBeforeUrl,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-                Positioned(
-                  left: x - 1.25,
-                  top: 0,
-                  bottom: 0,
-                  child: const GlassDividerLine(),
-                ),
-                Positioned(
-                  left: x - 28,
-                  top: h / 2 - 28,
-                  child: const IgnorePointer(child: GlassKnob()),
-                ),
-                // Alttaki ad yazısı okunsun diye koyu bir geçiş
-                const IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: [0.5, 1.0],
-                        colors: [Colors.transparent, Color(0xCC0F2F3A)],
+                  Positioned(
+                    left: x - 1.25,
+                    top: 0,
+                    bottom: 0,
+                    child: const GlassDividerLine(),
+                  ),
+                  Positioned(
+                    left: x - 28,
+                    top: h / 2 - 28,
+                    child: const IgnorePointer(child: GlassKnob()),
+                  ),
+                  // Alttaki ad yazısı okunsun diye koyu bir geçiş
+                  const IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: [0.5, 1.0],
+                          colors: [Colors.transparent, Color(0xCC0F2F3A)],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 14,
-                  child: IgnorePointer(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          p.nameFor(en),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: AppTheme.headingFont,
-                            fontSize: 22,
-                            height: 1.1,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 14,
+                    child: IgnorePointer(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            p.nameFor(en),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: AppTheme.headingFont,
+                              fontSize: 22,
+                              height: 1.1,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${p.category.labelFor(en)} · ${p.city}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w500,
+                          const SizedBox(height: 4),
+                          Text(
+                            '${p.category.labelFor(en)} · ${p.city}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 14,
-                  top: 14,
-                  child: Opacity(
-                    opacity: d > 0.3 ? 1 : 0,
-                    child: GlassBadge(
-                      context.t('period_label'),
-                      tint: AppColors.primaryTealDark,
+                  Positioned(
+                    left: 14,
+                    top: 14,
+                    child: Opacity(
+                      opacity: d > 0.3 ? 1 : 0,
+                      child: GlassBadge(
+                        context.t('period_label'),
+                        tint: AppColors.primaryTealDark,
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  right: 18,
-                  top: 16,
-                  child: Opacity(
-                    opacity: d < 0.7 ? 1 : 0,
-                    child: GlassBadge(
-                      context.t('today_label'),
-                      tint: AppColors.ciniCobalt,
+                  Positioned(
+                    right: 18,
+                    top: 16,
+                    child: Opacity(
+                      opacity: d < 0.7 ? 1 : 0,
+                      child: GlassBadge(
+                        context.t('today_label'),
+                        tint: AppColors.ciniCobalt,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         );
       },
     );

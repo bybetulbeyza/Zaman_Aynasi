@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,13 @@ import '../../data/repositories/heritage_repository.dart';
 import 'slider_screen.dart';
 
 class QRScannerScreen extends StatefulWidget {
-  const QRScannerScreen({super.key});
+  /// true: bir eser sayfasındaki QR görevinden açıldı (sekme değil, kapatınca geri döner).
+  final bool pushed;
+
+  /// Görevin ait olduğu eser; okutulan QR bu eserse yeni sayfa açılmaz, o sayfaya dönülür.
+  final String? returnToPlaceId;
+
+  const QRScannerScreen({super.key, this.pushed = false, this.returnToPlaceId});
 
   @override
   State<QRScannerScreen> createState() => _QRScannerScreenState();
@@ -21,7 +28,7 @@ class QRScannerScreen extends StatefulWidget {
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
   final HeritageRepository _repository = HeritageRepository();
-  bool _isScannerOpen = false;
+  late bool _isScannerOpen = widget.pushed;
   bool _isProcessing = false;
 
   void _onDetect(BarcodeCapture capture) async {
@@ -82,12 +89,24 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             icon: Icons.qr_code_2_rounded,
           );
         }
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SliderScreen(place: matchedPlace!),
-          ),
-        );
+        final place = matchedPlace;
+        if (widget.pushed) {
+          // Görevden gelindi: tarayıcıyı kapat; aynı eserse doğrudan onun sayfasına dönülür
+          Navigator.pop(context);
+          if (place.id != widget.returnToPlaceId) {
+            AppNav.open(
+              context,
+              AppNav.place(place.id),
+              (_) => SliderScreen(place: place),
+            );
+          }
+        } else {
+          AppNav.open(
+            context,
+            AppNav.place(place.id),
+            (_) => SliderScreen(place: place),
+          );
+        }
       }
     } catch (_) {
       if (mounted) {
@@ -112,7 +131,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 excludeSemantics: true,
                 child: Icon(Icons.close_rounded, color: Colors.white),
               ),
-              onPressed: () => setState(() => _isScannerOpen = false),
+              onPressed: () => widget.pushed
+                  ? Navigator.pop(context)
+                  : setState(() => _isScannerOpen = false),
             ),
             title: Text(
               context.t('qr_align'),

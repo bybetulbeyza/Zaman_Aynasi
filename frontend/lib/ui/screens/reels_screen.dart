@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/app_back_button.dart';
 import '../widgets/common/dark_cancel.dart';
@@ -249,13 +250,13 @@ class _ReelPageState extends State<_ReelPage>
     // Eser sayfası açıkken hikâyenin sesi arkada çalmasın
     _away = true;
     _c.pause();
-    await Navigator.push(
+    // Eser sayfası zaten açıksa (akış oradan açıldıysa) yenisini yığmak yerine ona geri dönülür
+    await AppNav.open(
       context,
-      MaterialPageRoute(
-        builder: (_) => SliderScreen(
-          place: widget.reel.place,
-          focusHotspot: widget.reel.hotspot,
-        ),
+      AppNav.place(widget.reel.place.id),
+      (_) => SliderScreen(
+        place: widget.reel.place,
+        focusHotspot: widget.reel.hotspot,
       ),
     );
     _away = false;

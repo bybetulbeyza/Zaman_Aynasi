@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import '../widgets/common/pill_button.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/action_card.dart';
@@ -259,9 +260,10 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    onTap: () => Navigator.push(
+                    onTap: () => AppNav.open(
                       context,
-                      MaterialPageRoute(builder: (_) => const PassportScreen()),
+                      AppNav.passport,
+                      (_) => const PassportScreen(),
                     ),
                   ),
                 ),

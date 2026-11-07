@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import '../widgets/common/app_icon.dart';
 import '../../core/utils/search_fold.dart';
 import 'package:flutter/material.dart';
@@ -66,8 +67,9 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
           place.name,
           place.city,
           place.nameEn,
-          place.shortDescription,
-          place.shortDescriptionEn,
+          // Açıklamalar aranmaz: "hamam" yazınca içinde hamam geçen külliye çıkmasın
+          place.category.labelFor(false),
+          place.category.labelFor(true),
         ]);
         final matchesCat =
             _selectedCategory == null || place.category == _selectedCategory;
@@ -95,9 +97,10 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   }
 
   void _openPlace(HeritagePlace place) {
-    Navigator.push(
+    AppNav.open(
       context,
-      MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
+      AppNav.place(place.id),
+      (_) => SliderScreen(place: place),
     );
   }
 

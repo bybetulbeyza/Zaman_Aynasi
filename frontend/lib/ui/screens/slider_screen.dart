@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/app_icon.dart';
 import 'main_screen.dart' show mainTabRequest, mapFocusRequest;
@@ -162,9 +163,10 @@ class _SliderScreenState extends State<SliderScreen>
   }
 
   void _openPlace(HeritagePlace place) {
-    Navigator.push(
+    AppNav.open(
       context,
-      MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
+      AppNav.place(place.id),
+      (_) => SliderScreen(place: place),
     );
   }
 
@@ -230,14 +232,13 @@ class _SliderScreenState extends State<SliderScreen>
 
   /// Eserin hotspot videolarını dikey kaydırmalı akışta açar (verilirse o hotspot'tan başlar).
   void _openReels(Hotspot? start) {
-    Navigator.push(
+    AppNav.open(
       context,
-      MaterialPageRoute(
-        builder: (_) => ReelsScreen(
-          initialPlace: _place,
-          placeOnly: true,
-          initialHotspotId: start?.id,
-        ),
+      AppNav.reels(_place.id),
+      (_) => ReelsScreen(
+        initialPlace: _place,
+        placeOnly: true,
+        initialHotspotId: start?.id,
       ),
     );
   }

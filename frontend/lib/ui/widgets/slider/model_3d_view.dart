@@ -334,6 +334,8 @@ html, body { overflow: hidden; background: transparent; }
   content: ''; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px;
   border-radius: 50%; background: #0E807A;
 }
+#glens { position: absolute; width: 168px; height: 168px; margin: -84px 0 0 -84px; border-radius: 50%; z-index: 8;
+  border: 3px solid rgba(255,255,255,0.95); box-shadow: 0 6px 22px rgba(0,0,0,0.35); pointer-events: none; display: none; }
 #gline { position: absolute; top: 0; bottom: 0; width: 2.5px; margin-left: -1.25px; z-index: 6;
   pointer-events: none;
   background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.95) 20%, rgba(255,255,255,.95) 80%, rgba(255,255,255,0));
@@ -461,6 +463,45 @@ html, body { overflow: hidden; background: transparent; }
         apply();
       });
       document.addEventListener('pointerdown', function () { userTouched = true; }, true);
+      // --- Zaman merceği: basılı tutunca parmağın altındaki dairede tarihî model büyütülerek görünür
+      const lens = document.createElement('div'); lens.id = 'glens'; document.body.append(lens);
+      const LR = 84, LM = 1.8;
+      let lensOn = false, lensT = 0, sx = 0, sy = 0;
+      function lensAt(x, y) {
+        lens.style.left = x + 'px'; lens.style.top = y + 'px';
+        oldWrap.style.clipPath = 'circle(' + LR + 'px at ' + x + 'px ' + y + 'px)';
+        od.style.transformOrigin = x + 'px ' + y + 'px';
+      }
+      function lensStart(x, y) {
+        lensOn = true; cancelAnimationFrame(fAnim);
+        nw.cameraControls = false;
+        oldWrap.style.width = '100%';
+        od.style.transform = 'scale(' + LM + ')';
+        lensAt(x, y);
+        lens.style.display = 'block'; gline.style.opacity = '0'; gknob.style.opacity = '0';
+        ZoomCh.postMessage('haptic');
+      }
+      function lensEnd() {
+        clearTimeout(lensT);
+        if (!lensOn) return;
+        lensOn = false;
+        nw.cameraControls = true;
+        oldWrap.style.clipPath = ''; od.style.transform = '';
+        lens.style.display = 'none'; gline.style.opacity = ''; gknob.style.opacity = '';
+        apply();
+      }
+      document.addEventListener('pointerdown', function (e) {
+        if (e.target.closest && (e.target.closest('#gknob') || e.target.closest('.hs'))) return;
+        sx = e.clientX; sy = e.clientY;
+        clearTimeout(lensT);
+        lensT = setTimeout(function () { lensStart(sx, sy); }, 450);
+      }, true);
+      document.addEventListener('pointermove', function (e) {
+        if (lensOn) { lensAt(e.clientX, e.clientY); e.stopPropagation(); return; }
+        if (Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10) clearTimeout(lensT);
+      }, true);
+      document.addEventListener('pointerup', lensEnd, true);
+      document.addEventListener('pointercancel', lensEnd, true);
       apply();
       // Açılışta çizgi kendiliğinden iki yana gider (fotoğraf slider'ıyla aynı eğri)
       const seg = [[0.5, 0.18, 0.35], [0.18, 0.82, 0.45], [0.82, 0.5, 0.20]];

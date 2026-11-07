@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/app_back_button.dart';
 import '../widgets/common/dark_cancel.dart';
@@ -267,8 +268,6 @@ class _PassportScreenState extends State<PassportScreen> {
     );
   }
 
-  void _open(HeritagePlace p) => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => SliderScreen(place: p)),
-  );
+  void _open(HeritagePlace p) =>
+      AppNav.open(context, AppNav.place(p.id), (_) => SliderScreen(place: p));
 }

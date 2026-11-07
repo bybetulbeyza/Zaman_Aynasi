@@ -1,3 +1,4 @@
+import '../../../core/navigation/app_nav.dart';
 import '../common/dark_cancel.dart';
 import '../common/action_card.dart';
 import '../common/pattern_background.dart';
@@ -62,12 +63,10 @@ Future<void> show3dPlacesSheet(
                       round: 26,
                       onTap: () {
                         Navigator.pop(sheet);
-                        Navigator.push(
+                        AppNav.open(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                SliderScreen(place: p, start3d: true),
-                          ),
+                          AppNav.place(p.id),
+                          (_) => SliderScreen(place: p, start3d: true),
                         );
                       },
                     ),

@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import '../widgets/common/app_icon.dart';
 import 'package:flutter/material.dart';
 import '../widgets/common/shimmer_box.dart';
@@ -151,9 +152,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openSlider(HeritagePlace place) {
-    Navigator.push(
+    AppNav.open(
       context,
-      MaterialPageRoute(builder: (_) => SliderScreen(place: place)),
+      AppNav.place(place.id),
+      (_) => SliderScreen(place: place),
     );
   }
 
@@ -192,15 +194,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   places: _byDistance,
                   featured: _daily,
                   showDistance: !_locationOff,
-                  onOpenPlace: (p) => Navigator.push(
+                  onOpenPlace: (p) => AppNav.open(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => SliderScreen(place: p, focusTasks: true),
-                    ),
+                    AppNav.place(p.id),
+                    (_) => SliderScreen(place: p, focusTasks: true),
                   ),
-                  onOpenPassport: () => Navigator.push(
+                  onOpenPassport: () => AppNav.open(
                     context,
-                    MaterialPageRoute(builder: (_) => const PassportScreen()),
+                    AppNav.passport,
+                    (_) => const PassportScreen(),
                   ),
                 ),
               ),
@@ -423,11 +425,21 @@ class _HomeScreenState extends State<HomeScreen> {
           _quickAction(
             context.t('qa_stories'),
             'stories',
-            () => Navigator.push(
+            () => AppNav.open(
               context,
-              MaterialPageRoute(builder: (_) => const ReelsScreen()),
+              AppNav.reels(null),
+              (_) => const ReelsScreen(),
             ),
             highlight: true,
+          ),
+          _quickAction(
+            context.t('qa_passport'),
+            'passport',
+            () => AppNav.open(
+              context,
+              AppNav.passport,
+              (_) => const PassportScreen(),
+            ),
           ),
           _quickAction(
             context.t('qa_cities'),
@@ -445,53 +457,56 @@ class _HomeScreenState extends State<HomeScreen> {
     VoidCallback? onTap, {
     bool highlight = false,
   }) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: SizedBox(
-        width: 80,
-        child: Column(
-          children: [
-            // Tüm kısayollar aynı çerçeve ve iç boşlukla; vurgulu olan bordo tonda
-            Container(
-              width: 64,
-              height: 64,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: highlight ? AppColors.ciniBordeauxLight : Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: SizedBox(
+          child: Column(
+            children: [
+              // Tüm kısayollar aynı çerçeve ve iç boşlukla; vurgulu olan bordo tonda
+              Container(
+                width: 64,
+                height: 64,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: highlight ? AppColors.ciniBordeauxLight : Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: highlight
+                        ? bordeauxOf(context)
+                        : AppColors.primaryTeal.withValues(alpha: 0.4),
+                    width: 1.3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: shadowOf(context, 0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: AppIcon(
+                  icon,
+                  size: 30,
                   color: highlight
                       ? bordeauxOf(context)
-                      : AppColors.primaryTeal.withValues(alpha: 0.4),
-                  width: 1.3,
+                      : AppColors.primaryTeal,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: shadowOf(context, 0.06),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
               ),
-              child: AppIcon(
-                icon,
-                size: 30,
-                color: highlight ? bordeauxOf(context) : AppColors.primaryTeal,
+              const SizedBox(height: 8),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

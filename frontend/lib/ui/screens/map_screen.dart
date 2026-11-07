@@ -1,3 +1,4 @@
+import '../../core/navigation/app_nav.dart';
 import '../widgets/common/pill_button.dart';
 import '../../core/utils/search_fold.dart';
 import 'dart:async';
@@ -364,8 +365,9 @@ class MapScreenState extends State<MapScreen> {
           place.name,
           place.city,
           place.nameEn,
-          place.shortDescription,
-          place.shortDescriptionEn,
+          // Açıklamalar aranmaz: "hamam" yazınca içinde hamam geçen külliye çıkmasın
+          place.category.labelFor(false),
+          place.category.labelFor(true),
         ]);
 
         final matchesCategory =
@@ -718,11 +720,10 @@ class MapScreenState extends State<MapScreen> {
                           placeName: currentPlace.nameFor(context.isEn),
                           placeDistanceTime: _subtitleFor(currentPlace),
                           placeImageUrl: currentPlace.imageAfterUrl,
-                          onDetailTap: () => Navigator.push(
+                          onDetailTap: () => AppNav.open(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => SliderScreen(place: currentPlace),
-                            ),
+                            AppNav.place(currentPlace.id),
+                            (_) => SliderScreen(place: currentPlace),
                           ),
                           onCloseRoute: _routeChip != null ? _closeRoute : null,
                           stopCount: _routeChip != null
