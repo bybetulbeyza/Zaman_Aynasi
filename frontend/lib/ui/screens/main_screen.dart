@@ -1,3 +1,4 @@
+import 'slider_screen.dart';
 import '../../core/navigation/app_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,6 +30,10 @@ class MainScreen extends StatefulWidget {
 
 /// Başka ekranlardan (örn. eser sayfası) ana ekrandaki bir sekmeye geçmek için.
 final ValueNotifier<int?> mainTabRequest = ValueNotifier<int?>(null);
+
+/// Eser sayfasından başka bir sekmeye (harita, rotalar) geçilirken kapanan eser.
+/// Ana Sayfa sekmesine dönülünce bu eser yeniden açılır; kullanıcı baştan başlamaz.
+HeritagePlace? resumePlace;
 
 /// Eser sayfasından "Haritada gör": harita sekmesine geçip o eseri seçer.
 final ValueNotifier<HeritagePlace?> mapFocusRequest =
@@ -98,6 +103,15 @@ class _MainScreenState extends State<MainScreen> {
     if (i == null || !mounted) return;
     mainTabRequest.value = null;
     setState(() => _currentIndex = i);
+  }
+
+  void _selectTab(int index) {
+    setState(() => _currentIndex = index);
+    final p = resumePlace;
+    if (index == 0 && p != null) {
+      resumePlace = null;
+      AppNav.open(context, AppNav.place(p.id), (_) => SliderScreen(place: p));
+    }
   }
 
   @override
@@ -249,10 +263,10 @@ class _MainScreenState extends State<MainScreen> {
       selected: isSelected,
       label: label,
       excludeSemantics: true,
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () => _selectTab(index),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _currentIndex = index),
+        onTap: () => _selectTab(index),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,

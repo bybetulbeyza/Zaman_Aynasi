@@ -1,3 +1,5 @@
+import '../../../core/navigation/app_nav.dart';
+import '../../screens/passport_screen.dart';
 import '../../screens/qr_scanner_screen.dart';
 import '../common/app_card.dart';
 import 'dart:math' as math;
@@ -105,11 +107,48 @@ class _ActivitiesSectionState extends State<ActivitiesSection>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  '$done/${_items.length}',
-                  style: const TextStyle(
-                    color: AppColors.primaryTeal,
-                    fontWeight: FontWeight.w700,
+                // Sayaca dokununca pasaport açılır (mühürler orada birikir)
+                Semantics(
+                  button: true,
+                  label: context.t('passport_title'),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => AppNav.open(
+                      context,
+                      AppNav.passport,
+                      (_) => const PassportScreen(),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(10, 5, 6, 5),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTeal.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.workspace_premium_rounded,
+                            size: 16,
+                            color: AppColors.primaryTeal,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$done/${_items.length} · ${context.t('passport_title')}',
+                            style: const TextStyle(
+                              color: AppColors.primaryTeal,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const Icon(
+                            Icons.chevron_right_rounded,
+                            size: 18,
+                            color: AppColors.primaryTeal,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],

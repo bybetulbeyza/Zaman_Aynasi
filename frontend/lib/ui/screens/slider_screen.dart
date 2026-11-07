@@ -1,7 +1,7 @@
 import '../../core/navigation/app_nav.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/app_icon.dart';
-import 'main_screen.dart' show mainTabRequest, mapFocusRequest;
+import 'main_screen.dart' show mainTabRequest, mapFocusRequest, resumePlace;
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -287,6 +287,7 @@ class _SliderScreenState extends State<SliderScreen>
       actionLabel: action,
       bottomMargin: 92,
       onAction: () {
+        resumePlace = _place;
         Navigator.of(context).popUntil((r) => r.isFirst);
         mainTabRequest.value = 3;
       },
@@ -759,6 +760,7 @@ class _SliderScreenState extends State<SliderScreen>
   /// "Haritada gör": harita sekmesinde bu eseri seçili gösterir (yol tarifi Google Haritalar'a gider).
   Widget _buildShowOnMap() {
     void go() {
+      resumePlace = _place;
       Navigator.of(context).popUntil((r) => r.isFirst);
       mapFocusRequest.value = _place;
     }
