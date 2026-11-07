@@ -171,7 +171,14 @@ class _ReelPage extends StatefulWidget {
   State<_ReelPage> createState() => _ReelPageState();
 }
 
-class _ReelPageState extends State<_ReelPage> with TickerProviderStateMixin {
+class _ReelPageState extends State<_ReelPage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  /// Kullanıcı dokunarak durdurduysa kendiliğinden yeniden başlatılmaz.
+  bool _userPaused = false;
+
+  /// Eser sayfası açıkken (video arkada) oynatılmaz.
+  bool _away = false;
+
   late final VideoPlayerController _c;
   bool _error = false;
 
@@ -204,6 +211,7 @@ class _ReelPageState extends State<_ReelPage> with TickerProviderStateMixin {
           .then((_) {
             if (mounted) {
               setState(() {});
+              _c.addListener(_keepPlaying);
               _syncPlayback();
             }
           })
@@ -211,10 +219,35 @@ class _ReelPageState extends State<_ReelPage> with TickerProviderStateMixin {
             if (mounted) setState(() => _error = true);
           });
     widget.pageController.addListener(_syncPlayback);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _syncPlayback();
+  }
+
+  bool get _visible {
+    final page = widget.pageController.positions.length == 1
+        ? widget.pageController.page
+        : 0.0;
+    return ((page ?? 0) - widget.index).abs() < 0.5;
+  }
+
+  /// Sistem (ör. açılır pencere, odak değişimi) videoyu durdurursa ekrandaki video yeniden başlar.
+  void _keepPlaying() {
+    final v = _c.value;
+    if (!mounted || _userPaused || _away || v.isPlaying || v.isBuffering)
+      return;
+    if (v.hasError || !_visible) return;
+    if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed)
+      return;
+    _c.play();
   }
 
   Future<void> _openDetails() async {
     // Eser sayfası açıkken hikâyenin sesi arkada çalmasın
+    _away = true;
     _c.pause();
     await Navigator.push(
       context,
@@ -225,17 +258,16 @@ class _ReelPageState extends State<_ReelPage> with TickerProviderStateMixin {
         ),
       ),
     );
+    _away = false;
     if (mounted) _syncPlayback();
   }
 
   /// Yalnızca ekranda tam görünen sayfa oynar.
   void _syncPlayback() {
-    if (!_c.value.isInitialized) return;
-    final page = widget.pageController.positions.length == 1
-        ? widget.pageController.page
-        : 0.0;
-    final visible = ((page ?? 0) - widget.index).abs() < 0.5;
-    if (visible && !_c.value.isPlaying) {
+    if (!_c.value.isInitialized || _away) return;
+    final visible = _visible;
+    if (!visible) _userPaused = false;
+    if (visible && !_userPaused && !_c.value.isPlaying) {
       _c.play();
       // İpucu video ekrana geldiğinde başlar (önceden yüklenen sayfada boşa dolmasın)
       _startHint();
@@ -246,6 +278,8 @@ class _ReelPageState extends State<_ReelPage> with TickerProviderStateMixin {
   @override
   void dispose() {
     widget.pageController.removeListener(_syncPlayback);
+    WidgetsBinding.instance.removeObserver(this);
+    _c.removeListener(_keepPlaying);
     _hint.dispose();
     _hintLife.dispose();
     _c.dispose();
@@ -259,7 +293,15 @@ class _ReelPageState extends State<_ReelPage> with TickerProviderStateMixin {
     final script = r.hotspot.videoScriptFor(en);
     final hasScript = script.trim().isNotEmpty;
     return GestureDetector(
-      onTap: () => setState(() => _c.value.isPlaying ? _c.pause() : _c.play()),
+      onTap: () => setState(() {
+        if (_c.value.isPlaying) {
+          _userPaused = true;
+          _c.pause();
+        } else {
+          _userPaused = false;
+          _c.play();
+        }
+      }),
       // Yatay kaydırınca eser sayfası açılır
       onHorizontalDragEnd: (d) {
         // Her iki yöne de yatay kaydırma eser sayfasını açar
@@ -296,14 +338,21 @@ class _ReelPageState extends State<_ReelPage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          if (_c.value.isInitialized && !_c.value.isPlaying)
-            const Center(
-              child: Icon(
-                Icons.play_circle_fill_rounded,
-                size: 76,
-                color: Colors.white70,
-              ),
-            ),
+          // Oynat simgesi videonun anlık durumunu izler (otomatik başlayınca/durunca kendiliğinden güncellenir)
+          ValueListenableBuilder<VideoPlayerValue>(
+            valueListenable: _c,
+            builder: (context, v, _) => (v.isInitialized && !v.isPlaying)
+                ? const Center(
+                    child: IgnorePointer(
+                      child: Icon(
+                        Icons.play_circle_fill_rounded,
+                        size: 76,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
           // Üst sağ: altyazı düğmesi
           if (hasScript)
             Positioned(
