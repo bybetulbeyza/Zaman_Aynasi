@@ -167,6 +167,13 @@ class AuthService {
   /// Supabase hata mesajını kullanıcıya gösterilecek metnin sözlük anahtarına çevirir.
   static String friendlyErrorKey(Object e) {
     final m = e is AuthException ? e.message.toLowerCase() : e.toString();
+    final code = e is AuthException ? (e.code ?? '') : '';
+    // E-posta gönderme sınırı (kayıt/şifre sıfırlama doğrulama e-postası): bekleyip yeniden denenir
+    if (code == 'over_email_send_rate_limit' ||
+        code == 'over_request_rate_limit' ||
+        m.contains('rate limit')) {
+      return 'auth_err_rate';
+    }
     if (m.contains('invalid login')) return 'auth_err_wrong';
     if (m.contains('already registered')) return 'auth_err_exists';
     if (m.contains('email not confirmed')) return 'auth_err_unconfirmed';
