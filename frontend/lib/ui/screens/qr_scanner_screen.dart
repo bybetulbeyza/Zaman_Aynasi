@@ -13,6 +13,7 @@ import '../../data/models/heritage_place.dart';
 import '../../data/repositories/heritage_repository.dart';
 import 'slider_screen.dart';
 import '../widgets/yadigar/yadigar_widget.dart' show YadigarVisibility;
+import 'main_screen.dart' show qrScanRequest;
 
 class QRScannerScreen extends StatefulWidget {
   /// true: bir eser sayfasındaki QR görevinden açıldı (sekme değil, kapatınca geri döner).
@@ -31,6 +32,22 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   final HeritageRepository _repository = HeritageRepository();
   late bool _isScannerOpen = widget.pushed;
   bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.pushed) qrScanRequest.addListener(_onScanRequest);
+  }
+
+  @override
+  void dispose() {
+    qrScanRequest.removeListener(_onScanRequest);
+    super.dispose();
+  }
+
+  void _onScanRequest() {
+    if (mounted && !_isScannerOpen) setState(() => _isScannerOpen = true);
+  }
 
   void _onDetect(BarcodeCapture capture) async {
     if (_isProcessing) return;

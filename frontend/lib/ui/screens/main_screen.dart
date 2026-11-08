@@ -33,6 +33,9 @@ class MainScreen extends StatefulWidget {
 /// Başka ekranlardan (örn. eser sayfası) ana ekrandaki bir sekmeye geçmek için.
 final ValueNotifier<int?> mainTabRequest = ValueNotifier<int?>(null);
 
+/// QR düğmesine basılınca artar: QR sekmesi başına döner ve kamera doğrudan açılır.
+final ValueNotifier<int> qrScanRequest = ValueNotifier<int>(0);
+
 /// Eser sayfasından "Haritada gör": harita sekmesine geçip o eseri seçer.
 final ValueNotifier<HeritagePlace?> mapFocusRequest =
     ValueNotifier<HeritagePlace?>(null);
@@ -112,6 +115,14 @@ class _MainScreenState extends State<MainScreen> {
     (_) => GlobalKey<NavigatorState>(),
   );
   final List<StackObserver> _navObs = List.generate(5, (_) => StackObserver());
+
+  /// QR düğmesi her zaman tarayıcıyı açar: QR sekmesinde açık kalmış eser sayfası
+  /// (ör. okutmadan sonra açılan) kapanır ve kamera doğrudan başlar.
+  void _openQr() {
+    _navKeys[2].currentState?.popUntil((r) => r.isFirst);
+    if (_currentIndex != 2) setState(() => _currentIndex = 2);
+    qrScanRequest.value++;
+  }
 
   /// Sekmeye basınca oraya geçer; zaten o sekmedeysen sekmenin başına döner.
   void _selectTab(int index) {
@@ -372,9 +383,9 @@ class _MainScreenState extends State<MainScreen> {
       selected: selected,
       label: context.t('nav_qr'),
       excludeSemantics: true,
-      onTap: () => setState(() => _currentIndex = 2),
+      onTap: _openQr,
       child: GestureDetector(
-        onTap: () => setState(() => _currentIndex = 2),
+        onTap: _openQr,
         child: Container(
           width: _qrSize + 12,
           height: _qrSize + 12,
