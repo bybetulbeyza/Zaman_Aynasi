@@ -52,6 +52,33 @@ Yapay zekâ ile üretilen tarihî sahneler **“Tarihî canlandırma / AI üreti
 
 Vakıf eserlerinin yanında kullanılabilecek **dijital bilgilendirme ekranları** ile geçmiş-bugün karşılaştırmalarının ve kısa tarihî hikâyelerin, uygulama açılmadan da ziyaretçilere sunulması hedeflenmektedir. İçerik mimarisi, yeni şehir ve eserlerle genişletilebilecek biçimde kurgulanmıştır.
 
+## 🛠️ Uygulamayı Çalıştırma
+
+Gereksinimler: [Flutter](https://docs.flutter.dev/get-started/install) (stable) ve bir [Mapbox](https://account.mapbox.com/) public token (`pk.…`).
+
+```bash
+git clone https://github.com/bybetulbeyza/Zaman_Aynasi.git
+cd Zaman_Aynasi
+flutter pub get
+```
+
+Proje kökünde `env.json` dosyası oluştur (git'e eklenmez):
+
+```json
+{
+  "MAPBOX_TOKEN": "pk.SENIN_MAPBOX_TOKENIN"
+}
+```
+
+Çalıştır veya APK al:
+
+```bash
+flutter run --dart-define-from-file=env.json
+flutter build apk --release --dart-define-from-file=env.json
+```
+
+> `env.json` olmadan uygulama açılır ama harita ve yürüyüş bilgileri görünmez. Supabase bağlantısı kod içinde hazırdır, ayrıca ayar gerekmez.
+
 ## 👥 Ekip
 
 | İsim | Sorumluluk |
