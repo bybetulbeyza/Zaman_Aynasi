@@ -55,3 +55,6 @@ ios/Pods/
 **/ios/Pods/
 .flutter-plugins
 .flutter-plugin-dependencies
+
+# yerel anahtarlar
+env.json
