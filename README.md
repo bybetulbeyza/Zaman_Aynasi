@@ -8,6 +8,8 @@
 
 *Önünden geçmek yerine, bilerek bakmak.*
 
+[🇬🇧 English](README.en.md) · **🇹🇷 Türkçe**
+
 </div>
 
 ## 📖 Proje Hakkında
