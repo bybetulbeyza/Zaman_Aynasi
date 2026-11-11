@@ -58,3 +58,4 @@ ios/Pods/
 
 # yerel anahtarlar
 env.json
+.vscode/
